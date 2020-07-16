@@ -46,7 +46,7 @@ contract SpellAction {
 
     // LEND specific addresses
     address constant public MCD_JOIN_LEND_A     = 0x0Dd1a7BD9BB1E81935AC128D9af48e1288cBb2f8;
-    address constant public PIP_LEND            = 0x03E4D947888AADC7ab2BB39785EE806274d46810;
+    address constant public PIP_LEND            = 0xA84120aA702F671c5E6223A730D54fAb48681A57;
     address constant public MCD_FLIP_LEND_A     = 0xf97CDb0432943232B0b98a790492a3344eCB5256;
 
     // decimals & precision
@@ -86,7 +86,7 @@ contract SpellAction {
         // LEND-A 
 
         // set ilk bytes32 variable
-        bytes32 constant LEND_A_ILK = "LEND-A";
+        bytes32 LEND_A_ILK = "LEND-A";
 
         // Init USDC-B in Vat & Jug
         VatAbstract(MCD_VAT).init(LEND_A_ILK);
@@ -96,7 +96,7 @@ contract SpellAction {
         VatAbstract(MCD_VAT).rely(MCD_JOIN_LEND_A);
 
         // set price feed for LEND-A
-        SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "pip", PIP_USDC);
+        SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "pip", PIP_LEND);
 
         // set the USDC-B flipper in the cat
         CatAbstract(MCD_CAT).file(LEND_A_ILK, "flip", MCD_FLIP_LEND_A);
@@ -130,7 +130,7 @@ contract SpellAction {
 
 contract DssSpell {
     DSPauseAbstract  public pause =
-        DSPauseAbstract(0xbE286431454714F511008713973d3B053A2d38f3);
+        DSPauseAbstract(0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address          public action;
     bytes32          public tag;
     uint256          public eta;
