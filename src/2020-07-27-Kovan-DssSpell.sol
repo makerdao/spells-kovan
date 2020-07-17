@@ -26,6 +26,7 @@ import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
 import "lib/dss-interfaces/src/dss/PotAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/VowAbstract.sol";
+import "lib/dss-interfaces/src/dss/MkrAuthorityAbstract.sol";
 
 contract SpellAction {
     // Provides a descriptive tag for bot consumption
@@ -43,6 +44,7 @@ contract SpellAction {
     address constant public MCD_CAT         = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
     address constant public MCD_JUG         = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
     address constant public MCD_POT         = 0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb;
+    address constant public MCD_GOV         = 0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD;
 
     address constant public MCD_SPOT        = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
     address constant public MCD_END         = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
@@ -104,9 +106,10 @@ contract SpellAction {
         JugAbstract(MCD_JUG).drip("TUSD-A");
 
         /*** Add new Flip, Flap, Flop contracts ***/
-        CatAbstract vat = VatAbstract(MCD_CAT);
-        CatAbstract cat = CatAbstract(MCD_CAT);
-        VowAbstract vow = VowAbstract(MCD_VOW);
+        MkrAuthorityAbstract mkrAuthority = MkrAuthorityAbstract(MCD_GOV);
+        VatAbstract vat                   = VatAbstract(MCD_CAT);
+        CatAbstract cat                   = CatAbstract(MCD_CAT);
+        VowAbstract vow                   = VowAbstract(MCD_VOW);
 
         FlapAbstract newFlap = FlapAbstract(MCD_FLAP);
         FlopAbstract newFlop = FlopAbstract(MCD_FLOP);
@@ -259,10 +262,6 @@ contract SpellAction {
         ilk = "TUSD-A";
         newFlip = FlipAbstract(TUSD_A_FLIP);
         oldFlip = FlipAbstract(TUSD_A_FLIP_OLD);
-        newFlap = FlapAbstract(TUSD_A_FLAP);
-        oldFlap = FlapAbstract(TUSD_A_FLAP_OLD);
-        newFlop = FlopAbstract(TUSD_A_FLOP);
-        oldFlop = FlopAbstract(TUSD_A_FLOP_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
