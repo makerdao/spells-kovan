@@ -48,33 +48,33 @@ contract SpellAction {
     address constant public MCD_END         = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
     address constant public FLIPPER_MOM     = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
 
-    // address constant public MCD_FLAP        = ;
-    // address constant public MCD_FLOP        = ;
+    address constant public MCD_FLAP        = 0xc6d3C83A080e2Ef16E4d7d4450A869d0891024F5;
+    address constant public MCD_FLOP        = 0x52482a3100F79FC568eb2f38C4a45ba457FBf5fA;
     address constant public MCD_FLAP_OLD    = 0x064cd5f762851b1af81Fd8fcA837227cb3eC84b4;
     address constant public MCD_FLOP_OLD    = 0x145B00b1AC4F01E84594EFa2972Fce1f5Beb5CED;
 
-    // address constant public ETH_A_FLIP      = ;
+    address constant public ETH_A_FLIP      = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
     address constant public ETH_A_FLIP_OLD  = 0xB40139Ea36D35d0C9F6a2e62601B616F1FfbBD1b;
 
-    // address constant public BAT_A_FLIP      = ;
+    address constant public BAT_A_FLIP      = 0xcf4D650679a23ec4027f6675c7245d02fbFc7Da3;
     address constant public BAT_A_FLIP_OLD  = 0xC94014A032cA5fCc01271F4519Add7E87a16b94C;
 
-    // address constant public USDC_A_FLIP     = ;
+    address constant public USDC_A_FLIP     = 0x157c2552165fE6e1003981076eAA20F6e0a2B30F;
     address constant public USDC_A_FLIP_OLD = 0x45d5b4A304f554262539cfd167dd05e331Da686E;
 
-    // address constant public USDC_B_FLIP     = ;
+    address constant public USDC_B_FLIP     = 0x8ceC95bB1758Ff2126e63a85ffC3C3c0F3717ea1;
     address constant public USDC_B_FLIP_OLD = 0x93AE217b0C6bF52E9FFea6Ab191cCD438d9EC0de;
 
-    // address constant public WBTC_A_FLIP     = ;
+    address constant public WBTC_A_FLIP     = 0x21926b5aeC6732B87985376cCb9308823E7e377b;
     address constant public WBTC_A_FLIP_OLD = 0xc45A1b76D3316D56a0225fB02Ab6b7637403fF67;
 
-    // address constant public ZRX_A_FLIP      = ;
+    address constant public ZRX_A_FLIP      = 0xdc181998D4d4aF194a16b59a3a018017F624D5C4;
     address constant public ZRX_A_FLIP_OLD  = 0x1341E0947D03Fd2C24e16aaEDC347bf9D9af002F;
 
-    // address constant public KNC_A_FLIP      = ;
+    address constant public KNC_A_FLIP      = 0x675597341Cb21Bdbb69A5Aa18C9638eaa5DC06d6;
     address constant public KNC_A_FLIP_OLD  = 0xf14Ec3538C86A31bBf576979783a8F6dbF16d571;
 
-    // address constant public TUSD_A_FLIP     = ;
+    address constant public TUSD_A_FLIP     = 0x72bE7125B1CFf0dA9D6AD98e9e14d560F57FaAd2;
     address constant public TUSD_A_FLIP_OLD = 0x51a8fB578E830c932A2D49927584C643Ad08d9eC;
 
     // decimals & precision
