@@ -51,8 +51,8 @@ contract SpellAction {
 
     // LEND specific addresses
     address constant public LEND                = 0x1BCe8A0757B7315b74bA1C7A731197295ca4747a;
-    address constant public MCD_JOIN_LEND_A     = 0xa99A821d16c476a29fA27A8f218925a8DE80b9ce;
-    address constant public PIP_LEND            = 0xA84120aA702F671c5E6223A730D54fAb48681A57;
+    address constant public MCD_JOIN_LEND_A     = 0x46c872fF52dBD9CfFAaE0Dde6BbB6076DFDc0343;
+    address constant public PIP_LEND            = 0xBD24c753520288129faec8D21Ba91655592c228a;
     address constant public MCD_FLIP_LEND_A     = 0xf97CDb0432943232B0b98a790492a3344eCB5256;
 
     // decimals & precision
@@ -76,7 +76,7 @@ contract SpellAction {
         JugAbstract(MCD_JUG).drip("ETH-A");
         JugAbstract(MCD_JUG).drip("BAT-A");
         JugAbstract(MCD_JUG).drip("USDC-A");
-        JugAbstract(MCD_JUG).drip("LEND-A");
+        JugAbstract(MCD_JUG).drip("USDC-B");
         JugAbstract(MCD_JUG).drip("WBTC-A");
         JugAbstract(MCD_JUG).drip("ZRX-A");
         JugAbstract(MCD_JUG).drip("KNC-A");
@@ -96,26 +96,18 @@ contract SpellAction {
         require(FlipAbstract(MCD_FLIP_LEND_A).vat()    == MCD_VAT,      "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_LEND_A).ilk()    == LEND_A_ILK,   "flip-ilk-not-match");
 
-        // Init LEND-A in Vat & Jug
-        VatAbstract(MCD_VAT).init(LEND_A_ILK);
-        JugAbstract(MCD_JUG).init(LEND_A_ILK);
-
-        // Allow LEND-A Join to modify Vat registry
-        VatAbstract(MCD_VAT).rely(MCD_JOIN_LEND_A);
-
-        // update OSM
-        MedianAbstract(OsmAbstract(PIP_LEND).src()).kiss(PIP_LEND);
-        OsmAbstract(PIP_LEND).rely(OSM_MOM);
-        OsmAbstract(PIP_LEND).kiss(MCD_SPOT);
-        OsmAbstract(PIP_LEND).kiss(MCD_END);
-        OsmMomAbstract(OSM_MOM).setOsm(LEND_A_ILK, PIP_LEND);
-
         // set price feed for LEND-A
-        SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "pip", PIP_LEND);
+        SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "pip", PIP_LEND); // X
 
         // set the LEND-A flipper in the cat
-        CatAbstract(MCD_CAT).file(LEND_A_ILK, "flip", MCD_FLIP_LEND_A);
+        CatAbstract(MCD_CAT).file(LEND_A_ILK, "flip", MCD_FLIP_LEND_A); // X
 
+        // Init LEND-A in Vat & Jug
+        VatAbstract(MCD_VAT).init(LEND_A_ILK); // X
+        JugAbstract(MCD_JUG).init(LEND_A_ILK); // X
+
+        // Allow LEND-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_LEND_A); // X
         // Allow cat to kick auctions in LEND-A Flipper 
         // NOTE: this will be reverse later in spell, and is done only for explicitness.
         FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_CAT);
@@ -126,6 +118,14 @@ contract SpellAction {
         // Allow FlipperMom to access the LEND-A Flipper
         FlipAbstract(MCD_FLIP_LEND_A).rely(FLIPPER_MOM);
 
+        // update OSM
+        MedianAbstract(OsmAbstract(PIP_LEND).src()).kiss(PIP_LEND);
+        OsmAbstract(PIP_LEND).rely(OSM_MOM);
+        OsmAbstract(PIP_LEND).kiss(MCD_SPOT);
+        OsmAbstract(PIP_LEND).kiss(MCD_END);
+        OsmMomAbstract(OSM_MOM).setOsm(LEND_A_ILK, PIP_LEND);
+
+        // set all the risk parameters
         VatAbstract(MCD_VAT).file(LEND_A_ILK,   "line"  , 1 * MILLION * RAD    ); // 1 MM debt ceiling
         VatAbstract(MCD_VAT).file(LEND_A_ILK,   "dust"  , 20 * RAD             ); // 20 Dai dust
         CatAbstract(MCD_CAT).file(LEND_A_ILK,   "lump"  , 200 * THOUSAND * WAD ); // 200,000 lot size
@@ -135,6 +135,11 @@ contract SpellAction {
         FlipAbstract(MCD_FLIP_LEND_A).file(     "ttl"   , 6 hours              ); // 6 hours ttl
         FlipAbstract(MCD_FLIP_LEND_A).file(     "tau"   , 6 hours              ); // 6 hours tau
         SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "mat"   , 120 * RAY / 100      ); // 175% coll. ratio
+
+        // execute the first poke in the Osm for the next value
+        OsmAbstract(PIP_LEND).poke();
+
+        // update LEND-A spot value in Vat (will be zero as the Osm will not have any value as of yet)
         SpotAbstract(MCD_SPOT).poke(LEND_A_ILK);
 
         // consequently, deny USDC-A Flipper

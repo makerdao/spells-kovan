@@ -63,12 +63,12 @@ contract DssSpellTest is DSTest, DSMath {
 
     FlipAbstract    flip        = FlipAbstract(     0xf97CDb0432943232B0b98a790492a3344eCB5256);
 
-    GemJoinAbstract lendjoin    = GemJoinAbstract(  0xa99A821d16c476a29fA27A8f218925a8DE80b9ce);
+    GemJoinAbstract lendjoin    = GemJoinAbstract(  0x46c872fF52dBD9CfFAaE0Dde6BbB6076DFDc0343);
     EndAbstract     end         = EndAbstract(      0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     address  flipperMom         =                   0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
     GemAbstract     lend        = GemAbstract(      0x1BCe8A0757B7315b74bA1C7A731197295ca4747a);
 
-    DSValueAbstract pip         = DSValueAbstract(  0xA84120aA702F671c5E6223A730D54fAb48681A57);
+    OsmAbstract     pip         = OsmAbstract(  0xBD24c753520288129faec8D21Ba91655592c228a);
 
     DssSpell spell;
 
@@ -244,10 +244,11 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues("LEND-A", afterSpell);
 
         // LEND-A Pip Owner
+
         // assertEq(pip.owner(), pauseProxy);
         // LEND-A Pip Authority
+
         // assertEq(pip.authority(), address(0));
-        spot.poke("LEND-A");
 
         // // Authorization
         assertEq(lendjoin.wards(pauseProxy), 1);
@@ -268,6 +269,10 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem("LEND-A", address(this)), 600 * WAD);
 
         // Deposit collateral, generate DAI
+        (,,uint256 tempspot,,) = vat.ilks("LEND-A");
+        (, uint256 tempmat) = spot.ilks("LEND-A");
+        assertEq(tempspot, 1);
+        assertEq(tempmat, 1);
         assertEq(vat.dai(address(this)), current_dai);
         vat.frob("LEND-A", address(this), address(this), address(this), int(600 * WAD), int(25 * WAD));
         assertEq(vat.gem("LEND-A", address(this)), 0);
