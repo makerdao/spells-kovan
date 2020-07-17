@@ -52,7 +52,8 @@ contract SpellAction {
     // LEND specific addresses
     address constant public LEND                = 0x1BCe8A0757B7315b74bA1C7A731197295ca4747a;
     address constant public MCD_JOIN_LEND_A     = 0x46c872fF52dBD9CfFAaE0Dde6BbB6076DFDc0343;
-    address constant public PIP_LEND            = 0xBD24c753520288129faec8D21Ba91655592c228a;
+    // address constant public PIP_LEND            = 0xBD24c753520288129faec8D21Ba91655592c228a;
+    address constant public PIP_LEND            = 0xA84120aA702F671c5E6223A730D54fAb48681A57;
     address constant public MCD_FLIP_LEND_A     = 0xf97CDb0432943232B0b98a790492a3344eCB5256;
 
     // decimals & precision
@@ -110,13 +111,13 @@ contract SpellAction {
         VatAbstract(MCD_VAT).rely(MCD_JOIN_LEND_A); // X
         // Allow cat to kick auctions in LEND-A Flipper 
         // NOTE: this will be reverse later in spell, and is done only for explicitness.
-        FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_CAT);
+        FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_CAT); // X
 
         // Allow End to yank auctions in LEND-A Flipper
-        FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_END);
+        FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_END); // X
 
         // Allow FlipperMom to access the LEND-A Flipper
-        FlipAbstract(MCD_FLIP_LEND_A).rely(FLIPPER_MOM);
+        FlipAbstract(MCD_FLIP_LEND_A).rely(FLIPPER_MOM); // X
 
         // update OSM
         MedianAbstract(OsmAbstract(PIP_LEND).src()).kiss(PIP_LEND);
@@ -134,10 +135,10 @@ contract SpellAction {
         FlipAbstract(MCD_FLIP_LEND_A).file(     "beg"   , 103 * WAD / 100      ); // 3% bid increase
         FlipAbstract(MCD_FLIP_LEND_A).file(     "ttl"   , 6 hours              ); // 6 hours ttl
         FlipAbstract(MCD_FLIP_LEND_A).file(     "tau"   , 6 hours              ); // 6 hours tau
-        SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "mat"   , 120 * RAY / 100      ); // 175% coll. ratio
+        SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "mat"   , 175 * RAY / 100      ); // 175% coll. ratio
 
         // execute the first poke in the Osm for the next value
-        OsmAbstract(PIP_LEND).poke();
+        // OsmAbstract(PIP_LEND).poke();
 
         // update LEND-A spot value in Vat (will be zero as the Osm will not have any value as of yet)
         SpotAbstract(MCD_SPOT).poke(LEND_A_ILK);

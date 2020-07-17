@@ -68,7 +68,9 @@ contract DssSpellTest is DSTest, DSMath {
     address  flipperMom         =                   0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
     GemAbstract     lend        = GemAbstract(      0x1BCe8A0757B7315b74bA1C7A731197295ca4747a);
 
-    OsmAbstract     pip         = OsmAbstract(  0xBD24c753520288129faec8D21Ba91655592c228a);
+    // OsmAbstract     pip         = OsmAbstract(      0xBD24c753520288129faec8D21Ba91655592c228a);
+    OsmAbstract     pip         = OsmAbstract(      0xA84120aA702F671c5E6223A730D54fAb48681A57);
+    OsmMomAbstract  osmMom      = OsmMomAbstract(   0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
 
     DssSpell spell;
 
@@ -140,7 +142,7 @@ contract DssSpellTest is DSTest, DSMath {
             pct: 6 * 1000,
             chop: 113 * RAY / 100,
             lump: 200 * THOUSAND * WAD,
-            mat: 120 * RAY / 100,
+            mat: 175 * RAY / 100,
             beg: 103 * WAD / 100,
             ttl: 6 hours,
             tau: 6 hours 
@@ -221,7 +223,7 @@ contract DssSpellTest is DSTest, DSMath {
         if(address(spell) != address(MAINNET_SPELL)) {
             assertEq(spell.expiration(), (now + 30 days));
         } else {
-            assertEq(spell.expiration(), (1590773091 + 30 days));
+            assertEq(spell.expiration(), (1595012528 + 30 days));
         }
 
         vote();
@@ -244,6 +246,8 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues("LEND-A", afterSpell);
 
         // LEND-A Pip Owner
+        hevm.warp(now + 180);
+        pip.poke();
 
         // assertEq(pip.owner(), pauseProxy);
         // LEND-A Pip Authority
@@ -256,6 +260,9 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flip.wards(address(cat)), 0); // FlipperMom denied it at end of the spell (no liquidations on first phase)
         assertEq(flip.wards(address(end)), 1);
         assertEq(flip.wards(flipperMom), 1);
+        assertEq(pip.wards(address(osmMom)), 1);
+        assertEq(pip.bud(address(spot)), 1);
+        assertEq(MedianAbstract(pip.src()).bud(address(pip)), 1);
 
         // Start testing Vault
         uint256 current_dai = vat.dai(address(this));
@@ -269,10 +276,6 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem("LEND-A", address(this)), 600 * WAD);
 
         // Deposit collateral, generate DAI
-        (,,uint256 tempspot,,) = vat.ilks("LEND-A");
-        (, uint256 tempmat) = spot.ilks("LEND-A");
-        assertEq(tempspot, 1);
-        assertEq(tempmat, 1);
         assertEq(vat.dai(address(this)), current_dai);
         vat.frob("LEND-A", address(this), address(this), address(this), int(600 * WAD), int(25 * WAD));
         assertEq(vat.gem("LEND-A", address(this)), 0);
