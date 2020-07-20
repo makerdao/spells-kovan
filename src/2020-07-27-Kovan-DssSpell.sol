@@ -46,9 +46,9 @@ contract SpellAction {
 
     // MANA specific addresses
     // MANA token address 0x221f4d62636b7b51b99e36444ea47dc7831c2b2f
-    address constant public MCD_JOIN_MANA_A     = 0xd4af9cd0d9e7b98890875282ef2554b6c1a26c77;
+    address constant public MCD_JOIN_MANA_A     = 0xd4AF9cD0d9e7b98890875282EF2554B6c1a26c77;
     address constant public PIP_MANA            = 0xE97D2b077Fe19c80929718d377981d9F754BF36e;
-    address constant public MCD_FLIP_MANA_A     = 0x392f8559f3a3bb39dd917eb8db115f61a3b9208b;
+    address constant public MCD_FLIP_MANA_A     = 0x392f8559f3A3bB39DD917eb8DB115F61a3b9208B;
 
     // decimals & precision
     uint256 constant public THOUSAND            = 10 ** 3;
@@ -87,9 +87,9 @@ contract SpellAction {
         // MANA-A 
 
         // set ilk bytes32 variable
-        bytes32 constant MANA_A_ILK = "MANA-A";
+        bytes32 MANA_A_ILK = "MANA-A";
 
-        // Init USDC-B in Vat & Jug
+        // Init MANA-A in Vat & Jug
         VatAbstract(MCD_VAT).init(MANA_A_ILK);
         JugAbstract(MCD_JUG).init(MANA_A_ILK);
 
@@ -97,19 +97,19 @@ contract SpellAction {
         VatAbstract(MCD_VAT).rely(MCD_JOIN_MANA_A);
 
         // set price feed for MANA-A
-        SpotAbstract(MCD_SPOT).file(MANA_A_ILK, "pip", PIP_USDC);
+        SpotAbstract(MCD_SPOT).file(MANA_A_ILK, "pip", PIP_MANA);
 
-        // set the USDC-B flipper in the cat
+        // set the MANA-A flipper in the cat
         CatAbstract(MCD_CAT).file(MANA_A_ILK, "flip", MCD_FLIP_MANA_A);
 
-        // Allow cat to kick auctions in USDC-B Flipper 
+        // Allow cat to kick auctions in MANA-A Flipper 
         // NOTE: this will be reverse later in spell, and is done only for explicitness.
         FlipAbstract(MCD_FLIP_MANA_A).rely(MCD_CAT);
 
-        // Allow End to yank auctions in USDC-B Flipper
+        // Allow End to yank auctions in MANA-A Flipper
         FlipAbstract(MCD_FLIP_MANA_A).rely(MCD_END);
 
-        // Allow FlipperMom to access the USDC-B Flipper
+        // Allow FlipperMom to access the MANA-A Flipper
         FlipAbstract(MCD_FLIP_MANA_A).rely(FLIPPER_MOM);
 
         VatAbstract(MCD_VAT).file(MANA_A_ILK,   "line"  , 1 * MILLION * RAD    ); // 1 MM debt ceiling
@@ -122,10 +122,6 @@ contract SpellAction {
         FlipAbstract(MCD_FLIP_MANA_A).file(     "tau"   , 6 hours              ); // 6 hours tau
         SpotAbstract(MCD_SPOT).file(MANA_A_ILK, "mat"   , 175 * RAY / 100      ); // 175% coll. ratio
         SpotAbstract(MCD_SPOT).poke(MANA_A_ILK);
-
-        // consequently, deny USDC-A Flipper
-        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_MANA_A);
-
     }
 }
 
