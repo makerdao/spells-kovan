@@ -38,7 +38,6 @@ contract SpellAction {
     // The contracts in this list should correspond to MCD core contracts, verify
     //  against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.0.8/contracts.json
-
     address constant public MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
     address constant public MCD_CAT             = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
     address constant public MCD_JUG             = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
@@ -52,7 +51,6 @@ contract SpellAction {
     // LEND specific addresses
     address constant public LEND                = 0x1BCe8A0757B7315b74bA1C7A731197295ca4747a;
     address constant public MCD_JOIN_LEND_A     = 0x46c872fF52dBD9CfFAaE0Dde6BbB6076DFDc0343;
-    // address constant public PIP_LEND            = 0xBD24c753520288129faec8D21Ba91655592c228a;
     address constant public PIP_LEND            = 0xA84120aA702F671c5E6223A730D54fAb48681A57;
     address constant public MCD_FLIP_LEND_A     = 0xf97CDb0432943232B0b98a790492a3344eCB5256;
 
@@ -122,7 +120,7 @@ contract SpellAction {
         // update OSM
         MedianAbstract(OsmAbstract(PIP_LEND).src()).kiss(PIP_LEND);
         OsmAbstract(PIP_LEND).rely(OSM_MOM);
-        OsmAbstract(PIP_LEND).kiss(MCD_SPOT);
+        // OsmAbstract(PIP_LEND).kiss(MCD_SPOT);
         OsmAbstract(PIP_LEND).kiss(MCD_END);
         OsmMomAbstract(OSM_MOM).setOsm(LEND_A_ILK, PIP_LEND);
 
@@ -138,14 +136,10 @@ contract SpellAction {
         SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "mat"   , 175 * RAY / 100      ); // 175% coll. ratio
 
         // execute the first poke in the Osm for the next value
-        // OsmAbstract(PIP_LEND).poke();
+        OsmAbstract(PIP_LEND).poke();
 
         // update LEND-A spot value in Vat (will be zero as the Osm will not have any value as of yet)
         SpotAbstract(MCD_SPOT).poke(LEND_A_ILK);
-
-        // consequently, deny USDC-A Flipper
-        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_LEND_A);
-
     }
 }
 

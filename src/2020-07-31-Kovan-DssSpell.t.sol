@@ -45,12 +45,11 @@ contract DssSpellTest is DSTest, DSMath {
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
-    // SystemValues beforeSpell;
     SystemValues afterSpell;
 
     Hevm hevm;
 
-    // MAINNET ADDRESSES
+    // KOVAN ADDRESSES
     DSPauseAbstract pause       = DSPauseAbstract(  0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address pauseProxy          =                   0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
     DSChiefAbstract chief       = DSChiefAbstract(  0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
@@ -67,9 +66,8 @@ contract DssSpellTest is DSTest, DSMath {
     EndAbstract     end         = EndAbstract(      0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     address  flipperMom         =                   0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
     GemAbstract     lend        = GemAbstract(      0x1BCe8A0757B7315b74bA1C7A731197295ca4747a);
-
-    // OsmAbstract     pip         = OsmAbstract(      0xBD24c753520288129faec8D21Ba91655592c228a);
     OsmAbstract     pip         = OsmAbstract(      0xA84120aA702F671c5E6223A730D54fAb48681A57);
+    address         median      =                   0x40828A42ebAAE02A2dC774077fb286702bC4D2F7;
     OsmMomAbstract  osmMom      = OsmMomAbstract(   0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
 
     DssSpell spell;
@@ -136,13 +134,13 @@ contract DssSpellTest is DSTest, DSMath {
         });
 
         afterSpell.collaterals["LEND-A"] = CollateralValues({
-            line: 1 * MILLION * RAD,
+            line: 1 * MILLION * RAD,            // 1m debt ceiling
             dust: 20 * RAD,
             duty: 1000000001847694957439350562, // 6% stability fee
             pct: 6 * 1000,
             chop: 113 * RAY / 100,
             lump: 200 * THOUSAND * WAD,
-            mat: 175 * RAY / 100,
+            mat: 175 * RAY / 100,               // 175% collateralization ratio
             beg: 103 * WAD / 100,
             ttl: 6 hours,
             tau: 6 hours 
@@ -206,6 +204,7 @@ contract DssSpellTest is DSTest, DSMath {
         (,uint256 mat) = spot.ilks(ilk);
         assertEq(mat, values.collaterals[ilk].mat);
 
+        // just doing 1 new ilk, so we don't need to change flippers
         // (address flipper,,) = cat.ilks(ilk);
         // FlipAbstract flip = FlipAbstract(flipper);
         assertEq(uint256(flip.beg()), values.collaterals[ilk].beg);
@@ -245,19 +244,12 @@ contract DssSpellTest is DSTest, DSMath {
         checkSystemValues(afterSpell);
         checkCollateralValues("LEND-A", afterSpell);
 
-        // LEND-A Pip Owner
-        hevm.warp(now + 180);
-        pip.poke();
+        // check median matches pip.src()
+        assertEq(pip.src(), median);
 
-        // assertEq(pip.owner(), pauseProxy);
-        // LEND-A Pip Authority
-
-        // assertEq(pip.authority(), address(0));
-
-        // // Authorization
+        // Authorization
         assertEq(lendjoin.wards(pauseProxy), 1);
         assertEq(vat.wards(address(lendjoin)), 1);
-        assertEq(flip.wards(address(cat)), 0); // FlipperMom denied it at end of the spell (no liquidations on first phase)
         assertEq(flip.wards(address(end)), 1);
         assertEq(flip.wards(flipperMom), 1);
         assertEq(pip.wards(address(osmMom)), 1);
@@ -292,13 +284,13 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem("LEND-A", address(this)), 0);
 
         // Generate new DAI to force a liquidation
-        // lend.approve(address(lendjoin), 40 * 10 ** 18);
-        // lendjoin.join(address(this), 40 * 10 ** 18);
-        // vat.frob("LEND-A", address(this), address(this), address(this), int(40 * WAD), int(32 * WAD)); // Max amount of DAI
-        // hevm.warp(now + 1);
-        // jug.drip("LEND-A");
-        // assertEq(flip.kicks(), 0);
-        // cat.bite("LEND-A", address(this));
-        // assertEq(flip.kicks(), 1);
+        lend.approve(address(lendjoin), 250 * 10 ** 18);
+        lendjoin.join(address(this), 250 * 10 ** 18);
+        vat.frob("LEND-A", address(this), address(this), address(this), int(250 * WAD), int(20 * WAD)); // Max amount of DAI
+        hevm.warp(now + 1000000000);
+        jug.drip("LEND-A");
+        assertEq(flip.kicks(), 0);
+        cat.bite("LEND-A", address(this));
+        assertEq(flip.kicks(), 1);
     }
 }
