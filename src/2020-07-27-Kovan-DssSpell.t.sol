@@ -137,10 +137,10 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["MANA-A"] = CollateralValues({
             line: 1 * MILLION * RAD,
             dust: 20 * RAD,
-            duty: 1000000001847694957439350562, // 6% stability fee
+            duty: 1000000003593629043335673582, // 12% stability fee
             pct: 6 * 1000,
             chop: 113 * RAY / 100,
-            lump: 200 * THOUSAND * WAD,
+            lump: 500 * THOUSAND * WAD,
             mat: 175 * RAY / 100,
             beg: 103 * WAD / 100,
             ttl: 6 hours,
@@ -166,7 +166,7 @@ contract DssSpellTest is DSTest, DSMath {
 
     function scheduleWaitAndCast() public {
         spell.schedule();
-        hevm.warp(now + pause.delay());
+        hevm.warp(now + pause.delay() + 180000);
         spell.cast();
     }
 

@@ -21,6 +21,10 @@ import "lib/dss-interfaces/src/dss/CatAbstract.sol";
 import "lib/dss-interfaces/src/dss/JugAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
 import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
+import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/PotAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
 
@@ -43,6 +47,7 @@ contract SpellAction {
     address constant public MCD_SPOT            = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
     address constant public MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
     address constant public FLIPPER_MOM         = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
+    address constant public OSM_MOM             = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
 
     // MANA specific addresses
     // MANA token address 0x221f4d62636b7b51b99e36444ea47dc7831c2b2f
@@ -112,6 +117,12 @@ contract SpellAction {
         // Allow FlipperMom to access the MANA-A Flipper
         FlipAbstract(MCD_FLIP_MANA_A).rely(FLIPPER_MOM);
 
+        // update OSM
+        MedianAbstract(OsmAbstract(PIP_MANA).src()).kiss(PIP_MANA);
+        OsmAbstract(PIP_MANA).rely(OSM_MOM);
+        OsmAbstract(PIP_MANA).kiss(MCD_END);
+        OsmMomAbstract(OSM_MOM).setOsm(MANA_A_ILK, PIP_MANA);
+
         VatAbstract(MCD_VAT).file(MANA_A_ILK,   "line"  , 1 * MILLION * RAD    ); // 1 MM debt ceiling
         VatAbstract(MCD_VAT).file(MANA_A_ILK,   "dust"  , 20 * RAD             ); // 20 Dai dust
         CatAbstract(MCD_CAT).file(MANA_A_ILK,   "lump"  , 500 * THOUSAND * WAD ); // 500,000 lot size
@@ -122,12 +133,18 @@ contract SpellAction {
         FlipAbstract(MCD_FLIP_MANA_A).file(     "tau"   , 6 hours              ); // 6 hours tau
         SpotAbstract(MCD_SPOT).file(MANA_A_ILK, "mat"   , 175 * RAY / 100      ); // 175% coll. ratio
         SpotAbstract(MCD_SPOT).poke(MANA_A_ILK);
+
+        // execute the first poke in the Osm for the next value
+        OsmAbstract(PIP_MANA).poke();
+
+        // update LEND-A spot value in Vat (will be zero as the Osm will not have any value as of yet)
+        SpotAbstract(MCD_SPOT).poke(MANA_A_ILK);
     }
 }
 
 contract DssSpell {
     DSPauseAbstract  public pause =
-        DSPauseAbstract(0xbE286431454714F511008713973d3B053A2d38f3);
+        DSPauseAbstract(0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address          public action;
     bytes32          public tag;
     uint256          public eta;
