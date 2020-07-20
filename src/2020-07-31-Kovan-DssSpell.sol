@@ -61,6 +61,10 @@ contract SpellAction {
     uint256 constant public RAY                 = 10 ** 27;
     uint256 constant public RAD                 = 10 ** 45;
 
+    function add(uint x, uint y) internal pure returns (uint z) {
+        require((z = x + y) >= x, "ds-math-add-overflow");
+    }
+
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
     // To check this yourself, use the following rate calculation (example 8%):
@@ -80,6 +84,10 @@ contract SpellAction {
         JugAbstract(MCD_JUG).drip("ZRX-A");
         JugAbstract(MCD_JUG).drip("KNC-A");
         JugAbstract(MCD_JUG).drip("TUSD-A");
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // GLOBAL 
+        VatAbstract(MCD_VAT).file("Line", add(172050 * THOUSAND * RAD, 1 * MILLION * RAD));
 
         ////////////////////////////////////////////////////////////////////////////////
         // LEND-A 

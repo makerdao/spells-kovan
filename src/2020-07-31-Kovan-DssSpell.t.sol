@@ -129,7 +129,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: 172050 * THOUSAND * RAD,
+            Line: 173050 * THOUSAND * RAD,
             pauseDelay: 60
         });
 
