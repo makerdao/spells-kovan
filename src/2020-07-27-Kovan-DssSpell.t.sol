@@ -51,17 +51,17 @@ contract DssSpellTest is DSTest, DSMath {
     Hevm hevm;
 
     // KOVAN ADDRESSES
-    DSPauseAbstract pause       = DSPauseAbstract(0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
-    address pauseProxy          =                 0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
-    DSChiefAbstract chief       = DSChiefAbstract(0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
-    VatAbstract     vat         = VatAbstract(    0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
-    CatAbstract     cat         = CatAbstract(    0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
-    PotAbstract     pot         = PotAbstract(    0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
-    JugAbstract     jug         = JugAbstract(    0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
-    SpotAbstract    spot        = SpotAbstract(   0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    MKRAbstract     gov         = MKRAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
-
-    FlipAbstract    flip        = FlipAbstract(   0xf97CDb0432943232B0b98a790492a3344eCB5256); // ?
+    DSPauseAbstract pause          = DSPauseAbstract(0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
+    address pauseProxy             =                 0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
+    DSChiefAbstract chief          = DSChiefAbstract(0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
+    VatAbstract     vat            = VatAbstract(    0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
+    CatAbstract     cat            = CatAbstract(    0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
+    PotAbstract     pot            = PotAbstract(    0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
+    JugAbstract     jug            = JugAbstract(    0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
+    SpotAbstract    spot           = SpotAbstract(   0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
+    MKRAbstract     gov            = MKRAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
+    VowAbstract     vow            = VowAbstract(    0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b);
+    MkrAuthorityAbstract mkrAuthority = MkrAuthorityAbstract(0xE50303C6B67a2d869684EFb09a62F6aaDD06387B);
 
     EndAbstract     end         = EndAbstract(    0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     address  flipperMom         =                 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
@@ -74,27 +74,27 @@ contract DssSpellTest is DSTest, DSMath {
     address constant public ETH_A_FLIP      = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
     address constant public ETH_A_FLIP_OLD  = 0xB40139Ea36D35d0C9F6a2e62601B616F1FfbBD1b;
 
-    address constant public BAT_A_FLIP      = 0xcf4D650679a23ec4027f6675c7245d02fbFc7Da3;
+    address constant public BAT_A_FLIP      = 0xc0126c3383777bDc175E659A51020E56307dDe21;
     address constant public BAT_A_FLIP_OLD  = 0xC94014A032cA5fCc01271F4519Add7E87a16b94C;
 
-    address constant public USDC_A_FLIP     = 0x157c2552165fE6e1003981076eAA20F6e0a2B30F;
+    address constant public USDC_A_FLIP     = 0xc29Ad1913C3B415497fdA1eA15c132502B8fa372;
     address constant public USDC_A_FLIP_OLD = 0x45d5b4A304f554262539cfd167dd05e331Da686E;
 
-    address constant public USDC_B_FLIP     = 0x8ceC95bB1758Ff2126e63a85ffC3C3c0F3717ea1;
+    address constant public USDC_B_FLIP     = 0x3c9eF711B68882d9732F60758e7891AcEae2Aa7c;
     address constant public USDC_B_FLIP_OLD = 0x93AE217b0C6bF52E9FFea6Ab191cCD438d9EC0de;
 
-    address constant public WBTC_A_FLIP     = 0x21926b5aeC6732B87985376cCb9308823E7e377b;
+    address constant public WBTC_A_FLIP     = 0x28dd4263e1FcE04A9016Bd7BF71a4f0F7aB93810;
     address constant public WBTC_A_FLIP_OLD = 0xc45A1b76D3316D56a0225fB02Ab6b7637403fF67;
 
-    address constant public ZRX_A_FLIP      = 0xdc181998D4d4aF194a16b59a3a018017F624D5C4;
+    address constant public ZRX_A_FLIP      = 0xe07F1219f7d6ccD59431a6b151179A9181e3902c;
     address constant public ZRX_A_FLIP_OLD  = 0x1341E0947D03Fd2C24e16aaEDC347bf9D9af002F;
 
-    address constant public KNC_A_FLIP      = 0x675597341Cb21Bdbb69A5Aa18C9638eaa5DC06d6;
+    address constant public KNC_A_FLIP      = 0x644699674D06cF535772D0DC19Ad5EA695000F51;
     address constant public KNC_A_FLIP_OLD  = 0xf14Ec3538C86A31bBf576979783a8F6dbF16d571;
 
-    address constant public TUSD_A_FLIP     = 0x72bE7125B1CFf0dA9D6AD98e9e14d560F57FaAd2;
+    address constant public TUSD_A_FLIP     = 0xD4A145d161729A4B43B7Ab7DD683cB9A16E01a1b;
     address constant public TUSD_A_FLIP_OLD = 0x51a8fB578E830c932A2D49927584C643Ad08d9eC;
-
+    
     DssSpell spell;
 
     // CHEAT_CODE = 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D
@@ -157,26 +157,6 @@ contract DssSpellTest is DSTest, DSMath {
             Line: 172050 * THOUSAND * RAD,
             pauseDelay: 60
         });
-
-        address[] memory newFlips = new address[](1);
-        newFlips[0] = ETH_A_FLIP;
-        // newFlips[1] = BAT_A_FLIP;
-        // newFlips[2] = USDC_A_FLIP;
-        // newFlips[3] = USDC_B_FLIP;
-        // newFlips[4] = WBTC_A_FLIP;
-        // newFlips[5] = ZRX_A_FLIP;
-        // newFlips[6] = KNC_A_FLIP;
-        // newFlips[7] = TUSD_A_FLIP;
-
-        address[] memory oldFlips = new address[](1);
-        oldFlips[0] = ETH_A_FLIP_OLD;
-        // oldFlips[1] = BAT_A_FLIP_OLD;
-        // oldFlips[2] = USDC_A_FLIP_OLD;
-        // oldFlips[3] = USDC_B_FLIP_OLD;
-        // oldFlips[4] = WBTC_A_FLIP_OLD;
-        // oldFlips[5] = ZRX_A_FLIP_OLD;
-        // oldFlips[6] = KNC_A_FLIP_OLD;
-        // oldFlips[7] = TUSD_A_FLIP_OLD;
     }
 
     function vote() private {
@@ -235,36 +215,56 @@ contract DssSpellTest is DSTest, DSMath {
         (,uint256 mat) = spot.ilks(ilk);
         assertEq(mat, values.collaterals[ilk].mat);
 
-        // (address flipper,,) = cat.ilks(ilk);
-        // FlipAbstract flip = FlipAbstract(flipper);
+        (address flipper,,) = cat.ilks(ilk);
+        FlipAbstract flip = FlipAbstract(flipper);
         assertEq(uint256(flip.beg()), values.collaterals[ilk].beg);
         assertEq(uint256(flip.ttl()), values.collaterals[ilk].ttl);
         assertEq(uint256(flip.tau()), values.collaterals[ilk].tau);
     }
 
-    // function checkFlipValues(address flip, FlipValues storage values) internal {
+    function checkFlipValues(bytes32 ilk, address _newFlip, address _oldFlip) internal {
+        FlipAbstract newFlip = FlipAbstract(_newFlip);
+        FlipAbstract oldFlip = FlipAbstract(_oldFlip);
 
-    // }
+        assertEq(newFlip.ilk(), ilk);
+        assertEq(newFlip.vat(), address(vat));
 
-    // function testSpellIsCast() public {
-    //     string memory description = new SpellAction().description();
-    //     assertTrue(bytes(description).length > 0);
-    //     // DS-Test can't handle strings directly, so cast to a bytes32.
-    //     assertEq(stringToBytes32(spell.description()),
-    //             stringToBytes32(description));
+        (address flip,,) = cat.ilks(ilk);
 
-    //     if(address(spell) != address(MAINNET_SPELL)) {
-    //         assertEq(spell.expiration(), (now + 30 days));
-    //     } else {
-    //         assertEq(spell.expiration(), (1590773091 + 30 days));
-    //     }
+        assertEq(flip, address(newFlip));
 
-    //     vote();
-    //     scheduleWaitAndCast();
-    //     assertTrue(spell.done());
+        assertEq(newFlip.wards(address(cat)), 1);
+        assertEq(newFlip.wards(address(end)), 1);
+        assertEq(newFlip.wards(address(flipperMom)), 1);
 
-    //     checkSystemValues(afterSpell);
-    // }
+        assertEq(oldFlip.wards(address(cat)), 0);
+        assertEq(oldFlip.wards(address(end)), 0);
+        assertEq(oldFlip.wards(address(flipperMom)), 0);
+
+        assertEq(uint256(newFlip.beg()), uint256(oldFlip.beg()));
+        assertEq(uint256(newFlip.ttl()), uint256(oldFlip.ttl()));
+        assertEq(uint256(newFlip.tau()), uint256(oldFlip.tau()));
+    }
+
+    function testSpellIsCast() public {
+        string memory description = new SpellAction().description();
+        assertTrue(bytes(description).length > 0);
+        // DS-Test can't handle strings directly, so cast to a bytes32.
+        assertEq(stringToBytes32(spell.description()),
+                stringToBytes32(description));
+
+        if(address(spell) != address(MAINNET_SPELL)) {
+            assertEq(spell.expiration(), (now + 30 days));
+        } else {
+            assertEq(spell.expiration(), (1590773091 + 30 days));
+        }
+
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        checkSystemValues(afterSpell);
+    }
 
     function testFlips() public {
         vote();
@@ -273,29 +273,91 @@ contract DssSpellTest is DSTest, DSMath {
         // spell done
         assertTrue(spell.done());
 
+        bytes32[] memory ilks = new bytes32[](8);
+        ilks[0] = "ETH-A";
+        ilks[1] = "BAT-A";
+        ilks[2] = "USDC-A";
+        ilks[3] = "USDC-B";
+        ilks[4] = "WBTC-A";
+        ilks[5] = "ZRX-A";
+        ilks[6] = "KNC-A";
+        ilks[7] = "TUSD-A";
+
+        address[] memory newFlips = new address[](8);
+        newFlips[0] = ETH_A_FLIP;
+        newFlips[1] = BAT_A_FLIP;
+        newFlips[2] = USDC_A_FLIP;
+        newFlips[3] = USDC_B_FLIP;
+        newFlips[4] = WBTC_A_FLIP;
+        newFlips[5] = ZRX_A_FLIP;
+        newFlips[6] = KNC_A_FLIP;
+        newFlips[7] = TUSD_A_FLIP;
+
+        address[] memory oldFlips = new address[](8);
+        oldFlips[0] = ETH_A_FLIP_OLD;
+        oldFlips[1] = BAT_A_FLIP_OLD;
+        oldFlips[2] = USDC_A_FLIP_OLD;
+        oldFlips[3] = USDC_B_FLIP_OLD;
+        oldFlips[4] = WBTC_A_FLIP_OLD;
+        oldFlips[5] = ZRX_A_FLIP_OLD;
+        oldFlips[6] = KNC_A_FLIP_OLD;
+        oldFlips[7] = TUSD_A_FLIP_OLD;
+
+        require(
+            ilks.length == newFlips.length && ilks.length == oldFlips.length,
+            "array-lengths-not-equal"
+        );
         // check flip parameters
-        // checkFlipValues(afterSpell);
+        for(uint i = 0; i < ilks.length; i++) {
+            checkFlipValues(ilks[i], newFlips[i], oldFlips[i]);
+        }
     }
 
-    // function testFlaps() public {
-    //     vote();
-    //     scheduleWaitAndCast();
+    function testFlaps() public {
+        vote();
+        scheduleWaitAndCast();
 
-    //     // spell done
-    //     assertTrue(spell.done());
+        // spell done
+        assertTrue(spell.done());
 
-    //     // check afterSpell parameters
-    //     checkSystemValues(afterSpell);
-    // }
+        FlapAbstract newFlap = FlapAbstract(MCD_FLAP);
+        FlapAbstract oldFlap = FlapAbstract(MCD_FLAP_OLD);
 
-    // function testFlops() public {
-    //     vote();
-    //     scheduleWaitAndCast();
+        assertEq(vow.flapper(), address(newFlap));
+        assertEq(vat.can(address(vow), address(newFlap)), 1);
+        assertEq(vat.can(address(vow), address(oldFlap)), 0);
 
-    //     // spell done
-    //     assertTrue(spell.done());
+        assertEq(newFlap.wards(address(vow)), 1);
+        assertEq(oldFlap.wards(address(vow)), 0);
 
-    //     // check afterSpell parameters
-    //     checkSystemValues(afterSpell);
-    // }
+        assertEq(uint256(newFlap.beg()), uint256(oldFlap.beg()));
+        assertEq(uint256(newFlap.ttl()), uint256(oldFlap.ttl()));
+        assertEq(uint256(newFlap.tau()), uint256(oldFlap.tau()));
+    }
+
+    function testFlops() public {
+        vote();
+        scheduleWaitAndCast();
+
+        // spell done
+        assertTrue(spell.done());
+
+        FlopAbstract newFlop = FlopAbstract(MCD_FLOP);
+        FlopAbstract oldFlop = FlopAbstract(MCD_FLOP_OLD);
+
+        assertEq(vow.flopper(), address(newFlop));
+
+        assertEq(newFlop.wards(address(vow)), 1);
+        assertEq(vat.wards(address(newFlop)), 1);
+        assertEq(mkrAuthority.wards(address(newFlop)), 1);
+        
+        assertEq(oldFlop.wards(address(vow)), 0);
+        assertEq(vat.wards(address(oldFlop)), 0);
+        assertEq(mkrAuthority.wards(address(oldFlop)), 0);
+
+        assertEq(uint256(newFlop.beg()), uint256(oldFlop.beg()));
+        assertEq(uint256(newFlop.pad()), uint256(oldFlop.pad()));
+        assertEq(uint256(newFlop.ttl()), uint256(oldFlop.ttl()));
+        assertEq(uint256(newFlop.tau()), uint256(oldFlop.tau()));
+    }
 }

@@ -58,25 +58,25 @@ contract SpellAction {
     address constant public ETH_A_FLIP      = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
     address constant public ETH_A_FLIP_OLD  = 0xB40139Ea36D35d0C9F6a2e62601B616F1FfbBD1b;
 
-    address constant public BAT_A_FLIP      = 0xcf4D650679a23ec4027f6675c7245d02fbFc7Da3;
+    address constant public BAT_A_FLIP      = 0xc0126c3383777bDc175E659A51020E56307dDe21;
     address constant public BAT_A_FLIP_OLD  = 0xC94014A032cA5fCc01271F4519Add7E87a16b94C;
 
-    address constant public USDC_A_FLIP     = 0x157c2552165fE6e1003981076eAA20F6e0a2B30F;
+    address constant public USDC_A_FLIP     = 0xc29Ad1913C3B415497fdA1eA15c132502B8fa372;
     address constant public USDC_A_FLIP_OLD = 0x45d5b4A304f554262539cfd167dd05e331Da686E;
 
-    address constant public USDC_B_FLIP     = 0x8ceC95bB1758Ff2126e63a85ffC3C3c0F3717ea1;
+    address constant public USDC_B_FLIP     = 0x3c9eF711B68882d9732F60758e7891AcEae2Aa7c;
     address constant public USDC_B_FLIP_OLD = 0x93AE217b0C6bF52E9FFea6Ab191cCD438d9EC0de;
 
-    address constant public WBTC_A_FLIP     = 0x21926b5aeC6732B87985376cCb9308823E7e377b;
+    address constant public WBTC_A_FLIP     = 0x28dd4263e1FcE04A9016Bd7BF71a4f0F7aB93810;
     address constant public WBTC_A_FLIP_OLD = 0xc45A1b76D3316D56a0225fB02Ab6b7637403fF67;
 
-    address constant public ZRX_A_FLIP      = 0xdc181998D4d4aF194a16b59a3a018017F624D5C4;
+    address constant public ZRX_A_FLIP      = 0xe07F1219f7d6ccD59431a6b151179A9181e3902c;
     address constant public ZRX_A_FLIP_OLD  = 0x1341E0947D03Fd2C24e16aaEDC347bf9D9af002F;
 
-    address constant public KNC_A_FLIP      = 0x675597341Cb21Bdbb69A5Aa18C9638eaa5DC06d6;
+    address constant public KNC_A_FLIP      = 0x644699674D06cF535772D0DC19Ad5EA695000F51;
     address constant public KNC_A_FLIP_OLD  = 0xf14Ec3538C86A31bBf576979783a8F6dbF16d571;
 
-    address constant public TUSD_A_FLIP     = 0x72bE7125B1CFf0dA9D6AD98e9e14d560F57FaAd2;
+    address constant public TUSD_A_FLIP     = 0xD4A145d161729A4B43B7Ab7DD683cB9A16E01a1b;
     address constant public TUSD_A_FLIP_OLD = 0x51a8fB578E830c932A2D49927584C643Ad08d9eC;
 
     // decimals & precision
@@ -85,13 +85,6 @@ contract SpellAction {
     uint256 constant public WAD      = 10 ** 18;
     uint256 constant public RAY      = 10 ** 27;
     uint256 constant public RAD      = 10 ** 45;
-
-    // Are these the right values?
-    uint256 constant beg = 1.05E18; // 5% minimum bid increase
-    uint48  constant ttl = 3 hours; // 3 hours bid duration
-    uint48  constant tau = 2 days;  // 2 days total auction length
-    uint256 constant pad = 1.50E18; // 50% lot increase for tick
-
 
     function execute() external {
 
@@ -107,7 +100,7 @@ contract SpellAction {
 
         /*** Add new Flip, Flap, Flop contracts ***/
         MkrAuthorityAbstract mkrAuthority = MkrAuthorityAbstract(GOV_GUARD);
-        VatAbstract vat                   = VatAbstract(MCD_CAT);
+        VatAbstract vat                   = VatAbstract(MCD_VAT);
         CatAbstract cat                   = CatAbstract(MCD_CAT);
         VowAbstract vow                   = VowAbstract(MCD_VOW);
 
@@ -119,9 +112,9 @@ contract SpellAction {
         /*** Flap ***/
         vow.file("flapper", MCD_FLAP);
         newFlap.rely(MCD_VOW);
-        newFlap.file("beg", beg);
-        newFlap.file("ttl", ttl);
-        newFlap.file("tau", tau);
+        newFlap.file("beg", oldFlap.beg());
+        newFlap.file("ttl", oldFlap.ttl());
+        newFlap.file("tau", oldFlap.tau());
         oldFlap.deny(MCD_VOW);
 
         /*** Flop ***/
@@ -129,10 +122,10 @@ contract SpellAction {
         newFlop.rely(MCD_VOW);
         vat.rely(MCD_FLOP);
         mkrAuthority.rely(MCD_FLOP);
-        newFlop.file("beg", beg);
-        newFlop.file("pad", pad);
-        newFlop.file("ttl", ttl);
-        newFlop.file("tau", tau);
+        newFlop.file("beg", oldFlop.beg());
+        newFlop.file("pad", oldFlop.pad());
+        newFlop.file("ttl", oldFlop.ttl());
+        newFlop.file("tau", oldFlop.tau());
         oldFlop.deny(MCD_VOW);
         vat.deny(MCD_FLOP_OLD);
         mkrAuthority.deny(MCD_FLOP_OLD);
@@ -141,7 +134,7 @@ contract SpellAction {
         FlipAbstract oldFlip;
         bytes32 ilk;
 
-        /*** ETH-A Flip ***/
+        // /*** ETH-A Flip ***/
         ilk = "ETH-A";
         newFlip = FlipAbstract(ETH_A_FLIP);
         oldFlip = FlipAbstract(ETH_A_FLIP_OLD);
@@ -153,128 +146,144 @@ contract SpellAction {
         oldFlip.deny(MCD_CAT);
         oldFlip.deny(MCD_END);
         oldFlip.deny(FLIPPER_MOM);
-        newFlip.file("beg", beg);
-        newFlip.file("ttl", ttl);
-        newFlip.file("tau", tau);
+        newFlip.file("beg", oldFlip.beg());
+        newFlip.file("ttl", oldFlip.ttl());
+        newFlip.file("tau", oldFlip.tau());
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
-        // /*** BAT-A Flip ***/
-        // ilk = "BAT-A";
-        // newFlip = FlipAbstract(BAT_A_FLIP);
-        // oldFlip = FlipAbstract(BAT_A_FLIP_OLD);
+        /*** BAT-A Flip ***/
+        ilk = "BAT-A";
+        newFlip = FlipAbstract(BAT_A_FLIP);
+        oldFlip = FlipAbstract(BAT_A_FLIP_OLD);
 
-        // cat.file(ilk, "flip", address(newFlip));
-        // newFlip.rely(MCD_CAT);
-        // newFlip.rely(MCD_END);
-        // newFlip.rely(FLIPPER_MOM);
-        // oldFlip.deny(MCD_CAT);
-        // oldFlip.deny(MCD_END);
-        // oldFlip.deny(FLIPPER_MOM);
-        // newFlip.file("beg", beg);
-        // newFlip.file("ttl", ttl);
-        // newFlip.file("tau", tau);
-
-
-        // /*** USDC-A Flip ***/
-        // ilk = "USDC-A";
-        // newFlip = FlipAbstract(USDC_A_FLIP);
-        // oldFlip = FlipAbstract(USDC_A_FLIP_OLD);
-
-        // cat.file(ilk, "flip", address(newFlip));
-        // newFlip.rely(MCD_CAT);
-        // newFlip.rely(MCD_END);
-        // newFlip.rely(FLIPPER_MOM);
-        // oldFlip.deny(MCD_CAT);
-        // oldFlip.deny(MCD_END);
-        // oldFlip.deny(FLIPPER_MOM);
-        // newFlip.file("beg", beg);
-        // newFlip.file("ttl", ttl);
-        // newFlip.file("tau", tau);
+        cat.file(ilk, "flip", address(newFlip));
+        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_END);
+        newFlip.rely(FLIPPER_MOM);
+        oldFlip.deny(MCD_CAT);
+        oldFlip.deny(MCD_END);
+        oldFlip.deny(FLIPPER_MOM);
+        newFlip.file("beg", oldFlip.beg());
+        newFlip.file("ttl", oldFlip.ttl());
+        newFlip.file("tau", oldFlip.tau());
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
-        // /*** USDC-B Flip ***/
-        // ilk = "USDC-B";
-        // newFlip = FlipAbstract(USDC_B_FLIP);
-        // oldFlip = FlipAbstract(USDC_B_FLIP_OLD);
+        /*** USDC-A Flip ***/
+        ilk = "USDC-A";
+        newFlip = FlipAbstract(USDC_A_FLIP);
+        oldFlip = FlipAbstract(USDC_A_FLIP_OLD);
 
-        // cat.file(ilk, "flip", address(newFlip));
-        // newFlip.rely(MCD_CAT);
-        // newFlip.rely(MCD_END);
-        // newFlip.rely(FLIPPER_MOM);
-        // oldFlip.deny(MCD_CAT);
-        // oldFlip.deny(MCD_END);
-        // oldFlip.deny(FLIPPER_MOM);
-        // newFlip.file("beg", beg);
-        // newFlip.file("ttl", ttl);
-        // newFlip.file("tau", tau);
-
-
-        // /*** WBTC-A Flip ***/
-        // ilk = "WBTC-A";
-        // newFlip = FlipAbstract(WBTC_A_FLIP);
-        // oldFlip = FlipAbstract(WBTC_A_FLIP_OLD);
-
-        // cat.file(ilk, "flip", address(newFlip));
-        // newFlip.rely(MCD_CAT);
-        // newFlip.rely(MCD_END);
-        // newFlip.rely(FLIPPER_MOM);
-        // oldFlip.deny(MCD_CAT);
-        // oldFlip.deny(MCD_END);
-        // oldFlip.deny(FLIPPER_MOM);
-        // newFlip.file("beg", beg);
-        // newFlip.file("ttl", ttl);
-        // newFlip.file("tau", tau);
+        cat.file(ilk, "flip", address(newFlip));
+        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_END);
+        newFlip.rely(FLIPPER_MOM);
+        oldFlip.deny(MCD_CAT);
+        oldFlip.deny(MCD_END);
+        oldFlip.deny(FLIPPER_MOM);
+        newFlip.file("beg", oldFlip.beg());
+        newFlip.file("ttl", oldFlip.ttl());
+        newFlip.file("tau", oldFlip.tau());
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
-        // /*** ZRX-A Flip ***/
-        // ilk = "ZRX-A";
-        // newFlip = FlipAbstract(ZRX_A_FLIP);
-        // oldFlip = FlipAbstract(ZRX_A_FLIP_OLD);
+        /*** USDC-B Flip ***/
+        ilk = "USDC-B";
+        newFlip = FlipAbstract(USDC_B_FLIP);
+        oldFlip = FlipAbstract(USDC_B_FLIP_OLD);
 
-        // cat.file(ilk, "flip", address(newFlip));
-        // newFlip.rely(MCD_CAT);
-        // newFlip.rely(MCD_END);
-        // newFlip.rely(FLIPPER_MOM);
-        // oldFlip.deny(MCD_CAT);
-        // oldFlip.deny(MCD_END);
-        // oldFlip.deny(FLIPPER_MOM);
-        // newFlip.file("beg", beg);
-        // newFlip.file("ttl", ttl);
-        // newFlip.file("tau", tau);
-
-
-        // /*** KNC-A Flip ***/
-        // ilk = "KNC-A";
-        // newFlip = FlipAbstract(KNC_A_FLIP);
-        // oldFlip = FlipAbstract(KNC_A_FLIP_OLD);
-
-        // cat.file(ilk, "flip", address(newFlip));
-        // newFlip.rely(MCD_CAT);
-        // newFlip.rely(MCD_END);
-        // newFlip.rely(FLIPPER_MOM);
-        // oldFlip.deny(MCD_CAT);
-        // oldFlip.deny(MCD_END);
-        // oldFlip.deny(FLIPPER_MOM);
-        // newFlip.file("beg", beg);
-        // newFlip.file("ttl", ttl);
-        // newFlip.file("tau", tau);
+        cat.file(ilk, "flip", address(newFlip));
+        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_END);
+        newFlip.rely(FLIPPER_MOM);
+        oldFlip.deny(MCD_CAT);
+        oldFlip.deny(MCD_END);
+        oldFlip.deny(FLIPPER_MOM);
+        newFlip.file("beg", oldFlip.beg());
+        newFlip.file("ttl", oldFlip.ttl());
+        newFlip.file("tau", oldFlip.tau());
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
-        // /*** TUSD-A Flip ***/
-        // ilk = "TUSD-A";
-        // newFlip = FlipAbstract(TUSD_A_FLIP);
-        // oldFlip = FlipAbstract(TUSD_A_FLIP_OLD);
+        /*** WBTC-A Flip ***/
+        ilk = "WBTC-A";
+        newFlip = FlipAbstract(WBTC_A_FLIP);
+        oldFlip = FlipAbstract(WBTC_A_FLIP_OLD);
 
-        // cat.file(ilk, "flip", address(newFlip));
-        // newFlip.rely(MCD_CAT);
-        // newFlip.rely(MCD_END);
-        // newFlip.rely(FLIPPER_MOM);
-        // oldFlip.deny(MCD_CAT);
-        // oldFlip.deny(MCD_END);
-        // oldFlip.deny(FLIPPER_MOM);
-        // newFlip.file("beg", beg);
-        // newFlip.file("ttl", ttl);
-        // newFlip.file("tau", tau);
+        cat.file(ilk, "flip", address(newFlip));
+        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_END);
+        newFlip.rely(FLIPPER_MOM);
+        oldFlip.deny(MCD_CAT);
+        oldFlip.deny(MCD_END);
+        oldFlip.deny(FLIPPER_MOM);
+        newFlip.file("beg", oldFlip.beg());
+        newFlip.file("ttl", oldFlip.ttl());
+        newFlip.file("tau", oldFlip.tau());
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+
+
+        /*** ZRX-A Flip ***/
+        ilk = "ZRX-A";
+        newFlip = FlipAbstract(ZRX_A_FLIP);
+        oldFlip = FlipAbstract(ZRX_A_FLIP_OLD);
+
+        cat.file(ilk, "flip", address(newFlip));
+        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_END);
+        newFlip.rely(FLIPPER_MOM);
+        oldFlip.deny(MCD_CAT);
+        oldFlip.deny(MCD_END);
+        oldFlip.deny(FLIPPER_MOM);
+        newFlip.file("beg", oldFlip.beg());
+        newFlip.file("ttl", oldFlip.ttl());
+        newFlip.file("tau", oldFlip.tau());
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+
+
+        /*** KNC-A Flip ***/
+        ilk = "KNC-A";
+        newFlip = FlipAbstract(KNC_A_FLIP);
+        oldFlip = FlipAbstract(KNC_A_FLIP_OLD);
+
+        cat.file(ilk, "flip", address(newFlip));
+        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_END);
+        newFlip.rely(FLIPPER_MOM);
+        oldFlip.deny(MCD_CAT);
+        oldFlip.deny(MCD_END);
+        oldFlip.deny(FLIPPER_MOM);
+        newFlip.file("beg", oldFlip.beg());
+        newFlip.file("ttl", oldFlip.ttl());
+        newFlip.file("tau", oldFlip.tau());
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+
+
+        /*** TUSD-A Flip ***/
+        ilk = "TUSD-A";
+        newFlip = FlipAbstract(TUSD_A_FLIP);
+        oldFlip = FlipAbstract(TUSD_A_FLIP_OLD);
+
+        cat.file(ilk, "flip", address(newFlip));
+        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_END);
+        newFlip.rely(FLIPPER_MOM);
+        oldFlip.deny(MCD_CAT);
+        oldFlip.deny(MCD_END);
+        oldFlip.deny(FLIPPER_MOM);
+        newFlip.file("beg", oldFlip.beg());
+        newFlip.file("ttl", oldFlip.ttl());
+        newFlip.file("tau", oldFlip.tau());
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
     }
 }
 
