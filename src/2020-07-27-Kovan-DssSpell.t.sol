@@ -71,29 +71,29 @@ contract DssSpellTest is DSTest, DSMath {
     address constant public MCD_FLAP_OLD    = 0x064cd5f762851b1af81Fd8fcA837227cb3eC84b4;
     address constant public MCD_FLOP_OLD    = 0x145B00b1AC4F01E84594EFa2972Fce1f5Beb5CED;
 
-    address constant public ETH_A_FLIP      = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
-    address constant public ETH_A_FLIP_OLD  = 0xB40139Ea36D35d0C9F6a2e62601B616F1FfbBD1b;
+    address constant public MCD_FLIP_ETH_A      = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
+    address constant public MCD_FLIP_ETH_A_OLD  = 0xB40139Ea36D35d0C9F6a2e62601B616F1FfbBD1b;
 
-    address constant public BAT_A_FLIP      = 0xc0126c3383777bDc175E659A51020E56307dDe21;
-    address constant public BAT_A_FLIP_OLD  = 0xC94014A032cA5fCc01271F4519Add7E87a16b94C;
+    address constant public MCD_FLIP_BAT_A      = 0xc0126c3383777bDc175E659A51020E56307dDe21;
+    address constant public MCD_FLIP_BAT_A_OLD  = 0xC94014A032cA5fCc01271F4519Add7E87a16b94C;
 
-    address constant public USDC_A_FLIP     = 0xc29Ad1913C3B415497fdA1eA15c132502B8fa372;
-    address constant public USDC_A_FLIP_OLD = 0x45d5b4A304f554262539cfd167dd05e331Da686E;
+    address constant public MCD_FLIP_USDC_A     = 0xc29Ad1913C3B415497fdA1eA15c132502B8fa372;
+    address constant public MCD_FLIP_USDC_A_OLD = 0x45d5b4A304f554262539cfd167dd05e331Da686E;
 
-    address constant public USDC_B_FLIP     = 0x3c9eF711B68882d9732F60758e7891AcEae2Aa7c;
-    address constant public USDC_B_FLIP_OLD = 0x93AE217b0C6bF52E9FFea6Ab191cCD438d9EC0de;
+    address constant public MCD_FLIP_USDC_B     = 0x3c9eF711B68882d9732F60758e7891AcEae2Aa7c;
+    address constant public MCD_FLIP_USDC_B_OLD = 0x93AE217b0C6bF52E9FFea6Ab191cCD438d9EC0de;
 
-    address constant public WBTC_A_FLIP     = 0x28dd4263e1FcE04A9016Bd7BF71a4f0F7aB93810;
-    address constant public WBTC_A_FLIP_OLD = 0xc45A1b76D3316D56a0225fB02Ab6b7637403fF67;
+    address constant public MCD_FLIP_WBTC_A     = 0x28dd4263e1FcE04A9016Bd7BF71a4f0F7aB93810;
+    address constant public MCD_FLIP_WBTC_A_OLD = 0xc45A1b76D3316D56a0225fB02Ab6b7637403fF67;
 
-    address constant public ZRX_A_FLIP      = 0xe07F1219f7d6ccD59431a6b151179A9181e3902c;
-    address constant public ZRX_A_FLIP_OLD  = 0x1341E0947D03Fd2C24e16aaEDC347bf9D9af002F;
+    address constant public MCD_FLIP_ZRX_A      = 0xe07F1219f7d6ccD59431a6b151179A9181e3902c;
+    address constant public MCD_FLIP_ZRX_A_OLD  = 0x1341E0947D03Fd2C24e16aaEDC347bf9D9af002F;
 
-    address constant public KNC_A_FLIP      = 0x644699674D06cF535772D0DC19Ad5EA695000F51;
-    address constant public KNC_A_FLIP_OLD  = 0xf14Ec3538C86A31bBf576979783a8F6dbF16d571;
+    address constant public MCD_FLIP_KNC_A      = 0x644699674D06cF535772D0DC19Ad5EA695000F51;
+    address constant public MCD_FLIP_KNC_A_OLD  = 0xf14Ec3538C86A31bBf576979783a8F6dbF16d571;
 
-    address constant public TUSD_A_FLIP     = 0xD4A145d161729A4B43B7Ab7DD683cB9A16E01a1b;
-    address constant public TUSD_A_FLIP_OLD = 0x51a8fB578E830c932A2D49927584C643Ad08d9eC;
+    address constant public MCD_FLIP_TUSD_A     = 0xD4A145d161729A4B43B7Ab7DD683cB9A16E01a1b;
+    address constant public MCD_FLIP_TUSD_A_OLD = 0x51a8fB578E830c932A2D49927584C643Ad08d9eC;
     
     DssSpell spell;
 
@@ -270,24 +270,24 @@ contract DssSpellTest is DSTest, DSMath {
         ilks[7] = "TUSD-A";
 
         address[] memory newFlips = new address[](8);
-        newFlips[0] = ETH_A_FLIP;
-        newFlips[1] = BAT_A_FLIP;
-        newFlips[2] = USDC_A_FLIP;
-        newFlips[3] = USDC_B_FLIP;
-        newFlips[4] = WBTC_A_FLIP;
-        newFlips[5] = ZRX_A_FLIP;
-        newFlips[6] = KNC_A_FLIP;
-        newFlips[7] = TUSD_A_FLIP;
+        newFlips[0] = MCD_FLIP_ETH_A;
+        newFlips[1] = MCD_FLIP_BAT_A;
+        newFlips[2] = MCD_FLIP_USDC_A;
+        newFlips[3] = MCD_FLIP_USDC_B;
+        newFlips[4] = MCD_FLIP_WBTC_A;
+        newFlips[5] = MCD_FLIP_ZRX_A;
+        newFlips[6] = MCD_FLIP_KNC_A;
+        newFlips[7] = MCD_FLIP_TUSD_A;
 
         address[] memory oldFlips = new address[](8);
-        oldFlips[0] = ETH_A_FLIP_OLD;
-        oldFlips[1] = BAT_A_FLIP_OLD;
-        oldFlips[2] = USDC_A_FLIP_OLD;
-        oldFlips[3] = USDC_B_FLIP_OLD;
-        oldFlips[4] = WBTC_A_FLIP_OLD;
-        oldFlips[5] = ZRX_A_FLIP_OLD;
-        oldFlips[6] = KNC_A_FLIP_OLD;
-        oldFlips[7] = TUSD_A_FLIP_OLD;
+        oldFlips[0] = MCD_FLIP_ETH_A_OLD;
+        oldFlips[1] = MCD_FLIP_BAT_A_OLD;
+        oldFlips[2] = MCD_FLIP_USDC_A_OLD;
+        oldFlips[3] = MCD_FLIP_USDC_B_OLD;
+        oldFlips[4] = MCD_FLIP_WBTC_A_OLD;
+        oldFlips[5] = MCD_FLIP_ZRX_A_OLD;
+        oldFlips[6] = MCD_FLIP_KNC_A_OLD;
+        oldFlips[7] = MCD_FLIP_TUSD_A_OLD;
 
         require(
             ilks.length == newFlips.length && ilks.length == oldFlips.length,

@@ -36,45 +36,45 @@ contract SpellAction {
     //  against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.0.8/contracts.json
 
-    address constant public MCD_VAT         = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
-    address constant public MCD_VOW         = 0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b;
-    address constant public MCD_CAT         = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
-    address constant public MCD_JUG         = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
-    address constant public MCD_POT         = 0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb;
-    address constant public GOV_GUARD       = 0xE50303C6B67a2d869684EFb09a62F6aaDD06387B;
+    address constant public MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
+    address constant public MCD_VOW             = 0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b;
+    address constant public MCD_CAT             = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
+    address constant public MCD_JUG             = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
+    address constant public MCD_POT             = 0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb;
+    address constant public GOV_GUARD           = 0xE50303C6B67a2d869684EFb09a62F6aaDD06387B;
 
-    address constant public MCD_SPOT        = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
-    address constant public MCD_END         = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
-    address constant public FLIPPER_MOM     = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
+    address constant public MCD_SPOT            = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
+    address constant public MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
+    address constant public FLIPPER_MOM         = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
 
-    address constant public MCD_FLAP        = 0xc6d3C83A080e2Ef16E4d7d4450A869d0891024F5;
-    address constant public MCD_FLOP        = 0x52482a3100F79FC568eb2f38C4a45ba457FBf5fA;
-    address constant public MCD_FLAP_OLD    = 0x064cd5f762851b1af81Fd8fcA837227cb3eC84b4;
-    address constant public MCD_FLOP_OLD    = 0x145B00b1AC4F01E84594EFa2972Fce1f5Beb5CED;
+    address constant public MCD_FLAP            = 0xc6d3C83A080e2Ef16E4d7d4450A869d0891024F5;
+    address constant public MCD_FLOP            = 0x52482a3100F79FC568eb2f38C4a45ba457FBf5fA;
+    address constant public MCD_FLAP_OLD        = 0x064cd5f762851b1af81Fd8fcA837227cb3eC84b4;
+    address constant public MCD_FLOP_OLD        = 0x145B00b1AC4F01E84594EFa2972Fce1f5Beb5CED;
 
-    address constant public ETH_A_FLIP      = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
-    address constant public ETH_A_FLIP_OLD  = 0xB40139Ea36D35d0C9F6a2e62601B616F1FfbBD1b;
+    address constant public MCD_FLIP_ETH_A      = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
+    address constant public MCD_FLIP_ETH_A_OLD  = 0xB40139Ea36D35d0C9F6a2e62601B616F1FfbBD1b;
 
-    address constant public BAT_A_FLIP      = 0xc0126c3383777bDc175E659A51020E56307dDe21;
-    address constant public BAT_A_FLIP_OLD  = 0xC94014A032cA5fCc01271F4519Add7E87a16b94C;
+    address constant public MCD_FLIP_BAT_A      = 0xc0126c3383777bDc175E659A51020E56307dDe21;
+    address constant public MCD_FLIP_BAT_A_OLD  = 0xC94014A032cA5fCc01271F4519Add7E87a16b94C;
 
-    address constant public USDC_A_FLIP     = 0xc29Ad1913C3B415497fdA1eA15c132502B8fa372;
-    address constant public USDC_A_FLIP_OLD = 0x45d5b4A304f554262539cfd167dd05e331Da686E;
+    address constant public MCD_FLIP_USDC_A     = 0xc29Ad1913C3B415497fdA1eA15c132502B8fa372;
+    address constant public MCD_FLIP_USDC_A_OLD = 0x45d5b4A304f554262539cfd167dd05e331Da686E;
 
-    address constant public USDC_B_FLIP     = 0x3c9eF711B68882d9732F60758e7891AcEae2Aa7c;
-    address constant public USDC_B_FLIP_OLD = 0x93AE217b0C6bF52E9FFea6Ab191cCD438d9EC0de;
+    address constant public MCD_FLIP_USDC_B     = 0x3c9eF711B68882d9732F60758e7891AcEae2Aa7c;
+    address constant public MCD_FLIP_USDC_B_OLD = 0x93AE217b0C6bF52E9FFea6Ab191cCD438d9EC0de;
 
-    address constant public WBTC_A_FLIP     = 0x28dd4263e1FcE04A9016Bd7BF71a4f0F7aB93810;
-    address constant public WBTC_A_FLIP_OLD = 0xc45A1b76D3316D56a0225fB02Ab6b7637403fF67;
+    address constant public MCD_FLIP_WBTC_A     = 0x28dd4263e1FcE04A9016Bd7BF71a4f0F7aB93810;
+    address constant public MCD_FLIP_WBTC_A_OLD = 0xc45A1b76D3316D56a0225fB02Ab6b7637403fF67;
 
-    address constant public ZRX_A_FLIP      = 0xe07F1219f7d6ccD59431a6b151179A9181e3902c;
-    address constant public ZRX_A_FLIP_OLD  = 0x1341E0947D03Fd2C24e16aaEDC347bf9D9af002F;
+    address constant public MCD_FLIP_ZRX_A      = 0xe07F1219f7d6ccD59431a6b151179A9181e3902c;
+    address constant public MCD_FLIP_ZRX_A_OLD  = 0x1341E0947D03Fd2C24e16aaEDC347bf9D9af002F;
 
-    address constant public KNC_A_FLIP      = 0x644699674D06cF535772D0DC19Ad5EA695000F51;
-    address constant public KNC_A_FLIP_OLD  = 0xf14Ec3538C86A31bBf576979783a8F6dbF16d571;
+    address constant public MCD_FLIP_KNC_A      = 0x644699674D06cF535772D0DC19Ad5EA695000F51;
+    address constant public MCD_FLIP_KNC_A_OLD  = 0xf14Ec3538C86A31bBf576979783a8F6dbF16d571;
 
-    address constant public TUSD_A_FLIP     = 0xD4A145d161729A4B43B7Ab7DD683cB9A16E01a1b;
-    address constant public TUSD_A_FLIP_OLD = 0x51a8fB578E830c932A2D49927584C643Ad08d9eC;
+    address constant public MCD_FLIP_TUSD_A     = 0xD4A145d161729A4B43B7Ab7DD683cB9A16E01a1b;
+    address constant public MCD_FLIP_TUSD_A_OLD = 0x51a8fB578E830c932A2D49927584C643Ad08d9eC;
 
     // decimals & precision
     uint256 constant public THOUSAND = 10 ** 3;
@@ -137,8 +137,8 @@ contract SpellAction {
 
         // /*** ETH-A Flip ***/
         ilk = "ETH-A";
-        newFlip = FlipAbstract(ETH_A_FLIP);
-        oldFlip = FlipAbstract(ETH_A_FLIP_OLD);
+        newFlip = FlipAbstract(MCD_FLIP_ETH_A);
+        oldFlip = FlipAbstract(MCD_FLIP_ETH_A_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
@@ -156,8 +156,8 @@ contract SpellAction {
 
         /*** BAT-A Flip ***/
         ilk = "BAT-A";
-        newFlip = FlipAbstract(BAT_A_FLIP);
-        oldFlip = FlipAbstract(BAT_A_FLIP_OLD);
+        newFlip = FlipAbstract(MCD_FLIP_BAT_A);
+        oldFlip = FlipAbstract(MCD_FLIP_BAT_A_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
@@ -175,8 +175,8 @@ contract SpellAction {
 
         /*** USDC-A Flip ***/
         ilk = "USDC-A";
-        newFlip = FlipAbstract(USDC_A_FLIP);
-        oldFlip = FlipAbstract(USDC_A_FLIP_OLD);
+        newFlip = FlipAbstract(MCD_FLIP_USDC_A);
+        oldFlip = FlipAbstract(MCD_FLIP_USDC_A_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
@@ -194,8 +194,8 @@ contract SpellAction {
 
         /*** USDC-B Flip ***/
         ilk = "USDC-B";
-        newFlip = FlipAbstract(USDC_B_FLIP);
-        oldFlip = FlipAbstract(USDC_B_FLIP_OLD);
+        newFlip = FlipAbstract(MCD_FLIP_USDC_B);
+        oldFlip = FlipAbstract(MCD_FLIP_USDC_B_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
@@ -213,8 +213,8 @@ contract SpellAction {
 
         /*** WBTC-A Flip ***/
         ilk = "WBTC-A";
-        newFlip = FlipAbstract(WBTC_A_FLIP);
-        oldFlip = FlipAbstract(WBTC_A_FLIP_OLD);
+        newFlip = FlipAbstract(MCD_FLIP_WBTC_A);
+        oldFlip = FlipAbstract(MCD_FLIP_WBTC_A_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
@@ -232,8 +232,8 @@ contract SpellAction {
 
         /*** ZRX-A Flip ***/
         ilk = "ZRX-A";
-        newFlip = FlipAbstract(ZRX_A_FLIP);
-        oldFlip = FlipAbstract(ZRX_A_FLIP_OLD);
+        newFlip = FlipAbstract(MCD_FLIP_ZRX_A);
+        oldFlip = FlipAbstract(MCD_FLIP_ZRX_A_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
@@ -251,8 +251,8 @@ contract SpellAction {
 
         /*** KNC-A Flip ***/
         ilk = "KNC-A";
-        newFlip = FlipAbstract(KNC_A_FLIP);
-        oldFlip = FlipAbstract(KNC_A_FLIP_OLD);
+        newFlip = FlipAbstract(MCD_FLIP_KNC_A);
+        oldFlip = FlipAbstract(MCD_FLIP_KNC_A_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
@@ -270,8 +270,8 @@ contract SpellAction {
 
         /*** TUSD-A Flip ***/
         ilk = "TUSD-A";
-        newFlip = FlipAbstract(TUSD_A_FLIP);
-        oldFlip = FlipAbstract(TUSD_A_FLIP_OLD);
+        newFlip = FlipAbstract(MCD_FLIP_TUSD_A);
+        oldFlip = FlipAbstract(MCD_FLIP_TUSD_A_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
         newFlip.rely(MCD_CAT);
