@@ -44,7 +44,7 @@ contract SpellAction {
     address constant public MCD_CAT         = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
     address constant public MCD_JUG         = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
     address constant public MCD_POT         = 0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb;
-    address constant public MCD_GOV         = 0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD;
+    address constant public GOV_GUARD       = 0xE50303C6B67a2d869684EFb09a62F6aaDD06387B;
 
     address constant public MCD_SPOT        = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
     address constant public MCD_END         = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
@@ -106,7 +106,7 @@ contract SpellAction {
         JugAbstract(MCD_JUG).drip("TUSD-A");
 
         /*** Add new Flip, Flap, Flop contracts ***/
-        MkrAuthorityAbstract mkrAuthority = MkrAuthorityAbstract(MCD_GOV);
+        MkrAuthorityAbstract mkrAuthority = MkrAuthorityAbstract(GOV_GUARD);
         VatAbstract vat                   = VatAbstract(MCD_CAT);
         CatAbstract cat                   = CatAbstract(MCD_CAT);
         VowAbstract vow                   = VowAbstract(MCD_VOW);
@@ -116,6 +116,7 @@ contract SpellAction {
         FlapAbstract oldFlap = FlapAbstract(MCD_FLAP_OLD);
         FlopAbstract oldFlop = FlopAbstract(MCD_FLOP_OLD);
 
+        /*** Flap ***/
         vow.file("flapper", MCD_FLAP);
         newFlap.rely(MCD_VOW);
         newFlap.file("beg", beg);
@@ -123,6 +124,7 @@ contract SpellAction {
         newFlap.file("tau", tau);
         oldFlap.deny(MCD_VOW);
 
+        /*** Flop ***/
         vow.file("flopper", MCD_FLOP);
         newFlop.rely(MCD_VOW);
         vat.rely(MCD_FLOP);
@@ -138,8 +140,8 @@ contract SpellAction {
         FlipAbstract newFlip;
         FlipAbstract oldFlip;
         bytes32 ilk;
-        
-        /*** ETH-A ***/
+
+        /*** ETH-A Flip ***/
         ilk = "ETH-A";
         newFlip = FlipAbstract(ETH_A_FLIP);
         oldFlip = FlipAbstract(ETH_A_FLIP_OLD);
@@ -155,124 +157,124 @@ contract SpellAction {
         newFlip.file("ttl", ttl);
         newFlip.file("tau", tau);
 
-        
-        /*** BAT-A ***/
-        ilk = "BAT-A";
-        newFlip = FlipAbstract(BAT_A_FLIP);
-        oldFlip = FlipAbstract(BAT_A_FLIP_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
-        newFlip.rely(MCD_END);
-        newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
-        newFlip.file("beg", beg);
-        newFlip.file("ttl", ttl);
-        newFlip.file("tau", tau);
+        // /*** BAT-A Flip ***/
+        // ilk = "BAT-A";
+        // newFlip = FlipAbstract(BAT_A_FLIP);
+        // oldFlip = FlipAbstract(BAT_A_FLIP_OLD);
 
-        
-        /*** USDC-A ***/
-        ilk = "USDC-A";
-        newFlip = FlipAbstract(USDC_A_FLIP);
-        oldFlip = FlipAbstract(USDC_A_FLIP_OLD);
+        // cat.file(ilk, "flip", address(newFlip));
+        // newFlip.rely(MCD_CAT);
+        // newFlip.rely(MCD_END);
+        // newFlip.rely(FLIPPER_MOM);
+        // oldFlip.deny(MCD_CAT);
+        // oldFlip.deny(MCD_END);
+        // oldFlip.deny(FLIPPER_MOM);
+        // newFlip.file("beg", beg);
+        // newFlip.file("ttl", ttl);
+        // newFlip.file("tau", tau);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
-        newFlip.rely(MCD_END);
-        newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
-        newFlip.file("beg", beg);
-        newFlip.file("ttl", ttl);
-        newFlip.file("tau", tau);
 
-        
-        /*** USDC-B ***/
-        ilk = "USDC-B";
-        newFlip = FlipAbstract(USDC_B_FLIP);
-        oldFlip = FlipAbstract(USDC_B_FLIP_OLD);
+        // /*** USDC-A Flip ***/
+        // ilk = "USDC-A";
+        // newFlip = FlipAbstract(USDC_A_FLIP);
+        // oldFlip = FlipAbstract(USDC_A_FLIP_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
-        newFlip.rely(MCD_END);
-        newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
-        newFlip.file("beg", beg);
-        newFlip.file("ttl", ttl);
-        newFlip.file("tau", tau);
+        // cat.file(ilk, "flip", address(newFlip));
+        // newFlip.rely(MCD_CAT);
+        // newFlip.rely(MCD_END);
+        // newFlip.rely(FLIPPER_MOM);
+        // oldFlip.deny(MCD_CAT);
+        // oldFlip.deny(MCD_END);
+        // oldFlip.deny(FLIPPER_MOM);
+        // newFlip.file("beg", beg);
+        // newFlip.file("ttl", ttl);
+        // newFlip.file("tau", tau);
 
-        
-        /*** WBTC-A ***/
-        ilk = "WBTC-A";
-        newFlip = FlipAbstract(WBTC_A_FLIP);
-        oldFlip = FlipAbstract(WBTC_A_FLIP_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
-        newFlip.rely(MCD_END);
-        newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
-        newFlip.file("beg", beg);
-        newFlip.file("ttl", ttl);
-        newFlip.file("tau", tau);
+        // /*** USDC-B Flip ***/
+        // ilk = "USDC-B";
+        // newFlip = FlipAbstract(USDC_B_FLIP);
+        // oldFlip = FlipAbstract(USDC_B_FLIP_OLD);
 
-        
-        /*** ZRX-A ***/
-        ilk = "ZRX-A";
-        newFlip = FlipAbstract(ZRX_A_FLIP);
-        oldFlip = FlipAbstract(ZRX_A_FLIP_OLD);
+        // cat.file(ilk, "flip", address(newFlip));
+        // newFlip.rely(MCD_CAT);
+        // newFlip.rely(MCD_END);
+        // newFlip.rely(FLIPPER_MOM);
+        // oldFlip.deny(MCD_CAT);
+        // oldFlip.deny(MCD_END);
+        // oldFlip.deny(FLIPPER_MOM);
+        // newFlip.file("beg", beg);
+        // newFlip.file("ttl", ttl);
+        // newFlip.file("tau", tau);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
-        newFlip.rely(MCD_END);
-        newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
-        newFlip.file("beg", beg);
-        newFlip.file("ttl", ttl);
-        newFlip.file("tau", tau);
 
-        
-        /*** KNC-A ***/
-        ilk = "KNC-A";
-        newFlip = FlipAbstract(KNC_A_FLIP);
-        oldFlip = FlipAbstract(KNC_A_FLIP_OLD);
+        // /*** WBTC-A Flip ***/
+        // ilk = "WBTC-A";
+        // newFlip = FlipAbstract(WBTC_A_FLIP);
+        // oldFlip = FlipAbstract(WBTC_A_FLIP_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
-        newFlip.rely(MCD_END);
-        newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
-        newFlip.file("beg", beg);
-        newFlip.file("ttl", ttl);
-        newFlip.file("tau", tau);
+        // cat.file(ilk, "flip", address(newFlip));
+        // newFlip.rely(MCD_CAT);
+        // newFlip.rely(MCD_END);
+        // newFlip.rely(FLIPPER_MOM);
+        // oldFlip.deny(MCD_CAT);
+        // oldFlip.deny(MCD_END);
+        // oldFlip.deny(FLIPPER_MOM);
+        // newFlip.file("beg", beg);
+        // newFlip.file("ttl", ttl);
+        // newFlip.file("tau", tau);
 
-        
-        /*** TUSD-A ***/
-        ilk = "TUSD-A";
-        newFlip = FlipAbstract(TUSD_A_FLIP);
-        oldFlip = FlipAbstract(TUSD_A_FLIP_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
-        newFlip.rely(MCD_END);
-        newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
-        newFlip.file("beg", beg);
-        newFlip.file("ttl", ttl);
-        newFlip.file("tau", tau);
+        // /*** ZRX-A Flip ***/
+        // ilk = "ZRX-A";
+        // newFlip = FlipAbstract(ZRX_A_FLIP);
+        // oldFlip = FlipAbstract(ZRX_A_FLIP_OLD);
+
+        // cat.file(ilk, "flip", address(newFlip));
+        // newFlip.rely(MCD_CAT);
+        // newFlip.rely(MCD_END);
+        // newFlip.rely(FLIPPER_MOM);
+        // oldFlip.deny(MCD_CAT);
+        // oldFlip.deny(MCD_END);
+        // oldFlip.deny(FLIPPER_MOM);
+        // newFlip.file("beg", beg);
+        // newFlip.file("ttl", ttl);
+        // newFlip.file("tau", tau);
+
+
+        // /*** KNC-A Flip ***/
+        // ilk = "KNC-A";
+        // newFlip = FlipAbstract(KNC_A_FLIP);
+        // oldFlip = FlipAbstract(KNC_A_FLIP_OLD);
+
+        // cat.file(ilk, "flip", address(newFlip));
+        // newFlip.rely(MCD_CAT);
+        // newFlip.rely(MCD_END);
+        // newFlip.rely(FLIPPER_MOM);
+        // oldFlip.deny(MCD_CAT);
+        // oldFlip.deny(MCD_END);
+        // oldFlip.deny(FLIPPER_MOM);
+        // newFlip.file("beg", beg);
+        // newFlip.file("ttl", ttl);
+        // newFlip.file("tau", tau);
+
+
+        // /*** TUSD-A Flip ***/
+        // ilk = "TUSD-A";
+        // newFlip = FlipAbstract(TUSD_A_FLIP);
+        // oldFlip = FlipAbstract(TUSD_A_FLIP_OLD);
+
+        // cat.file(ilk, "flip", address(newFlip));
+        // newFlip.rely(MCD_CAT);
+        // newFlip.rely(MCD_END);
+        // newFlip.rely(FLIPPER_MOM);
+        // oldFlip.deny(MCD_CAT);
+        // oldFlip.deny(MCD_END);
+        // oldFlip.deny(FLIPPER_MOM);
+        // newFlip.file("beg", beg);
+        // newFlip.file("ttl", ttl);
+        // newFlip.file("tau", tau);
     }
 }
 

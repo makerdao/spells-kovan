@@ -158,25 +158,25 @@ contract DssSpellTest is DSTest, DSMath {
             pauseDelay: 60
         });
 
-        address[] memory newFlips = new address[](8);
+        address[] memory newFlips = new address[](1);
         newFlips[0] = ETH_A_FLIP;
-        newFlips[1] = BAT_A_FLIP;
-        newFlips[2] = USDC_A_FLIP;
-        newFlips[3] = USDC_B_FLIP;
-        newFlips[4] = WBTC_A_FLIP;
-        newFlips[5] = ZRX_A_FLIP;
-        newFlips[6] = KNC_A_FLIP;
-        newFlips[7] = TUSD_A_FLIP;
+        // newFlips[1] = BAT_A_FLIP;
+        // newFlips[2] = USDC_A_FLIP;
+        // newFlips[3] = USDC_B_FLIP;
+        // newFlips[4] = WBTC_A_FLIP;
+        // newFlips[5] = ZRX_A_FLIP;
+        // newFlips[6] = KNC_A_FLIP;
+        // newFlips[7] = TUSD_A_FLIP;
 
-        address[] memory oldFlips = new address[](8);
+        address[] memory oldFlips = new address[](1);
         oldFlips[0] = ETH_A_FLIP_OLD;
-        oldFlips[1] = BAT_A_FLIP_OLD;
-        oldFlips[2] = USDC_A_FLIP_OLD;
-        oldFlips[3] = USDC_B_FLIP_OLD;
-        oldFlips[4] = WBTC_A_FLIP_OLD;
-        oldFlips[5] = ZRX_A_FLIP_OLD;
-        oldFlips[6] = KNC_A_FLIP_OLD;
-        oldFlips[7] = TUSD_A_FLIP_OLD;
+        // oldFlips[1] = BAT_A_FLIP_OLD;
+        // oldFlips[2] = USDC_A_FLIP_OLD;
+        // oldFlips[3] = USDC_B_FLIP_OLD;
+        // oldFlips[4] = WBTC_A_FLIP_OLD;
+        // oldFlips[5] = ZRX_A_FLIP_OLD;
+        // oldFlips[6] = KNC_A_FLIP_OLD;
+        // oldFlips[7] = TUSD_A_FLIP_OLD;
     }
 
     function vote() private {
@@ -246,25 +246,25 @@ contract DssSpellTest is DSTest, DSMath {
 
     // }
 
-    function testSpellIsCast() public {
-        string memory description = new SpellAction().description();
-        assertTrue(bytes(description).length > 0);
-        // DS-Test can't handle strings directly, so cast to a bytes32.
-        assertEq(stringToBytes32(spell.description()),
-                stringToBytes32(description));
+    // function testSpellIsCast() public {
+    //     string memory description = new SpellAction().description();
+    //     assertTrue(bytes(description).length > 0);
+    //     // DS-Test can't handle strings directly, so cast to a bytes32.
+    //     assertEq(stringToBytes32(spell.description()),
+    //             stringToBytes32(description));
 
-        if(address(spell) != address(MAINNET_SPELL)) {
-            assertEq(spell.expiration(), (now + 30 days));
-        } else {
-            assertEq(spell.expiration(), (1590773091 + 30 days));
-        }
+    //     if(address(spell) != address(MAINNET_SPELL)) {
+    //         assertEq(spell.expiration(), (now + 30 days));
+    //     } else {
+    //         assertEq(spell.expiration(), (1590773091 + 30 days));
+    //     }
 
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
+    //     vote();
+    //     scheduleWaitAndCast();
+    //     assertTrue(spell.done());
 
-        checkSystemValues(afterSpell);
-    }
+    //     checkSystemValues(afterSpell);
+    // }
 
     function testFlips() public {
         vote();
