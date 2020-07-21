@@ -51,9 +51,10 @@ contract SpellAction {
 
     // MANA specific addresses
     // MANA token address 0x221f4d62636b7b51b99e36444ea47dc7831c2b2f
-    address constant public MCD_JOIN_MANA_A     = 0xd4AF9cD0d9e7b98890875282EF2554B6c1a26c77;
+    address constant public MCD_JOIN_MANA_A     = 0xdC9Fe394B27525e0D9C827EE356303b49F607aaF;
     address constant public PIP_MANA            = 0xE97D2b077Fe19c80929718d377981d9F754BF36e;
-    address constant public MCD_FLIP_MANA_A     = 0x392f8559f3A3bB39DD917eb8DB115F61a3b9208B;
+    address constant public MCD_FLIP_MANA_A     = 0x5CB9D33A9fE5244019e6F5f45e68F18600805264;
+    address constant public MANA                = 0x221F4D62636b7B51b99e36444ea47Dc7831c2B2f;
 
     // decimals & precision
     uint256 constant public THOUSAND            = 10 ** 3;
@@ -71,28 +72,31 @@ contract SpellAction {
     uint256 constant public TWELVE_PCT_RATE        = 1000000003593629043335673582;
 
     function execute() external {
+        ////////////////////////////////////////////////////////////////////////////////
+        // GLOBAL
 
-        PotAbstract(MCD_POT).drip();
-        JugAbstract(MCD_JUG).drip("ETH-A");
-        JugAbstract(MCD_JUG).drip("BAT-A");
-        JugAbstract(MCD_JUG).drip("USDC-A");
-        JugAbstract(MCD_JUG).drip("USDC-B");
-        JugAbstract(MCD_JUG).drip("WBTC-A");
-        JugAbstract(MCD_JUG).drip("ZRX-A");
-        JugAbstract(MCD_JUG).drip("KNC-A");
-        JugAbstract(MCD_JUG).drip("TUSD-A");
+        // set the global debt ceiling to
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 1 * MILLION * RAD);
 
         ////////////////////////////////////////////////////////////////////////////////
-        // GLOBAL 
-
-        // set the global debt ceiling to TODO: ???
-        // VatAbstract(MCD_VAT).file("Line", 246 * MILLION * RAD);
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // MANA-A 
+        // MANA-A
 
         // set ilk bytes32 variable
         bytes32 MANA_A_ILK = "MANA-A";
+
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_MANA_A).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_MANA_A).ilk() == MANA_A_ILK, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_MANA_A).gem() == MANA, "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_MANA_A).dec() == 18, "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_MANA_A).vat() == MCD_VAT, "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_MANA_A).ilk() == MANA_A_ILK, "flip-ilk-not-match");
+
+        // set price feed for MANA-A
+        SpotAbstract(MCD_SPOT).file(MANA_A_ILK, "pip", PIP_MANA);
+
+        // set the MANA-A flipper in the cat
+        CatAbstract(MCD_CAT).file(MANA_A_ILK, "flip", MCD_FLIP_MANA_A);
 
         // Init MANA-A in Vat & Jug
         VatAbstract(MCD_VAT).init(MANA_A_ILK);
@@ -101,13 +105,7 @@ contract SpellAction {
         // Allow MANA-A Join to modify Vat registry
         VatAbstract(MCD_VAT).rely(MCD_JOIN_MANA_A);
 
-        // set price feed for MANA-A
-        SpotAbstract(MCD_SPOT).file(MANA_A_ILK, "pip", PIP_MANA);
-
-        // set the MANA-A flipper in the cat
-        CatAbstract(MCD_CAT).file(MANA_A_ILK, "flip", MCD_FLIP_MANA_A);
-
-        // Allow cat to kick auctions in MANA-A Flipper 
+        // Allow cat to kick auctions in MANA-A Flipper
         // NOTE: this will be reverse later in spell, and is done only for explicitness.
         FlipAbstract(MCD_FLIP_MANA_A).rely(MCD_CAT);
 
@@ -120,6 +118,7 @@ contract SpellAction {
         // update OSM
         MedianAbstract(OsmAbstract(PIP_MANA).src()).kiss(PIP_MANA);
         OsmAbstract(PIP_MANA).rely(OSM_MOM);
+        OsmAbstract(PIP_MANA).kiss(MCD_SPOT);
         OsmAbstract(PIP_MANA).kiss(MCD_END);
         OsmMomAbstract(OSM_MOM).setOsm(MANA_A_ILK, PIP_MANA);
 
@@ -160,10 +159,6 @@ contract DssSpell {
         assembly { _tag := extcodehash(_action) }
         tag = _tag;
         expiration = now + 30 days;
-    }
-
-    function description() public view returns (string memory) {
-        return SpellAction(action).description();
     }
 
     function schedule() public {

@@ -21,8 +21,10 @@ contract FlipMomLike {
 }
 
 contract DssSpellTest is DSTest, DSMath {
-    // populate with mainnet spell if needed
-    address constant MAINNET_SPELL = address(0);
+    // populate with kovan spell if needed
+    address constant KOVAN_SPELL = address(0);
+    // this needs to be updated
+    uint256 constant SPELL_CREATED = 0;
 
     struct CollateralValues {
         uint256 line;
@@ -45,7 +47,7 @@ contract DssSpellTest is DSTest, DSMath {
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
-    // SystemValues beforeSpell;
+    SystemValues beforeSpell;
     SystemValues afterSpell;
 
     Hevm hevm;
@@ -61,9 +63,9 @@ contract DssSpellTest is DSTest, DSMath {
     SpotAbstract    spot        = SpotAbstract(     0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
     DSTokenAbstract gov         = DSTokenAbstract(  0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
 
-    FlipAbstract    flip        = FlipAbstract(     0x392f8559f3A3bB39DD917eb8DB115F61a3b9208B);
+    FlipAbstract    flip        = FlipAbstract(     0x5CB9D33A9fE5244019e6F5f45e68F18600805264);
 
-    GemJoinAbstract manajoin    = GemJoinAbstract(  0xd4AF9cD0d9e7b98890875282EF2554B6c1a26c77);
+    GemJoinAbstract manajoin    = GemJoinAbstract(  0xdC9Fe394B27525e0D9C827EE356303b49F607aaF);
     EndAbstract     end         = EndAbstract(      0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     address  flipperMom         =                   0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
     GemAbstract     mana        = GemAbstract(      0x221F4D62636b7B51b99e36444ea47Dc7831c2B2f);
@@ -125,12 +127,19 @@ contract DssSpellTest is DSTest, DSMath {
     function setUp() public {
         hevm = Hevm(address(CHEAT_CODE));
 
-        spell = MAINNET_SPELL != address(0) ? DssSpell(MAINNET_SPELL) : new DssSpell();
+        spell = KOVAN_SPELL != address(0) ? DssSpell(KOVAN_SPELL) : new DssSpell();
+
+        beforeSpell = SystemValues({
+            dsr: 1000000000000000000000000000,
+            dsrPct: 0 * 1000,
+            Line: 172050 * THOUSAND * RAD,
+            pauseDelay: 60
+        });
 
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: 172050 * THOUSAND * RAD,
+            Line: beforeSpell.Line + 1 * MILLION * RAD,
             pauseDelay: 60
         });
 
@@ -138,7 +147,7 @@ contract DssSpellTest is DSTest, DSMath {
             line: 1 * MILLION * RAD,
             dust: 20 * RAD,
             duty: 1000000003593629043335673582, // 12% stability fee
-            pct: 6 * 1000,
+            pct: 12 * 1000,
             chop: 113 * RAY / 100,
             lump: 500 * THOUSAND * WAD,
             mat: 175 * RAY / 100,
@@ -213,17 +222,13 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast() public {
-        string memory description = new SpellAction().description();
-        assertTrue(bytes(description).length > 0);
-        // DS-Test can't handle strings directly, so cast to a bytes32.
-        assertEq(stringToBytes32(spell.description()),
-                stringToBytes32(description));
-
-        if(address(spell) != address(MAINNET_SPELL)) {
+        if(address(spell) != address(KOVAN_SPELL)) {
             assertEq(spell.expiration(), (now + 30 days));
         } else {
-            assertEq(spell.expiration(), (1595012528 + 30 days));
+            assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
         }
+
+        checkSystemValues(beforeSpell);
 
         vote();
         scheduleWaitAndCast();
@@ -244,10 +249,6 @@ contract DssSpellTest is DSTest, DSMath {
         checkSystemValues(afterSpell);
         checkCollateralValues("MANA-A", afterSpell);
 
-        // MANA-A Pip Owner
-        hevm.warp(now + 180);
-        pip.poke();
-
         // assertEq(pip.owner(), pauseProxy);
         // MANA-A Pip Authority
 
@@ -256,21 +257,22 @@ contract DssSpellTest is DSTest, DSMath {
         // // Authorization
         assertEq(manajoin.wards(pauseProxy), 1);
         assertEq(vat.wards(address(manajoin)), 1);
-        assertEq(flip.wards(address(cat)), 0); // FlipperMom denied it at end of the spell (no liquidations on first phase)
+        assertEq(flip.wards(address(cat)), 1);
         assertEq(flip.wards(address(end)), 1);
         assertEq(flip.wards(flipperMom), 1);
         assertEq(pip.wards(address(osmMom)), 1);
         assertEq(pip.bud(address(spot)), 1);
+        assertEq(pip.bud(address(end)), 1);
         assertEq(MedianAbstract(pip.src()).bud(address(pip)), 1);
 
         // Start testing Vault
         uint256 current_dai = vat.dai(address(this));
 
         // Join to adapter
-        assertEq(mana.balanceOf(address(this)), 600 * 10 ** 18);
+        assertEq(mana.balanceOf(address(this)), 600 * WAD);
         assertEq(vat.gem("MANA-A", address(this)), 0);
-        mana.approve(address(manajoin), 600 * 10 ** 18);
-        manajoin.join(address(this), 600 * 10 ** 18);
+        mana.approve(address(manajoin), 600 * WAD);
+        manajoin.join(address(this), 600 * WAD);
         assertEq(mana.balanceOf(address(this)), 0);
         assertEq(vat.gem("MANA-A", address(this)), 600 * WAD);
 
@@ -286,8 +288,8 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.dai(address(this)), current_dai);
 
         // Withdraw from adapter
-        manajoin.exit(address(this), 600 * 10 ** 18);
-        assertEq(mana.balanceOf(address(this)), 600 * 10 ** 18);
+        manajoin.exit(address(this), 600 * WAD);
+        assertEq(mana.balanceOf(address(this)), 600 * WAD);
         assertEq(vat.gem("MANA-A", address(this)), 0);
 
         // Generate new DAI to force a liquidation
