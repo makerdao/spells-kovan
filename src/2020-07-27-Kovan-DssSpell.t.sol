@@ -59,7 +59,7 @@ contract DssSpellTest is DSTest, DSMath {
     PotAbstract     pot            = PotAbstract(    0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract     jug            = JugAbstract(    0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract    spot           = SpotAbstract(   0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    MKRAbstract     gov            = MKRAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
+    DSTokenAbstract gov            = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     VowAbstract     vow            = VowAbstract(    0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b);
     MkrAuthorityAbstract mkrAuthority = MkrAuthorityAbstract(0xE50303C6B67a2d869684EFb09a62F6aaDD06387B);
 
