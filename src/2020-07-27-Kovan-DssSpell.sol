@@ -179,7 +179,7 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_USDC_A_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_CAT); // This will be denied after via FlipperMom, just doing this for explicitness
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
         oldFlip.deny(MCD_CAT);
@@ -190,6 +190,7 @@ contract SpellAction {
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_A);
 
 
         /*** USDC-B Flip ***/
@@ -198,7 +199,7 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_USDC_B_OLD);
 
         cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
+        newFlip.rely(MCD_CAT); // This will be denied after via FlipperMom, just doing this for explicitness
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
         oldFlip.deny(MCD_CAT);
@@ -209,6 +210,7 @@ contract SpellAction {
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_B);
 
 
         /*** WBTC-A Flip ***/

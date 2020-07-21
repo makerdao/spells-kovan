@@ -233,7 +233,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         assertEq(flip, address(newFlip));
 
-        assertEq(newFlip.wards(address(cat)), 1);
+        assertEq(newFlip.wards(address(cat)), (ilk == "USDC-A" || ilk == "USDC-B") ? 0 : 1);
         assertEq(newFlip.wards(address(end)), 1);
         assertEq(newFlip.wards(address(flipperMom)), 1);
 
