@@ -4,7 +4,7 @@ import "ds-math/math.sol";
 import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 
-import {DssSpell, SpellAction} from "./2020-07-27-Kovan-DssSpell.sol";
+import {DssSpell, SpellAction} from "./ReplaceFlipFlapFlop.sol";
 
 contract Hevm {
     function warp(uint256) public;
