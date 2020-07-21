@@ -21,8 +21,9 @@ contract FlipMomLike {
 }
 
 contract DssSpellTest is DSTest, DSMath {
-    // populate with mainnet spell if needed
-    address constant MAINNET_SPELL = address(0);
+    // populate with kovan spell if needed
+    address constant KOVAN_SPELL = address(0);
+    uint256 constant SPELL_CREATED = 0;
 
     struct CollateralValues {
         uint256 line;
@@ -148,7 +149,7 @@ contract DssSpellTest is DSTest, DSMath {
     function setUp() public {
         hevm = Hevm(address(CHEAT_CODE));
 
-        spell = MAINNET_SPELL != address(0) ? DssSpell(MAINNET_SPELL) : new DssSpell();
+        spell = KOVAN_SPELL != address(0) ? DssSpell(KOVAN_SPELL) : new DssSpell();
 
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
@@ -246,10 +247,10 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast() public {
-        if(address(spell) != address(MAINNET_SPELL)) {
+        if(address(spell) != address(KOVAN_SPELL)) {
             assertEq(spell.expiration(), (now + 30 days));
         } else {
-            assertEq(spell.expiration(), (1590773091 + 30 days));
+            assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
         }
 
         vote();
