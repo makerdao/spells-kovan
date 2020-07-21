@@ -246,26 +246,12 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast() public {
-        string memory description = new SpellAction().description();
-        assertTrue(bytes(description).length > 0);
-        // DS-Test can't handle strings directly, so cast to a bytes32.
-        assertEq(stringToBytes32(spell.description()),
-                stringToBytes32(description));
-
         if(address(spell) != address(MAINNET_SPELL)) {
             assertEq(spell.expiration(), (now + 30 days));
         } else {
             assertEq(spell.expiration(), (1590773091 + 30 days));
         }
 
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        checkSystemValues(afterSpell);
-    }
-
-    function testFlips() public {
         vote();
         scheduleWaitAndCast();
 
@@ -310,14 +296,6 @@ contract DssSpellTest is DSTest, DSMath {
         for(uint i = 0; i < ilks.length; i++) {
             checkFlipValues(ilks[i], newFlips[i], oldFlips[i]);
         }
-    }
-
-    function testFlaps() public {
-        vote();
-        scheduleWaitAndCast();
-
-        // spell done
-        assertTrue(spell.done());
 
         FlapAbstract newFlap = FlapAbstract(MCD_FLAP);
         FlapAbstract oldFlap = FlapAbstract(MCD_FLAP_OLD);
@@ -332,14 +310,6 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(uint256(newFlap.beg()), uint256(oldFlap.beg()));
         assertEq(uint256(newFlap.ttl()), uint256(oldFlap.ttl()));
         assertEq(uint256(newFlap.tau()), uint256(oldFlap.tau()));
-    }
-
-    function testFlops() public {
-        vote();
-        scheduleWaitAndCast();
-
-        // spell done
-        assertTrue(spell.done());
 
         FlopAbstract newFlop = FlopAbstract(MCD_FLOP);
         FlopAbstract oldFlop = FlopAbstract(MCD_FLOP_OLD);

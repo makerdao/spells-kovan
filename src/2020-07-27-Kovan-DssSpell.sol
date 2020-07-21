@@ -29,9 +29,6 @@ import "lib/dss-interfaces/src/dss/VowAbstract.sol";
 import "lib/dss-interfaces/src/dss/MkrAuthorityAbstract.sol";
 
 contract SpellAction {
-    // Provides a descriptive tag for bot consumption
-    // This should be modified weekly to provide a summary of the actions
-    string constant public description = "2020-07-27 MakerDAO Executive Spell";
 
     // KOVAN ADDRESSES
     //
@@ -116,6 +113,8 @@ contract SpellAction {
         newFlap.file("ttl", oldFlap.ttl());
         newFlap.file("tau", oldFlap.tau());
         oldFlap.deny(MCD_VOW);
+        require(newFlap.gem() == oldFlap.gem(), "non-matching-gem");
+        require(newFlap.vat() == MCD_VAT, "non-matching-vat");
 
         /*** Flop ***/
         vow.file("flopper", MCD_FLOP);
@@ -129,6 +128,8 @@ contract SpellAction {
         oldFlop.deny(MCD_VOW);
         vat.deny(MCD_FLOP_OLD);
         mkrAuthority.deny(MCD_FLOP_OLD);
+        require(newFlop.gem() == oldFlop.gem(), "non-matching-gem");
+        require(newFlop.vat() == MCD_VAT, "non-matching-vat");
 
         FlipAbstract newFlip;
         FlipAbstract oldFlip;
@@ -305,10 +306,6 @@ contract DssSpell {
         assembly { _tag := extcodehash(_action) }
         tag = _tag;
         expiration = now + 30 days;
-    }
-
-    function description() public view returns (string memory) {
-        return SpellAction(action).description();
     }
 
     function schedule() public {
