@@ -22,8 +22,8 @@ contract FlipMomLike {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0);
-    uint256 constant SPELL_CREATED = 0;
+    address constant KOVAN_SPELL = 0x86aFD892CF9836241dbb448fEfbb158ABE9b35bA;
+    uint256 constant SPELL_CREATED = 1595363176;
 
     struct CollateralValues {
         uint256 line;
