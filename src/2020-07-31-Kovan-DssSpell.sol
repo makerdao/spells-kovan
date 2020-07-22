@@ -104,26 +104,26 @@ contract SpellAction {
         require(FlipAbstract(MCD_FLIP_LEND_A).ilk()    == LEND_A_ILK,   "flip-ilk-not-match");
 
         // set price feed for LEND-A
-        SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "pip", PIP_LEND); // X
+        SpotAbstract(MCD_SPOT).file(LEND_A_ILK, "pip", PIP_LEND); 
 
         // set the LEND-A flipper in the cat
-        CatAbstract(MCD_CAT).file(LEND_A_ILK, "flip", MCD_FLIP_LEND_A); // X
+        CatAbstract(MCD_CAT).file(LEND_A_ILK, "flip", MCD_FLIP_LEND_A);
 
         // Init LEND-A in Vat & Jug
-        VatAbstract(MCD_VAT).init(LEND_A_ILK); // X
-        JugAbstract(MCD_JUG).init(LEND_A_ILK); // X
+        VatAbstract(MCD_VAT).init(LEND_A_ILK);
+        JugAbstract(MCD_JUG).init(LEND_A_ILK);
 
         // Allow LEND-A Join to modify Vat registry
-        VatAbstract(MCD_VAT).rely(MCD_JOIN_LEND_A); // X
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_LEND_A);
         // Allow cat to kick auctions in LEND-A Flipper 
         // NOTE: this will be reverse later in spell, and is done only for explicitness.
-        FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_CAT); // X
+        FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_CAT);
 
         // Allow End to yank auctions in LEND-A Flipper
-        FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_END); // X
+        FlipAbstract(MCD_FLIP_LEND_A).rely(MCD_END);
 
         // Allow FlipperMom to access the LEND-A Flipper
-        FlipAbstract(MCD_FLIP_LEND_A).rely(FLIPPER_MOM); // X
+        FlipAbstract(MCD_FLIP_LEND_A).rely(FLIPPER_MOM);
 
         // update OSM
         MedianAbstract(OsmAbstract(PIP_LEND).src()).kiss(PIP_LEND);
