@@ -232,15 +232,6 @@ contract DssSpellTest is DSTest, DSMath {
 
         vote();
         scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        checkSystemValues(afterSpell);
-        checkCollateralValues("MANA-A", afterSpell);
-    }
-
-    function testSpellIsCast_INTEGRATION() public {
-        vote();
-        scheduleWaitAndCast();
 
         // spell done
         assertTrue(spell.done());
@@ -249,12 +240,7 @@ contract DssSpellTest is DSTest, DSMath {
         checkSystemValues(afterSpell);
         checkCollateralValues("MANA-A", afterSpell);
 
-        // assertEq(pip.owner(), pauseProxy);
-        // MANA-A Pip Authority
-
-        // assertEq(pip.authority(), address(0));
-
-        // // Authorization
+        // Authorization
         assertEq(manajoin.wards(pauseProxy), 1);
         assertEq(vat.wards(address(manajoin)), 1);
         assertEq(flip.wards(address(cat)), 1);
@@ -266,40 +252,41 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(MedianAbstract(pip.src()).bud(address(pip)), 1);
 
         // Start testing Vault
-        uint256 current_dai = vat.dai(address(this));
+        uint256 initialDAIBalance = vat.dai(address(this));
 
         // Join to adapter
-        assertEq(mana.balanceOf(address(this)), 600 * WAD);
+        uint256 initialManaBalance = mana.balanceOf(address(this));
         assertEq(vat.gem("MANA-A", address(this)), 0);
-        mana.approve(address(manajoin), 600 * WAD);
-        manajoin.join(address(this), 600 * WAD);
-        assertEq(mana.balanceOf(address(this)), 0);
-        assertEq(vat.gem("MANA-A", address(this)), 600 * WAD);
+        mana.approve(address(manajoin), 1500 ether);
+        manajoin.join(address(this), 1500 ether);
+        assertEq(mana.balanceOf(address(this)), initialManaBalance - 1500 ether);
+        assertEq(vat.gem("MANA-A", address(this)), 1500 ether);
 
         // Deposit collateral, generate DAI
-        assertEq(vat.dai(address(this)), current_dai);
-        vat.frob("MANA-A", address(this), address(this), address(this), int(600 * WAD), int(25 * WAD));
+        assertEq(vat.dai(address(this)), initialDAIBalance);
+        vat.frob("MANA-A", address(this), address(this), address(this), int(1500 ether), int(25 ether));
         assertEq(vat.gem("MANA-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), add(current_dai, 25 * RAD));
+        assertEq(vat.dai(address(this)), add(initialDAIBalance, 25 * RAD));
 
         // Payback DAI, withdraw collateral
-        vat.frob("MANA-A", address(this), address(this), address(this), -int(600 * WAD), -int(25 * WAD));
-        assertEq(vat.gem("MANA-A", address(this)), 600 * WAD);
-        assertEq(vat.dai(address(this)), current_dai);
+        vat.frob("MANA-A", address(this), address(this), address(this), -int(1500 ether), -int(25 ether));
+        assertEq(vat.gem("MANA-A", address(this)), 1500 ether);
+        assertEq(vat.dai(address(this)), initialDAIBalance);
 
         // Withdraw from adapter
-        manajoin.exit(address(this), 600 * WAD);
-        assertEq(mana.balanceOf(address(this)), 600 * WAD);
+        manajoin.exit(address(this), 1500 ether);
+        assertEq(mana.balanceOf(address(this)), initialManaBalance);
         assertEq(vat.gem("MANA-A", address(this)), 0);
 
         // Generate new DAI to force a liquidation
-        // mana.approve(address(manajoin), 40 * 10 ** 18);
-        // manajoin.join(address(this), 40 * 10 ** 18);
-        // vat.frob("MANA-A", address(this), address(this), address(this), int(40 * WAD), int(32 * WAD)); // Max amount of DAI
-        // hevm.warp(now + 1);
-        // jug.drip("MANA-A");
-        // assertEq(flip.kicks(), 0);
-        // cat.bite("MANA-A", address(this));
-        // assertEq(flip.kicks(), 1);
+        mana.approve(address(manajoin), 1000 ether);
+        manajoin.join(address(this), 1000 ether);
+        (,,uint spotV,,) = vat.ilks("MANA-A");
+        vat.frob("MANA-A", address(this), address(this), address(this), int(1000 ether), int(mul(1000 ether, spotV) / RAY)); // Max amount of DAI
+        hevm.warp(now + 1);
+        jug.drip("MANA-A");
+        assertEq(flip.kicks(), 0);
+        cat.bite("MANA-A", address(this));
+        assertEq(flip.kicks(), 1);
     }
 }

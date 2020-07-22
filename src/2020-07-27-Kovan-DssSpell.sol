@@ -174,4 +174,3 @@ contract DssSpell {
         pause.exec(action, tag, sig, eta);
     }
 }
-
