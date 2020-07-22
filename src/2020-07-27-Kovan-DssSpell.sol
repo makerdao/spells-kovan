@@ -75,13 +75,10 @@ contract SpellAction {
         ////////////////////////////////////////////////////////////////////////////////
         // GLOBAL
 
-        // set the global debt ceiling to
+        // Set the global debt ceiling to
         VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 1 * MILLION * RAD);
 
-        ////////////////////////////////////////////////////////////////////////////////
-        // MANA-A
-
-        // set ilk bytes32 variable
+        // Set ilk bytes32 variable
         bytes32 MANA_A_ILK = "MANA-A";
 
         // Sanity checks
@@ -92,10 +89,10 @@ contract SpellAction {
         require(FlipAbstract(MCD_FLIP_MANA_A).vat() == MCD_VAT, "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_MANA_A).ilk() == MANA_A_ILK, "flip-ilk-not-match");
 
-        // set price feed for MANA-A
+        // Set price feed for MANA-A
         SpotAbstract(MCD_SPOT).file(MANA_A_ILK, "pip", PIP_MANA);
 
-        // set the MANA-A flipper in the cat
+        // Set the MANA-A flipper in the cat
         CatAbstract(MCD_CAT).file(MANA_A_ILK, "flip", MCD_FLIP_MANA_A);
 
         // Init MANA-A in Vat & Jug
@@ -115,7 +112,7 @@ contract SpellAction {
         // Allow FlipperMom to access the MANA-A Flipper
         FlipAbstract(MCD_FLIP_MANA_A).rely(FLIPPER_MOM);
 
-        // update OSM
+        // Update OSM
         MedianAbstract(OsmAbstract(PIP_MANA).src()).kiss(PIP_MANA);
         OsmAbstract(PIP_MANA).rely(OSM_MOM);
         OsmAbstract(PIP_MANA).kiss(MCD_SPOT);
@@ -133,10 +130,10 @@ contract SpellAction {
         SpotAbstract(MCD_SPOT).file(MANA_A_ILK, "mat"   , 175 * RAY / 100      ); // 175% coll. ratio
         SpotAbstract(MCD_SPOT).poke(MANA_A_ILK);
 
-        // execute the first poke in the Osm for the next value
+        // Execute the first poke in the Osm for the next value
         OsmAbstract(PIP_MANA).poke();
 
-        // update LEND-A spot value in Vat (will be zero as the Osm will not have any value as of yet)
+        // Update MANA-A spot value in Vat
         SpotAbstract(MCD_SPOT).poke(MANA_A_ILK);
     }
 }
