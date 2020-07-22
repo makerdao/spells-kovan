@@ -29,10 +29,6 @@ import "lib/dss-interfaces/src/dss/PotAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
 
 contract SpellAction {
-    // Provides a descriptive tag for bot consumption
-    // This should be modified weekly to provide a summary of the actions
-    string constant public description = "2020-07-27 MakerDAO Executive Spell";
-
     // KOVAN ADDRESSES
     //
     // The contracts in this list should correspond to MCD core contracts, verify
@@ -72,9 +68,6 @@ contract SpellAction {
     uint256 constant public TWELVE_PCT_RATE        = 1000000003593629043335673582;
 
     function execute() external {
-        ////////////////////////////////////////////////////////////////////////////////
-        // GLOBAL
-
         // Set the global debt ceiling to
         VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 1 * MILLION * RAD);
 
