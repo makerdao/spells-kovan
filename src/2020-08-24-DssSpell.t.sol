@@ -259,6 +259,30 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["KNC-A"] = beforeSpell.collaterals["KNC-A"];
         afterSpell.collaterals["ZRX-A"] = beforeSpell.collaterals["ZRX-A"];
         afterSpell.collaterals["MANA-A"] = beforeSpell.collaterals["MANA-A"];
+        // afterSpell.collaterals["USDT-A"] = CollateralValues({
+        //     line: 3 * MILLION * RAD,
+        //     dust: 20 * RAD,
+        //     duty: 1000000001243680656318820312,
+        //     pct: 4 * 1000,
+        //     chop: 113 * RAY / 100,
+        //     lump: 100 * THOUSAND * WAD,
+        //     mat: 175 * RAY / 100,
+        //     beg: 103 * WAD / 100,
+        //     ttl: 6 hours,
+        //     tau: 6 hours
+        // });
+        afterSpell.collaterals["LRC-A"] = CollateralValues({
+            line: 3 * MILLION * RAD,
+            dust: 20 * RAD,
+            duty: 1000000000937303470807876289,
+            pct: 3 * 1000,
+            chop: 113 * RAY / 100,
+            lump: 200 * THOUSAND * WAD,
+            mat: 175 * RAY / 100,
+            beg: 103 * WAD / 100,
+            ttl: 6 hours,
+            tau: 6 hours
+        });
     }
 
     function vote() private {
