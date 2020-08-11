@@ -43,11 +43,11 @@ contract SpellAction {
     address constant FLIPPER_MOM         = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
     address constant OSM_MOM             = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
 
-    // USDT-A TODO: update
-    address constant MCD_JOIN_USDT_A     = ;
-    address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
-    address constant MCD_FLIP_USDT_A     = 0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998;
-    address constant USDT                = 0x13512979ADE267AB5100878E2e0f485B568328a4;
+    // // USDT-A TODO: update
+    // address constant MCD_JOIN_USDT_A     = ;
+    // address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
+    // address constant MCD_FLIP_USDT_A     = 0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998;
+    // address constant USDT                = 0x5A7d38C335d415d3701f2f7E2a82f993dE97F7C0;
 
     // LRC-A TODO: update
     address constant MCD_JOIN_LRC_A      = 0x436286788C5dB198d632F14A20890b0C4D236800;
@@ -62,13 +62,17 @@ contract SpellAction {
     uint256 constant RAY      = 10 ** 27;
     uint256 constant RAD      = 10 ** 45;
 
+    function add(uint x, uint y) internal pure returns (uint z) {
+        require((z = x + y) >= x, "ds-math-add-overflow");
+    }
+
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
     // To check this yourself, use the following rate calculation (example 8%):
     //
     // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
     //
-    uint256 THREE_PCT_RATE = 1000000000937303470807876289;
+    uint256 constant THREE_PCT_RATE = 1000000000937303470807876289;
 
     // Provides a descriptive tag for bot consumption
     // This should be modified weekly to provide a summary of the actions
@@ -78,63 +82,63 @@ contract SpellAction {
 
     function execute() external {
         // TODO: UPDATE THIS IS A 6 MILLION ASSUMPTION
-        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 6 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 3 * MILLION * RAD));
 
-        ////////////////////////////////////////////////////////////////////////////////
-        // USDT-A collateral deploy
+        // ////////////////////////////////////////////////////////////////////////////////
+        // // USDT-A collateral deploy
 
-        // Set ilk bytes32 variable
-        bytes32 ilkUSDTA = "USDT-A";
+        // // Set ilk bytes32 variable
+        // bytes32 ilkUSDTA = "USDT-A";
 
-        // Sanity checks
-        require(GemJoinAbstract(MCD_JOIN_USDT_A).vat() == MCD_VAT,  "join-vat-not-match");
-        require(GemJoinAbstract(MCD_JOIN_USDT_A).ilk() == ilkUSDTA, "join-ilk-not-match");
-        require(GemJoinAbstract(MCD_JOIN_USDT_A).gem() == USDT,     "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_USDT_A).dec() == 18,       "join-dec-not-match");
-        require(FlipAbstract(MCD_FLIP_USDT_A).vat()    == MCD_VAT,  "flip-vat-not-match");
-        require(FlipAbstract(MCD_FLIP_USDT_A).ilk()    == ilkUSDTA, "flip-ilk-not-match");
+        // // Sanity checks
+        // require(GemJoinAbstract(MCD_JOIN_USDT_A).vat() == MCD_VAT,  "join-vat-not-match");
+        // require(GemJoinAbstract(MCD_JOIN_USDT_A).ilk() == ilkUSDTA, "join-ilk-not-match");
+        // require(GemJoinAbstract(MCD_JOIN_USDT_A).gem() == USDT,     "join-gem-not-match");
+        // require(GemJoinAbstract(MCD_JOIN_USDT_A).dec() == 18,       "join-dec-not-match");
+        // require(FlipAbstract(MCD_FLIP_USDT_A).vat()    == MCD_VAT,  "flip-vat-not-match");
+        // require(FlipAbstract(MCD_FLIP_USDT_A).ilk()    == ilkUSDTA, "flip-ilk-not-match");
 
-        // Set price feed for USDT-A
-        SpotAbstract(MCD_SPOT).file(ilkUSDTA, "pip", PIP_USDT);
+        // // Set price feed for USDT-A
+        // SpotAbstract(MCD_SPOT).file(ilkUSDTA, "pip", PIP_USDT);
 
-        // Set the USDT-A flipper in the cat
-        CatAbstract(MCD_CAT).file(ilkUSDTA, "flip", MCD_FLIP_USDT_A);
+        // // Set the USDT-A flipper in the cat
+        // CatAbstract(MCD_CAT).file(ilkUSDTA, "flip", MCD_FLIP_USDT_A);
 
-        // Init USDT-A in Vat & Jug
-        VatAbstract(MCD_VAT).init(ilkUSDTA);
-        JugAbstract(MCD_JUG).init(ilkUSDTA);
+        // // Init USDT-A in Vat & Jug
+        // VatAbstract(MCD_VAT).init(ilkUSDTA);
+        // JugAbstract(MCD_JUG).init(ilkUSDTA);
 
-        // Allow USDT-A Join to modify Vat registry
-        VatAbstract(MCD_VAT).rely(MCD_JOIN_USDT_A);
+        // // Allow USDT-A Join to modify Vat registry
+        // VatAbstract(MCD_VAT).rely(MCD_JOIN_USDT_A);
 
-        // Allow cat to kick auctions in USDT-A Flipper
-        FlipAbstract(MCD_FLIP_USDT_A).rely(MCD_CAT);
+        // // Allow cat to kick auctions in USDT-A Flipper
+        // FlipAbstract(MCD_FLIP_USDT_A).rely(MCD_CAT);
 
-        // Allow End to yank auctions in USDT-A Flipper
-        FlipAbstract(MCD_FLIP_USDT_A).rely(MCD_END);
+        // // Allow End to yank auctions in USDT-A Flipper
+        // FlipAbstract(MCD_FLIP_USDT_A).rely(MCD_END);
 
-        // Allow FlipperMom to access the USDT-A Flipper
-        FlipAbstract(MCD_FLIP_USDT_A).rely(FLIPPER_MOM);
+        // // Allow FlipperMom to access the USDT-A Flipper
+        // FlipAbstract(MCD_FLIP_USDT_A).rely(FLIPPER_MOM);
 
-        // Update OSM
-        MedianAbstract(OsmAbstract(PIP_USDT).src()).kiss(PIP_USDT);
-        OsmAbstract(PIP_USDT).rely(OSM_MOM);
-        OsmAbstract(PIP_USDT).kiss(MCD_SPOT);
-        OsmAbstract(PIP_USDT).kiss(MCD_END);
-        OsmMomAbstract(OSM_MOM).setOsm(ilkUSDTA, PIP_USDT);
+        // // Update OSM
+        // MedianAbstract(OsmAbstract(PIP_USDT).src()).kiss(PIP_USDT);
+        // OsmAbstract(PIP_USDT).rely(OSM_MOM);
+        // OsmAbstract(PIP_USDT).kiss(MCD_SPOT);
+        // OsmAbstract(PIP_USDT).kiss(MCD_END);
+        // OsmMomAbstract(OSM_MOM).setOsm(ilkUSDTA, PIP_USDT);
 
-        VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 3 * MILLION * RAD    ); // 3m debt ceiling
-        VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 20 * RAD             ); // 20 Dai dust
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "lump", 500 * THOUSAND * WAD ); // 500,000 lot size
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * RAY / 100      ); // 13% liq. penalty
-        JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", TWELVE_PCT_RATE      ); // 12% stability fee
+        // VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 3 * MILLION * RAD    ); // 3m debt ceiling
+        // VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 20 * RAD             ); // 20 Dai dust
+        // CatAbstract(MCD_CAT).file( ilkUSDTA, "lump", 500 * THOUSAND * WAD ); // 500,000 lot size
+        // CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * RAY / 100      ); // 13% liq. penalty
+        // JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", TWELVE_PCT_RATE      ); // 12% stability fee
 
-        FlipAbstract(MCD_FLIP_USDT_A).file(  "beg" , 103 * WAD / 100      ); // 3% bid increase
-        FlipAbstract(MCD_FLIP_USDT_A).file(  "ttl" , 6 hours              ); // 6 hours ttl
-        FlipAbstract(MCD_FLIP_USDT_A).file(  "tau" , 6 hours              ); // 6 hours tau
+        // FlipAbstract(MCD_FLIP_USDT_A).file(  "beg" , 103 * WAD / 100      ); // 3% bid increase
+        // FlipAbstract(MCD_FLIP_USDT_A).file(  "ttl" , 6 hours              ); // 6 hours ttl
+        // FlipAbstract(MCD_FLIP_USDT_A).file(  "tau" , 6 hours              ); // 6 hours tau
 
-        SpotAbstract(MCD_SPOT).file(ilkUSDTA, "mat",  175 * RAY / 100     ); // 175% coll. ratio
-        SpotAbstract(MCD_SPOT).poke(ilkUSDTA);
+        // SpotAbstract(MCD_SPOT).file(ilkUSDTA, "mat",  175 * RAY / 100     ); // 175% coll. ratio
+        // SpotAbstract(MCD_SPOT).poke(ilkUSDTA);
 
         ////////////////////////////////////////////////////////////////////////////////
         // LRC-A collateral deploy
@@ -151,10 +155,10 @@ contract SpellAction {
         require(FlipAbstract(MCD_FLIP_LRC_A).ilk()    == ilkLRCA, "flip-ilk-not-match");
 
         // Set price feed for LRC-A
-        SpotAbstract(MCD_SPOT).file(ilkLRCA, "pip", PIP_USDT);
+        SpotAbstract(MCD_SPOT).file(ilkLRCA, "pip", PIP_LRC);
 
         // Set the LRC-A flipper in the cat
-        CatAbstract(MCD_CAT).file(ilkLRCA, "flip", MCD_FLIP_USDT_A);
+        CatAbstract(MCD_CAT).file(ilkLRCA, "flip", MCD_FLIP_LRC_A);
 
         // Init LRC-A in Vat & Jug
         VatAbstract(MCD_VAT).init(ilkLRCA);
@@ -185,7 +189,7 @@ contract SpellAction {
         VatAbstract(MCD_VAT).file( ilkLRCA, "dust", 20 * RAD             ); // 20 Dai dust
         CatAbstract(MCD_CAT).file( ilkLRCA, "lump", 200 * THOUSAND * WAD ); // 200,000 lot size
         CatAbstract(MCD_CAT).file( ilkLRCA, "chop", 113 * RAY / 100      ); // 13% liq. penalty
-        JugAbstract(MCD_JUG).file( ilkLRCA, "duty", THREE_PCT_RATE       ); // 12% stability fee
+        JugAbstract(MCD_JUG).file( ilkLRCA, "duty", THREE_PCT_RATE       ); // 3% stability fee
 
         FlipAbstract(MCD_FLIP_LRC_A).file("beg",  103 * WAD / 100   ); // 3% bid increase
         FlipAbstract(MCD_FLIP_LRC_A).file("ttl",  6 hours           ); // 6 hours ttl

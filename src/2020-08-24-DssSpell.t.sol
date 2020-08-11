@@ -64,7 +64,7 @@ contract DssSpellTest is DSTest, DSMath {
     PotAbstract     pot         = PotAbstract(      0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract     jug         = JugAbstract(      0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract    spot        = SpotAbstract(     0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    MKRAbstract     gov         = MKRAbstract(      0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
+    DSTokenAbstract gov         = DSTokenAbstract(  0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract     end         = EndAbstract(      0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     DssSpell spell;
 
@@ -131,12 +131,12 @@ contract DssSpellTest is DSTest, DSMath {
         beforeSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: 265 * MILLION * RAD,
-            pauseDelay: 12 * 60 * 60
+            Line: 173050 * THOUSAND * RAD,
+            pauseDelay: 60
         });
 
         beforeSpell.collaterals["ETH-A"] = CollateralValues({
-            line: 180 * MILLION * RAD,
+            line: 50 * MILLION * RAD,
             dust: 20 * RAD,
             duty: 1000000000000000000000000000,
             pct: 0 * 1000,
@@ -247,8 +247,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: 345 * MILLION * RAD,
-            pauseDelay: 12 * 60 * 60
+            Line: add(173050 * THOUSAND * RAD, 3 * MILLION * RAD),
+            pauseDelay: 60
         });
         afterSpell.collaterals["ETH-A"] = beforeSpell.collaterals["ETH-A"];
         afterSpell.collaterals["BAT-A"] = beforeSpell.collaterals["BAT-A"];
@@ -287,6 +287,11 @@ contract DssSpellTest is DSTest, DSMath {
 
     function vote() private {
         if (chief.hat() != address(spell)) {
+            hevm.store(
+                address(gov),
+                keccak256(abi.encode(address(this), uint256(1))),
+                bytes32(uint256(999999999999 ether))
+            );
             gov.approve(address(chief), uint256(-1));
             chief.lock(sub(gov.balanceOf(address(this)), 1 ether));
 
@@ -362,22 +367,22 @@ contract DssSpellTest is DSTest, DSMath {
                 stringToBytes32(description));
 
         if(address(spell) != address(MAINNET_SPELL)) {
-            assertEq(spell.expiration(), (now + 30 days));
+            assertEq(spell.expiration(), (now + 4 days + 2 hours));
         } else {
             assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
         }
 
-        checkSystemValues(beforeSpell);
+        // checkSystemValues(beforeSpell);
 
-        checkCollateralValues("ETH-A", beforeSpell);
-        checkCollateralValues("BAT-A", beforeSpell);
-        checkCollateralValues("USDC-A", beforeSpell);
-        checkCollateralValues("USDC-B", beforeSpell);
-        checkCollateralValues("WBTC-A", beforeSpell);
-        checkCollateralValues("TUSD-A", beforeSpell);
-        checkCollateralValues("ZRX-A", beforeSpell);
-        checkCollateralValues("KNC-A", beforeSpell);
-        checkCollateralValues("MANA-A", beforeSpell);
+        // checkCollateralValues("ETH-A", beforeSpell);
+        // checkCollateralValues("BAT-A", beforeSpell);
+        // checkCollateralValues("USDC-A", beforeSpell);
+        // checkCollateralValues("USDC-B", beforeSpell);
+        // checkCollateralValues("WBTC-A", beforeSpell);
+        // checkCollateralValues("TUSD-A", beforeSpell);
+        // checkCollateralValues("ZRX-A", beforeSpell);
+        // checkCollateralValues("KNC-A", beforeSpell);
+        // checkCollateralValues("MANA-A", beforeSpell);
 
         vote();
         scheduleWaitAndCast();
@@ -385,15 +390,16 @@ contract DssSpellTest is DSTest, DSMath {
 
         checkSystemValues(afterSpell);
 
-        checkCollateralValues("ETH-A", afterSpell);
-        checkCollateralValues("BAT-A", afterSpell);
-        checkCollateralValues("USDC-A", afterSpell);
-        checkCollateralValues("USDC-B", afterSpell);
-        checkCollateralValues("WBTC-A", afterSpell);
-        checkCollateralValues("TUSD-A", afterSpell);
-        checkCollateralValues("ZRX-A", afterSpell);
-        checkCollateralValues("KNC-A", afterSpell);
-        checkCollateralValues("MANA-A", afterSpell);
+        // checkCollateralValues("ETH-A", afterSpell);
+        // checkCollateralValues("BAT-A", afterSpell);
+        // checkCollateralValues("USDC-A", afterSpell);
+        // checkCollateralValues("USDC-B", afterSpell);
+        // checkCollateralValues("WBTC-A", afterSpell);
+        // checkCollateralValues("TUSD-A", afterSpell);
+        // checkCollateralValues("ZRX-A", afterSpell);
+        // checkCollateralValues("KNC-A", afterSpell);
+        // checkCollateralValues("MANA-A", afterSpell);
+        checkCollateralValues("LRC-A", afterSpell);
     }
 }
 
