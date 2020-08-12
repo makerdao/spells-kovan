@@ -44,25 +44,31 @@ contract DssSpellTest is DSTest, DSMath {
     Hevm hevm;
 
     // KOVAN ADDRESSES
-    DSPauseAbstract pause       = DSPauseAbstract(  0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
-    address pauseProxy          =                   0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
-    DSChiefAbstract chief       = DSChiefAbstract(  0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
-    VatAbstract     vat         = VatAbstract(      0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
-    CatAbstract     cat         = CatAbstract(      0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
-    PotAbstract     pot         = PotAbstract(      0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
-    JugAbstract     jug         = JugAbstract(      0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
-    SpotAbstract    spot        = SpotAbstract(     0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    DSTokenAbstract gov         = DSTokenAbstract(  0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
-    EndAbstract     end         = EndAbstract(      0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
-    FlipperMomAbstract flipMom  = FlipperMomAbstract(0xf3828caDb05E5F22844f6f9314D99516D68a0C84);
-    OsmMomAbstract  osmMom      = OsmMomAbstract(   0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
+    DSPauseAbstract pause        = DSPauseAbstract(  0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
+    address pauseProxy           =                   0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
+    DSChiefAbstract chief        = DSChiefAbstract(  0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
+    VatAbstract     vat          = VatAbstract(      0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
+    CatAbstract     cat          = CatAbstract(      0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
+    PotAbstract     pot          = PotAbstract(      0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
+    JugAbstract     jug          = JugAbstract(      0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
+    SpotAbstract    spot         = SpotAbstract(     0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
+    DSTokenAbstract gov          = DSTokenAbstract(  0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
+    EndAbstract     end          = EndAbstract(      0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
+    FlipperMomAbstract flipMom   = FlipperMomAbstract(0xf3828caDb05E5F22844f6f9314D99516D68a0C84);
+    OsmMomAbstract  osmMom       = OsmMomAbstract(   0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
 
     // USDT-A specific
-    GemAbstract usdt            = GemAbstract(      0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
-    GemJoinAbstract joinUSDTA   = GemJoinAbstract(  0x1456addbb650b4c89aa61d59D19f5f4470b8102C);
-    OsmAbstract pipUSDT         = OsmAbstract(      0x3588A7973D41AaeA7B203549553C991C4311951e);
-    FlipAbstract flipUSDTA      = FlipAbstract(     0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998);
-    MedianAbstract medUSDTA     = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7);
+    GemAbstract usdt             = GemAbstract(      0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
+    GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x1456addbb650b4c89aa61d59D19f5f4470b8102C);
+    OsmAbstract pipUSDT          = OsmAbstract(      0x3588A7973D41AaeA7B203549553C991C4311951e);
+    FlipAbstract flipUSDTA       = FlipAbstract(     0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998);
+    MedianAbstract medUSDTA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7);
+
+    // PAXUSD-A specific
+    GemAbstract      paxusd      = GemAbstract(      0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D);
+    GemJoinAbstract  joinPAXUSDA = GemJoinAbstract(  0x96831F3eC88874cf6B2cCe604e7531bF1B55171f);
+    OsmAbstract      pipPAXUSD   = OsmAbstract(      0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749);
+    FlipAbstract     flipPAXUSDA = FlipAbstract(     0xa653B4C2F96f82811a117c0384675FDeb2d77B03);
 
     DssSpell spell;
 
@@ -338,11 +344,10 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues("PAXUSD-A", afterSpell);
 
         // Authorization
-        assertEq(paxusdjoin.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(paxusdjoin)), 1);
-        assertEq(flip.wards(address(end)), 1);
-        assertEq(flip.wards(flipperMom), 1);
-        assertEq(pip.bud(address(spot)), 1);
+        assertEq(joinPAXUSDA.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinPAXUSDA)), 1);
+        assertEq(flipPAXUSDA.wards(address(end)), 1);
+        assertEq(flipPAXUSDA.wards(address(flipMom)), 1);
 
         // Start testing Vault
         uint256 current_dai = vat.dai(address(this));
@@ -355,8 +360,8 @@ contract DssSpellTest is DSTest, DSMath {
         );
         assertEq(paxusd.balanceOf(address(this)), 600 * WAD);
         assertEq(vat.gem("PAXUSD-A", address(this)), 0);
-        paxusd.approve(address(paxusdjoin), 600 * WAD);
-        paxusdjoin.join(address(this), 600 * WAD);
+        paxusd.approve(address(joinPAXUSDA), 600 * WAD);
+        joinPAXUSDA.join(address(this), 600 * WAD);
         assertEq(paxusd.balanceOf(address(this)), 0);
         assertEq(vat.gem("PAXUSD-A", address(this)), 600 * WAD);
 
@@ -372,7 +377,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.dai(address(this)), current_dai);
 
         // Withdraw from adapter
-        paxusdjoin.exit(address(this), 600 * 10 ** 18);
+        joinPAXUSDA.exit(address(this), 600 * 10 ** 18);
         assertEq(paxusd.balanceOf(address(this)), 600 * 10 ** 18);
         assertEq(vat.gem("PAXUSD-A", address(this)), 0);
     }
