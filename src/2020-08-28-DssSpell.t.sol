@@ -135,29 +135,29 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: add(173050 * THOUSAND * RAD, 4 * MILLION * RAD),
+            Line: add(173050 * THOUSAND * RAD, 15 * MILLION * RAD),
             pauseDelay: 60
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
-            line: 3 * MILLION * RAD,
-            dust: 20 * RAD,
-            duty: 1000000003593629043335673582,
-            pct: 12 * 1000,
+            line: 10 * MILLION * RAD,
+            dust: 100 * RAD,
+            duty: 1000000002440418608258400030, // 8% SF
+            pct: 8 * 1000,
             chop: 113 * RAY / 100,
-            lump: 500 * THOUSAND * WAD,
-            mat: 175 * RAY / 100,
+            lump: 50 * THOUSAND * WAD,
+            mat: 150 * RAY / 100,
             beg: 103 * WAD / 100,
             ttl: 6 hours,
             tau: 6 hours
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
-            line: 1 * MILLION * RAD,
-            dust: 20 * RAD,
-            duty: 1000000003593629043335673582, // 12% SF
-            pct: 12 * 1000,
+            line: 5 * MILLION * RAD,
+            dust: 100 * RAD,
+            duty: 1000000001243680656318820312, // 4% SF
+            pct: 4 * 1000,
             chop: 113 * RAY / 100,
-            lump: 500 * THOUSAND * WAD,
-            mat: 175 * RAY / 100,
+            lump: 50 * THOUSAND * WAD,
+            mat: 120 * RAY / 100,
             beg: 103 * WAD / 100,
             ttl: 6 hours,
             tau: 6 hours
@@ -307,12 +307,12 @@ contract DssSpellTest is DSTest, DSMath {
 
         // Deposit collateral, generate DAI
         assertEq(vat.dai(address(this)), current_dai);
-        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(25 * WAD));
+        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(100 * WAD));
         assertEq(vat.gem("USDT-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), add(current_dai, 25 * RAD));
+        assertEq(vat.dai(address(this)), add(current_dai, 100 * RAD));
 
         // Payback DAI, withdraw collateral
-        vat.frob("USDT-A", address(this), address(this), address(this), -int(600 * WAD), -int(25 * WAD));
+        vat.frob("USDT-A", address(this), address(this), address(this), -int(600 * WAD), -int(100 * WAD));
         assertEq(vat.gem("USDT-A", address(this)), 600 * WAD);
         assertEq(vat.dai(address(this)), current_dai);
 
@@ -324,7 +324,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Generate new DAI to force a liquidation
         usdt.approve(address(joinUSDTA), 600 * 10 ** 6);
         joinUSDTA.join(address(this), 600 * 10 ** 6);
-        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(20 * WAD)); // Max amount of DAI
+        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(100 * WAD)); // Max amount of DAI
         hevm.warp(now + 1000000000);
         jug.drip("USDT-A");
         assertEq(flipUSDTA.kicks(), 0);
@@ -367,12 +367,12 @@ contract DssSpellTest is DSTest, DSMath {
 
         // Deposit collateral, generate DAI
         assertEq(vat.dai(address(this)), current_dai);
-        vat.frob("PAXUSD-A", address(this), address(this), address(this), int(600 * WAD), int(25 * WAD));
+        vat.frob("PAXUSD-A", address(this), address(this), address(this), int(600 * WAD), int(100 * WAD));
         assertEq(vat.gem("PAXUSD-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), add(current_dai, 25 * RAD));
+        assertEq(vat.dai(address(this)), add(current_dai, 100 * RAD));
 
         // Payback DAI, withdraw collateral
-        vat.frob("PAXUSD-A", address(this), address(this), address(this), -int(600 * WAD), -int(25 * WAD));
+        vat.frob("PAXUSD-A", address(this), address(this), address(this), -int(600 * WAD), -int(100 * WAD));
         assertEq(vat.gem("PAXUSD-A", address(this)), 600 * WAD);
         assertEq(vat.dai(address(this)), current_dai);
 

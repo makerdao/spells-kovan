@@ -71,7 +71,8 @@ contract SpellAction {
     //
     // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
     //
-    uint256 constant TWELVE_PCT_RATE    = 1000000003593629043335673582;
+    uint256 constant FOUR_PCT_RATE    = 1000000001243680656318820312;
+    uint256 constant EIGHT_PCT_RATE   = 1000000002440418608258400030;
 
     // Provides a descriptive tag for bot consumption
     // This should be modified weekly to provide a summary of the actions
@@ -81,7 +82,7 @@ contract SpellAction {
 
     function execute() external {
         // TODO: UPDATE THIS IS A 6 MILLION ASSUMPTION
-        VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 4 * MILLION * RAD));
+        VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 15 * MILLION * RAD));
 
         ////////////////////////////////////////////////////////////////////////////////
         // USDT-A collateral deploy
@@ -128,17 +129,17 @@ contract SpellAction {
         OsmMomAbstract(OSM_MOM).setOsm(ilkUSDTA, PIP_USDT);
 
         // since we're adding 2 collateral types in this spell, global line is at beginning
-        VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 3 * MILLION * RAD    ); // 3m debt ceiling
-        VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 20 * RAD             ); // 20 Dai dust
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "lump", 500 * THOUSAND * WAD ); // 500,000 lot size
+        VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 10 * MILLION * RAD   ); // 10m debt ceiling
+        VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 100 * RAD            ); // 100 Dai dust
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "lump", 50 * THOUSAND * WAD  ); // 500,000 lot size
         CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * RAY / 100      ); // 13% liq. penalty
-        JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", TWELVE_PCT_RATE      ); // 12% stability fee
+        JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", EIGHT_PCT_RATE       ); // 8% stability fee
 
         FlipAbstract(MCD_FLIP_USDT_A).file(  "beg" , 103 * WAD / 100      ); // 3% bid increase
         FlipAbstract(MCD_FLIP_USDT_A).file(  "ttl" , 6 hours              ); // 6 hours ttl
         FlipAbstract(MCD_FLIP_USDT_A).file(  "tau" , 6 hours              ); // 6 hours tau
 
-        SpotAbstract(MCD_SPOT).file(ilkUSDTA, "mat",  175 * RAY / 100     ); // 175% coll. ratio
+        SpotAbstract(MCD_SPOT).file(ilkUSDTA, "mat",  150 * RAY / 100     ); // 150% coll. ratio
         OsmAbstract(PIP_USDT).poke();
         SpotAbstract(MCD_SPOT).poke(ilkUSDTA);
 
@@ -179,15 +180,15 @@ contract SpellAction {
         FlipAbstract(MCD_FLIP_PAXUSD_A).rely(FLIPPER_MOM);
 
         // TODO: update these, we still don't have variables yet
-        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "line"  , 1 * MILLION * RAD    ); // 1 MM debt ceiling
-        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 20 * RAD             ); // 20 Dai dust
-        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "lump"  , 500 * THOUSAND * WAD ); // 500,000 lot size
+        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "line"  , 5 * MILLION * RAD    ); // 1 MM debt ceiling
+        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 100 * RAD             ); // 20 Dai dust
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "lump"  , 50 * THOUSAND * WAD ); // 500,000 lot size
         CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "chop"  , 113 * RAY / 100      ); // 13% liq. penalty
-        JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , TWELVE_PCT_RATE      ); // 12% stability fee
+        JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , FOUR_PCT_RATE        ); // 12% stability fee
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "beg"   , 103 * WAD / 100      ); // 3% bid increase
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "ttl"   , 6 hours              ); // 6 hours ttl
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "tau"   , 6 hours              ); // 6 hours tau
-        SpotAbstract(MCD_SPOT).file(ilkPAXUSDA, "mat"   , 175 * RAY / 100      ); // 175% coll. ratio
+        SpotAbstract(MCD_SPOT).file(ilkPAXUSDA, "mat"   , 120 * RAY / 100      ); // 120% coll. ratio
         SpotAbstract(MCD_SPOT).poke(ilkPAXUSDA);
 
         // consequently, deny PAXUSD-A Flipper
