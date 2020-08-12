@@ -81,7 +81,7 @@ contract SpellAction {
 
     function execute() external {
         // TODO: UPDATE THIS IS A 6 MILLION ASSUMPTION
-        VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 1 * MILLION * RAD));
+        VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 4 * MILLION * RAD));
 
         ////////////////////////////////////////////////////////////////////////////////
         // USDT-A collateral deploy

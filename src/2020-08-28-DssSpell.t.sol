@@ -135,7 +135,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: add(173050 * THOUSAND * RAD, 3 * MILLION * RAD),
+            Line: add(173050 * THOUSAND * RAD, 4 * MILLION * RAD),
             pauseDelay: 60
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
@@ -257,8 +257,8 @@ contract DssSpellTest is DSTest, DSMath {
 
         checkSystemValues(afterSpell);
 
-        checkCollateralValues("LRC-A", afterSpell);
         checkCollateralValues("USDT-A", afterSpell);
+        checkCollateralValues("PAXUSD-A", afterSpell);
     }
 
     function testSpellIsCast_USDTA_INTEGRATION() public {
