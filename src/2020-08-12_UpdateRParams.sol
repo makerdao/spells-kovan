@@ -82,7 +82,7 @@ contract SpellAction {
         VowAbstract(MCD_VOW).file("hump", 500 * RAD); // Lower than mainnet (due keepers testing need)
         FlipAbstract(MCD_VOW).file("wait", 1 hours); // Lower than mainnet (due keepers testing need)
 
-        FlipAbstract(MCD_FLAP).file("beg", 103 * WAD / 100);
+        FlipAbstract(MCD_FLAP).file("beg", 102 * WAD / 100);
         FlipAbstract(MCD_FLAP).file("ttl", 1 hours); // Lower than mainnet (due keepers testing need)
         FlipAbstract(MCD_FLAP).file("tau", 1 hours); // Lower than mainnet (due keepers testing need)
 
