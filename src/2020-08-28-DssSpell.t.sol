@@ -135,7 +135,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: add(173050 * THOUSAND * RAD, 15 * MILLION * RAD),
+            Line: add(608 * MILLION * RAD, 15 * MILLION * RAD),
             pauseDelay: 60
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
