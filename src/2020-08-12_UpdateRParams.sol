@@ -20,6 +20,8 @@ import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 import "lib/dss-interfaces/src/dss/CatAbstract.sol";
 import "lib/dss-interfaces/src/dss/JugAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
+import "lib/dss-interfaces/src/dss/FlapAbstract.sol";
+import "lib/dss-interfaces/src/dss/FlopAbstract.sol";
 import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
 import "lib/dss-interfaces/src/dss/PotAbstract.sol";
 import "lib/dss-interfaces/src/dss/VowAbstract.sol";
@@ -80,16 +82,16 @@ contract SpellAction {
         VowAbstract(MCD_VOW).file("sump", 50 * RAD); // Lower than mainnet (due keepers testing need)
         VowAbstract(MCD_VOW).file("dump", 2 * WAD); // Lower than mainnet (due keepers testing need)
         VowAbstract(MCD_VOW).file("hump", 500 * RAD); // Lower than mainnet (due keepers testing need)
-        FlipAbstract(MCD_VOW).file("wait", 1 hours); // Lower than mainnet (due keepers testing need)
+        VowAbstract(MCD_VOW).file("wait", 1 hours); // Lower than mainnet (due keepers testing need)
 
-        FlipAbstract(MCD_FLAP).file("beg", 102 * WAD / 100);
-        FlipAbstract(MCD_FLAP).file("ttl", 1 hours); // Lower than mainnet (due keepers testing need)
-        FlipAbstract(MCD_FLAP).file("tau", 1 hours); // Lower than mainnet (due keepers testing need)
+        FlapAbstract(MCD_FLAP).file("beg", 102 * WAD / 100);
+        FlapAbstract(MCD_FLAP).file("ttl", 1 hours); // Lower than mainnet (due keepers testing need)
+        FlapAbstract(MCD_FLAP).file("tau", 1 hours); // Lower than mainnet (due keepers testing need)
 
-        FlipAbstract(MCD_FLOP).file("beg", 103 * WAD / 100);
-        FlipAbstract(MCD_FLOP).file("pad", 120 * WAD / 100);
-        FlipAbstract(MCD_FLOP).file("ttl", 1 hours); // Lower than mainnet (due keepers testing need)
-        FlipAbstract(MCD_FLOP).file("tau", 1 hours); // Lower than mainnet (due keepers testing need)
+        FlopAbstract(MCD_FLOP).file("beg", 103 * WAD / 100);
+        FlopAbstract(MCD_FLOP).file("pad", 120 * WAD / 100);
+        FlopAbstract(MCD_FLOP).file("ttl", 1 hours); // Lower than mainnet (due keepers testing need)
+        FlopAbstract(MCD_FLOP).file("tau", 1 hours); // Lower than mainnet (due keepers testing need)
 
         bytes32 ilk = "ETH-A";
         VatAbstract(MCD_VAT).file(ilk, "line", 340 * MILLION * RAD);
