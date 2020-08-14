@@ -11,6 +11,15 @@ contract Hevm {
     function store(address,bytes32,bytes32) public;
 }
 
+contract USDTAbstract {
+    function totalSupply() public view returns (uint256);
+    function balanceOf(address) public view returns (uint256);
+    function allowance(address, address) public view returns (uint256);
+    function approve(address, uint256) public;               // nonstandard
+    function transfer(address, uint256) public;              // nonstandard
+    function transferFrom(address, address, uint256) public; // nonstandard
+}
+
 contract DssSpellTest is DSTest, DSMath {
     // populate with mainnet spell if needed
     address constant MAINNET_SPELL = address(0);
@@ -58,7 +67,7 @@ contract DssSpellTest is DSTest, DSMath {
     OsmMomAbstract  osmMom       = OsmMomAbstract(   0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
 
     // USDT-A specific
-    GemAbstract usdt             = GemAbstract(      0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
+    USDTAbstract usdt            = USDTAbstract(     0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
     GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x1456addbb650b4c89aa61d59D19f5f4470b8102C);
     OsmAbstract pipUSDT          = OsmAbstract(      0x3588A7973D41AaeA7B203549553C991C4311951e);
     FlipAbstract flipUSDTA       = FlipAbstract(     0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998);
