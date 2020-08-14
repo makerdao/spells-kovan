@@ -140,7 +140,6 @@ contract SpellAction {
         FlipAbstract(MCD_FLIP_USDT_A).file(  "tau" , 6 hours              ); // 6 hours tau
 
         SpotAbstract(MCD_SPOT).file(ilkUSDTA, "mat",  150 * RAY / 100     ); // 150% coll. ratio
-        OsmAbstract(PIP_USDT).poke();
         SpotAbstract(MCD_SPOT).poke(ilkUSDTA);
 
         ////////////////////////////////////////////////////////////////////////////////

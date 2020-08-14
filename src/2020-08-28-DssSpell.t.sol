@@ -264,7 +264,10 @@ contract DssSpellTest is DSTest, DSMath {
     function testSpellIsCast_USDTA_INTEGRATION() public {
         vote();
         scheduleWaitAndCast();
+        // spell done
+        assertTrue(spell.done());
 
+        pipUSDT.poke();
         hevm.warp(now + 3601);
         pipUSDT.poke();
         spot.poke("USDT-A");
@@ -274,13 +277,6 @@ contract DssSpellTest is DSTest, DSMath {
             keccak256(abi.encode(address(this), uint256(2))),
             bytes32(uint256(600 * 10 ** 6))
         );
-
-        // spell done
-        assertTrue(spell.done());
-
-        // check afterSpell parameters
-        checkSystemValues(afterSpell);
-        checkCollateralValues("USDT-A", afterSpell);
 
         // check median matches pip.src()
         assertEq(pipUSDT.src(), address(medUSDTA));
@@ -292,10 +288,8 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flipUSDTA.wards(address(flipMom)), 1);
         assertEq(pipUSDT.wards(address(osmMom)), 1);
         assertEq(pipUSDT.bud(address(spot)), 1);
+        assertEq(pipUSDT.bud(address(end)), 1);
         assertEq(MedianAbstract(pipUSDT.src()).bud(address(pipUSDT)), 1);
-
-        // Start testing Vault
-        uint256 current_dai = vat.dai(address(this));
 
         // Join to adapter
         assertEq(usdt.balanceOf(address(this)), 600 * 10 ** 6);
@@ -306,15 +300,15 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem("USDT-A", address(this)), 600 * WAD);
 
         // Deposit collateral, generate DAI
-        assertEq(vat.dai(address(this)), current_dai);
+        assertEq(vat.dai(address(this)), 0);
         vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(100 * WAD));
         assertEq(vat.gem("USDT-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), add(current_dai, 100 * RAD));
+        assertEq(vat.dai(address(this)), 100 * RAD);
 
         // Payback DAI, withdraw collateral
         vat.frob("USDT-A", address(this), address(this), address(this), -int(600 * WAD), -int(100 * WAD));
         assertEq(vat.gem("USDT-A", address(this)), 600 * WAD);
-        assertEq(vat.dai(address(this)), current_dai);
+        assertEq(vat.dai(address(this)), 0);
 
         // Withdraw from adapter
         joinUSDTA.exit(address(this), 600 * 10 ** 6);
@@ -324,8 +318,9 @@ contract DssSpellTest is DSTest, DSMath {
         // Generate new DAI to force a liquidation
         usdt.approve(address(joinUSDTA), 600 * 10 ** 6);
         joinUSDTA.join(address(this), 600 * 10 ** 6);
-        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(100 * WAD)); // Max amount of DAI
-        hevm.warp(now + 1000000000);
+        (,,uint256 spotV,,) = vat.ilks("USDT-A");
+        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(mul(100 * WAD, spotV) / RAY)); // Max amount of DAI
+        hevm.warp(now + 1);
         jug.drip("USDT-A");
         assertEq(flipUSDTA.kicks(), 0);
         cat.bite("USDT-A", address(this));
@@ -335,22 +330,14 @@ contract DssSpellTest is DSTest, DSMath {
     function testSpellIsCast_PAXUSDA_INTEGRATION() public {
         vote();
         scheduleWaitAndCast();
-
         // spell done
         assertTrue(spell.done());
-
-        // check afterSpell parameters
-        checkSystemValues(afterSpell);
-        checkCollateralValues("PAXUSD-A", afterSpell);
 
         // Authorization
         assertEq(joinPAXUSDA.wards(pauseProxy), 1);
         assertEq(vat.wards(address(joinPAXUSDA)), 1);
         assertEq(flipPAXUSDA.wards(address(end)), 1);
         assertEq(flipPAXUSDA.wards(address(flipMom)), 1);
-
-        // Start testing Vault
-        uint256 current_dai = vat.dai(address(this));
 
         // Join to adapter
         hevm.store(
@@ -366,15 +353,15 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem("PAXUSD-A", address(this)), 600 * WAD);
 
         // Deposit collateral, generate DAI
-        assertEq(vat.dai(address(this)), current_dai);
+        assertEq(vat.dai(address(this)), 0);
         vat.frob("PAXUSD-A", address(this), address(this), address(this), int(600 * WAD), int(100 * WAD));
         assertEq(vat.gem("PAXUSD-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), add(current_dai, 100 * RAD));
+        assertEq(vat.dai(address(this)), 100 * RAD);
 
         // Payback DAI, withdraw collateral
         vat.frob("PAXUSD-A", address(this), address(this), address(this), -int(600 * WAD), -int(100 * WAD));
         assertEq(vat.gem("PAXUSD-A", address(this)), 600 * WAD);
-        assertEq(vat.dai(address(this)), current_dai);
+        assertEq(vat.dai(address(this)), 0);
 
         // Withdraw from adapter
         joinPAXUSDA.exit(address(this), 600 * 10 ** 18);
