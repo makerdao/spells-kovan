@@ -12,9 +12,9 @@ contract Hevm {
 }
 
 contract DssSpellTest is DSTest, DSMath {
-    // populate with mainnet spell if needed
-    address constant KOVAN_SPELL = address(0xB898944740a681b06d74e8322b68D89D45bde79E);
-    uint    constant SPELL_CREATED = 1597848648;
+    // populate with kovan spell if needed
+    address constant KOVAN_SPELL = address(0);
+    uint    constant SPELL_CREATED = 0;
 
     struct CollateralValues {
         uint line;
@@ -43,7 +43,7 @@ contract DssSpellTest is DSTest, DSMath {
 
     Hevm hevm;
 
-    // MAINNET ADDRESSES
+    // KOVAN ADDRESSES
     DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
     DSChiefAbstract      chief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
@@ -53,6 +53,7 @@ contract DssSpellTest is DSTest, DSMath {
     PotAbstract            pot = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
+    address         flipperMom =                     0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
 
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
@@ -355,6 +356,30 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
     }
 
+    function checkFlipValues(bytes32 ilk, address _newFlip, address _oldFlip) internal {
+        FlipAbstract newFlip = FlipAbstract(_newFlip);
+        FlipAbstract oldFlip = FlipAbstract(_oldFlip);
+
+        assertEq(newFlip.ilk(), ilk);
+        assertEq(newFlip.vat(), address(vat));
+
+        (address flip,,) = cat.ilks(ilk);
+
+        assertEq(flip, address(newFlip));
+
+        assertEq(newFlip.wards(address(cat)), (ilk == "USDC-A" || ilk == "USDC-B" || ilk == "TUSD-A") ? 0 : 1);
+        assertEq(newFlip.wards(address(end)), 1);
+        assertEq(newFlip.wards(address(flipperMom)), 1);
+
+        assertEq(oldFlip.wards(address(cat)), 0);
+        assertEq(oldFlip.wards(address(end)), 0);
+        assertEq(oldFlip.wards(address(flipperMom)), 0);
+
+        assertEq(uint256(newFlip.beg()), uint256(oldFlip.beg()));
+        assertEq(uint256(newFlip.ttl()), uint256(oldFlip.ttl()));
+        assertEq(uint256(newFlip.tau()), uint256(oldFlip.tau()));
+    }
+
     function testSpellIsCast() public {
         string memory description = new SpellAction().description();
         assertTrue(bytes(description).length > 0);
@@ -368,6 +393,18 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
         }
 
+        checkSystemValues(beforeSpell);
+
+        bytes32[] memory ilks = reg.list();
+        address[] memory oldFlips = new address[](ilks.length);
+        address[] memory newFlips = new address[](ilks.length);
+
+        for(uint i = 0; i < ilks.length; i++) {
+            checkCollateralValues(ilks[i],  beforeSpell);
+            (address flip_address,,) = cat.ilks(ilks[i]);
+            oldFlips[i] = flip_address;
+        }
+
         vote();
         scheduleWaitAndCast();
         assertTrue(spell.done());
@@ -377,6 +414,17 @@ contract DssSpellTest is DSTest, DSMath {
         bytes32[] memory ilks = reg.list();
         for(uint i = 0; i < ilks.length; i++) {
             checkCollateralValues(ilks[i],  afterSpell);
+            (address flip_address,,) = cat.ilks(ilks[i]);
+            newFlips[i] = flip_address;
+        }
+
+        require(
+            ilks.length == newFlips.length && ilks.length == oldFlips.length,
+            "array-lengths-not-equal"
+        );
+        // Check flip parameters
+        for(uint i = 0; i < ilks.length; i++) {
+            checkFlipValues(ilks[i], newFlips[i], oldFlips[i]);
         }
     }
 }
