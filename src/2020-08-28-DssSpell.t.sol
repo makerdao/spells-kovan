@@ -328,7 +328,8 @@ contract DssSpellTest is DSTest, DSMath {
         usdt.approve(address(joinUSDTA), 600 * 10 ** 6);
         joinUSDTA.join(address(this), 600 * 10 ** 6);
         (,,uint256 spotV,,) = vat.ilks("USDT-A");
-        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(mul(100 * WAD, spotV) / RAY)); // Max amount of DAI
+        // dart max amount of DAI
+        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(mul(600 * WAD, spotV) / RAY));
         hevm.warp(now + 1);
         jug.drip("USDT-A");
         assertEq(flipUSDTA.kicks(), 0);
