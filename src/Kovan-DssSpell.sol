@@ -92,23 +92,39 @@ contract SpellAction {
         FlipAbstract newFlip;
         FlipAbstract oldFlip;
         CatAbstract  cat = CatAbstract(MCD_CAT);
+        uint256 box = 100 * MILLION * RAD; // TODO: Change this
+
+        // TODO: Do we need oldFlip for anything anymore?
+        
+        /*** Update Cat ***/
+        newCat.file("vow", oldCat.vow());
+        vat.rely(address(newCat));
+        vat.deny(address(oldCat));
+        vow.rely(address(newCat));
+        vow.deny(address(oldCat));
+        end.file("cat", address(newCat));
+        newCat.rely(address(end));
+        newCat.file("box", box);
+
 
         /*** ETH-A Flip ***/
         ilk = "ETH-A";
         newFlip = FlipAbstract(MCD_FLIP_ETH_A);
         oldFlip = FlipAbstract(MCD_FLIP_ETH_A_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat));
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
@@ -117,17 +133,19 @@ contract SpellAction {
         newFlip = FlipAbstract(MCD_FLIP_BAT_A);
         oldFlip = FlipAbstract(MCD_FLIP_BAT_A_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat));
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
@@ -136,17 +154,19 @@ contract SpellAction {
         newFlip = FlipAbstract(MCD_FLIP_USDC_A);
         oldFlip = FlipAbstract(MCD_FLIP_USDC_A_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT); // This will be denied after via FlipperMom, just doing this for explicitness
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat)); // This will be denied after via FlipperMom, just doing this for explicitness
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_A);
 
@@ -156,17 +176,19 @@ contract SpellAction {
         newFlip = FlipAbstract(MCD_FLIP_USDC_B);
         oldFlip = FlipAbstract(MCD_FLIP_USDC_B_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT); // This will be denied after via FlipperMom, just doing this for explicitness
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat)); // This will be denied after via FlipperMom, just doing this for explicitness
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_B);
 
@@ -176,17 +198,19 @@ contract SpellAction {
         newFlip = FlipAbstract(MCD_FLIP_WBTC_A);
         oldFlip = FlipAbstract(MCD_FLIP_WBTC_A_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat));
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
@@ -195,17 +219,19 @@ contract SpellAction {
         newFlip = FlipAbstract(MCD_FLIP_TUSD_A);
         oldFlip = FlipAbstract(MCD_FLIP_TUSD_A_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT); // This will be denied after via FlipperMom, just doing this for explicitness
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat)); // This will be denied after via FlipperMom, just doing this for explicitness
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_TUSD_A); 
 
@@ -215,17 +241,19 @@ contract SpellAction {
         newFlip = FlipAbstract(MCD_FLIP_ZRX_A);
         oldFlip = FlipAbstract(MCD_FLIP_ZRX_A_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat));
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
@@ -234,17 +262,19 @@ contract SpellAction {
         newFlip = FlipAbstract(MCD_FLIP_KNC_A);
         oldFlip = FlipAbstract(MCD_FLIP_KNC_A_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat));
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
@@ -253,17 +283,19 @@ contract SpellAction {
         newFlip = FlipAbstract(MCD_FLIP_MANA_A);
         oldFlip = FlipAbstract(MCD_FLIP_MANA_A_OLD);
 
-        cat.file(ilk, "flip", address(newFlip));
-        newFlip.rely(MCD_CAT);
+        newCat.file(ilk, "flip", address(newFlip));
+        newCat.file(ilk, "chop", chop);
+        newCat.file(ilk, "lump", lump);
+        newCat.rely(address(newFlip));
+
+        newFlip.rely(address(newCat));
         newFlip.rely(MCD_END);
         newFlip.rely(FLIPPER_MOM);
-        oldFlip.deny(MCD_CAT);
-        oldFlip.deny(MCD_END);
-        oldFlip.deny(FLIPPER_MOM);
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
         require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
         require(newFlip.vat() == MCD_VAT, "non-matching-vat");
     }
 }
