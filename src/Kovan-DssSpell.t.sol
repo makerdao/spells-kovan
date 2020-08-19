@@ -169,16 +169,16 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: 608 * MILLION * RAD,
+            Line: 688 * MILLION * RAD,
             pauseDelay: 60,
-            hump: 2 * MILLION * RAD
+            hump: 500 * RAD
         });
 
         //
         // Test for all collateral based changes here
         //
         afterSpell.collaterals["ETH-A"] = CollateralValues({
-            line:         340 * MILLION * RAD,
+            line:         420 * MILLION * RAD,
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0 * 1000,

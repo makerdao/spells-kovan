@@ -49,6 +49,20 @@ contract SpellAction {
     uint256 constant FORTYFOUR_PCT_RATE = 1000000011562757347033522598;
 
     function execute() external {
+
+        // --- Raise ETH-A DC Exec ---
+        // Set the global debt ceiling
+        // Existing Line: 608m
+        // New Line: 688m
+        VatAbstract(MCD_VAT).file("Line", 688 * MILLION * RAD);
+
+        // Set the ETH-A debt ceiling
+        // Existing line: 340m
+        // New line: 420m
+        VatAbstract(MCD_VAT).file("ETH-A", "line", 420 * MILLION * RAD);
+
+
+        // --- 2020-08-14 Exec ---
         bytes32[] memory ilks = IlkRegistryAbstract(ILK_REGISTRY).list();
 
         for(uint i = 0; i < ilks.length; i++) {
@@ -73,9 +87,6 @@ contract SpellAction {
         // New Rate: 44%
         JugAbstract(MCD_JUG).drip("USDC-B");
         JugAbstract(MCD_JUG).file("USDC-B", "duty", FORTYFOUR_PCT_RATE);
-
-        // Sets the system surplus buffer from 500k Dai to 2mm Dai
-        VowAbstract(MCD_VOW).file("hump", 2 * MILLION * RAD);
     }
 }
 
