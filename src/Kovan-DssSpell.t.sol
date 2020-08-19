@@ -39,7 +39,6 @@ contract DssSpellTest is DSTest, DSMath {
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
-    SystemValues beforeSpell;
     SystemValues afterSpell;
 
     Hevm hevm;
@@ -119,49 +118,6 @@ contract DssSpellTest is DSTest, DSMath {
         hevm = Hevm(address(CHEAT_CODE));
 
         spell = KOVAN_SPELL != address(0) ? DssSpell(KOVAN_SPELL) : new DssSpell();
-
-        beforeSpell = SystemValues({
-            dsr: 1000000000000000000000000000,
-            dsrPct: 0 * 1000,
-            Line: 608 * MILLION * RAD,
-            pauseDelay: 60,
-            hump: 500 * RAD
-        });
-
-        bytes32[] memory ilks = reg.list();
-
-        //
-        // set before spell config
-        //
-        for(uint i = 0; i < ilks.length; i++) {
-            (,,, uint line, uint dust) = vat.ilks(ilks[i]);
-            (address flip_address, uint chop, uint lump) = cat.ilks(ilks[i]);
-            (, uint mat) = spot.ilks(ilks[i]);
-            (uint duty,) = jug.ilks(ilks[i]);
-            FlipAbstract flip = FlipAbstract(flip_address);
-
-            beforeSpell.collaterals[ilks[i]] = CollateralValues({
-                line: line,
-                dust: dust,
-                duty: duty,
-                pct: 0 * 1000,
-                chop: chop,
-                lump: lump,
-                mat: mat,
-                beg: flip.beg(),
-                ttl: flip.ttl(),
-                tau: flip.tau(),
-                liquidations: flip.wards(address(cat))
-            });
-
-            if (ilks[i] == "USDC-B") {
-                beforeSpell.collaterals[ilks[i]].pct = 46 * 1000;
-            }
-
-            if (ilks[i] == "MANA-A") {
-                beforeSpell.collaterals[ilks[i]].pct =  8 * 1000;
-            }
-        }
 
         //
         // Test for all system configuration changes
@@ -412,20 +368,13 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
         }
 
-        checkSystemValues(beforeSpell);
-
-        bytes32[] memory ilks = reg.list();
-
-        for(uint i = 0; i < ilks.length; i++) {
-            checkCollateralValues(ilks[i],  beforeSpell);
-        }
-
         vote();
         scheduleWaitAndCast();
         assertTrue(spell.done());
 
         checkSystemValues(afterSpell);
 
+        bytes32[] memory ilks = reg.list();
         for(uint i = 0; i < ilks.length; i++) {
             checkCollateralValues(ilks[i],  afterSpell);
         }
