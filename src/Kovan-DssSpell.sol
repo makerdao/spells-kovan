@@ -32,7 +32,6 @@ contract SpellAction {
 
     address constant MCD_VAT      = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
     address constant MCD_JUG      = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
-    address constant MCD_VOW      = 0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b;
     address constant ILK_REGISTRY = 0x6618BD7bBaBFacC518Fdec43542E4a73629B0819;
 
     uint256 constant MILLION = 10 ** 6;
