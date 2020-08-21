@@ -95,6 +95,7 @@ contract SpellAction {
         uint256 box = 100 * MILLION * RAD; // TODO: Change this
 
         // TODO: Do we need oldFlip for anything anymore?
+        // TODO: Determine chop/dunk values for each collateral type
         
         /*** Update Cat ***/
         newCat.file("vow", oldCat.vow());
@@ -114,7 +115,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat));
@@ -135,7 +136,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat));
@@ -156,7 +157,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat)); // This will be denied after via FlipperMom, just doing this for explicitness
@@ -178,7 +179,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat)); // This will be denied after via FlipperMom, just doing this for explicitness
@@ -200,7 +201,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat));
@@ -221,7 +222,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat)); // This will be denied after via FlipperMom, just doing this for explicitness
@@ -243,7 +244,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat));
@@ -264,7 +265,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat));
@@ -285,7 +286,7 @@ contract SpellAction {
 
         newCat.file(ilk, "flip", address(newFlip));
         newCat.file(ilk, "chop", chop);
-        newCat.file(ilk, "lump", lump);
+        newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
         newFlip.rely(address(newCat));
