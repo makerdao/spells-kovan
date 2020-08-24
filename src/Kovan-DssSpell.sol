@@ -19,6 +19,7 @@ import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 import "lib/dss-interfaces/src/dss/CatAbstract.sol";
+import "lib/dss-interfaces/src/dss/EndAbstract.sol";
 import "lib/dss-interfaces/src/dss/JugAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlapAbstract.sol";
@@ -42,43 +43,44 @@ contract SpellAction {
     // against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.0.9/contracts.json
 
-    address constant MCD_VAT      = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
-    address constant MCD_CAT      = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
-    address constant MCD_JUG      = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
-    address constant ILK_REGISTRY = 0x6618BD7bBaBFacC518Fdec43542E4a73629B0819;
+    address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
+    address constant MCD_VOW             = 0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b;
+    address constant MCD_JUG             = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
+    address constant ILK_REGISTRY        = 0x6618BD7bBaBFacC518Fdec43542E4a73629B0819;
+    address constant MCD_SPOT            = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
+    address constant MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
+    address constant FLIPPER_MOM         = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
+    address constant OSM_MOM             = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
 
-    // TODO(lucas-manuel); Update addresses
-    address constant MCD_SPOT            = 0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3;
-    address constant MCD_END             = 0xaB14d3CE3F733CACB76eC2AbE7d2fcb00c99F3d5;
-    address constant FLIPPER_MOM         = 0x9BdDB99625A711bf9bda237044924E34E8570f75;
-    address constant OSM_MOM             = 0x76416A4d5190d071bfed309861527431304aA14f;
+    address constant MCD_CAT             = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
+    address constant MCD_CAT_OLD         = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
 
-    address constant MCD_FLIP_ETH_A      = 0x0F398a2DaAa134621e4b687FCcfeE4CE47599Cc1;
-    address constant MCD_FLIP_ETH_A_OLD  = 0xd8a04F5412223F513DC55F839574430f5EC15531;
+    address constant MCD_FLIP_ETH_A      = 0x750295A8db0580F32355f97de7918fF538c818F1;
+    address constant MCD_FLIP_ETH_A_OLD  = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
 
-    address constant MCD_FLIP_BAT_A      = 0x5EdF770FC81E7b8C2c89f71F30f211226a4d7495;
-    address constant MCD_FLIP_BAT_A_OLD  = 0xaA745404d55f88C108A28c86abE7b5A1E7817c07;
+    address constant MCD_FLIP_BAT_A      = 0x44Acf0eb2C7b9F0B55723e5289437AefE8ef7a1c;
+    address constant MCD_FLIP_BAT_A_OLD  = 0xc0126c3383777bDc175E659A51020E56307dDe21;
 
-    address constant MCD_FLIP_USDC_A     = 0x545521e0105C5698f75D6b3C3050CfCC62FB0C12;
-    address constant MCD_FLIP_USDC_A_OLD = 0xE6ed1d09a19Bd335f051d78D5d22dF3bfF2c28B1;
+    address constant MCD_FLIP_USDC_A     = 0x17C144eaC1B3D6777eF2C3fA1F98e3BC3c18DB4F;
+    address constant MCD_FLIP_USDC_A_OLD = 0xc29Ad1913C3B415497fdA1eA15c132502B8fa372;
 
-    address constant MCD_FLIP_USDC_B     = 0x6002d3B769D64A9909b0B26fC00361091786fe48;
-    address constant MCD_FLIP_USDC_B_OLD = 0xec25Ca3fFa512afbb1784E17f1D414E16D01794F;
+    address constant MCD_FLIP_USDC_B     = 0x6DCd745D91AB422e962d08Ed1a9242adB47D8d0C;
+    address constant MCD_FLIP_USDC_B_OLD = 0x3c9eF711B68882d9732F60758e7891AcEae2Aa7c;
 
-    address constant MCD_FLIP_WBTC_A     = 0xF70590Fa4AaBe12d3613f5069D02B8702e058569;
-    address constant MCD_FLIP_WBTC_A_OLD = 0x3E115d85D4d7253b05fEc9C0bB5b08383C2b0603;
+    address constant MCD_FLIP_WBTC_A     = 0x80Fb08f2EF268f491D6B58438326a3006C1a0e09;
+    address constant MCD_FLIP_WBTC_A_OLD = 0x28dd4263e1FcE04A9016Bd7BF71a4f0F7aB93810;
 
-    address constant MCD_FLIP_ZRX_A      = 0x92645a34d07696395b6e5b8330b000D0436A9aAD;
-    address constant MCD_FLIP_ZRX_A_OLD  = 0x08c89251FC058cC97d5bA5F06F95026C0A5CF9B0;
+    address constant MCD_FLIP_ZRX_A      = 0x798eB3126f1d5cb54743E3e93D3512C58f461084;
+    address constant MCD_FLIP_ZRX_A_OLD  = 0xe07F1219f7d6ccD59431a6b151179A9181e3902c;
 
-    address constant MCD_FLIP_KNC_A      = 0xAD4a0B5F3c6Deb13ADE106Ba6E80Ca6566538eE6;
-    address constant MCD_FLIP_KNC_A_OLD  = 0xAbBCB9Ae89cDD3C27E02D279480C7fF33083249b;
+    address constant MCD_FLIP_KNC_A      = 0xF2c21882Bd14A5F7Cb46291cf3c86E53057FaD06;
+    address constant MCD_FLIP_KNC_A_OLD  = 0x644699674D06cF535772D0DC19Ad5EA695000F51;
 
-    address constant MCD_FLIP_TUSD_A     = 0x04C42fAC3e29Fd27118609a5c36fD0b3Cb8090b3;
-    address constant MCD_FLIP_TUSD_A_OLD = 0xba3f6a74BD12Cf1e48d4416c7b50963cA98AfD61;
+    address constant MCD_FLIP_TUSD_A     = 0x867711f695e11663eC8adCFAAD2a152eFBA56dfD;
+    address constant MCD_FLIP_TUSD_A_OLD = 0xD4A145d161729A4B43B7Ab7DD683cB9A16E01a1b;
 
-    address constant MCD_FLIP_MANA_A     = 0x4bf9D2EBC4c57B9B783C12D30076507660B58b3a;
-    address constant MCD_FLIP_MANA_A_OLD = 0x4bf9D2EBC4c57B9B783C12D30076507660B58b3a;
+    address constant MCD_FLIP_MANA_A     = 0xb2B7430D49D2D2e7abb6a6B4699B2659c141A2a6;
+    address constant MCD_FLIP_MANA_A_OLD = 0x5CB9D33A9fE5244019e6F5f45e68F18600805264;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -91,8 +93,15 @@ contract SpellAction {
         bytes32 ilk;
         FlipAbstract newFlip;
         FlipAbstract oldFlip;
-        CatAbstract  cat = CatAbstract(MCD_CAT);
-        uint256 box = 100 * MILLION * RAD; // TODO: Change this
+        CatAbstract  oldCat = CatAbstract(MCD_CAT_OLD);
+        CatAbstract  newCat = CatAbstract(MCD_CAT);
+        VatAbstract     vat = VatAbstract(MCD_VAT);
+        VowAbstract     vow = VowAbstract(MCD_VOW);
+        EndAbstract     end = EndAbstract(MCD_END);
+
+        uint256 box  = 100 * MILLION * RAD;  // TODO: Change this
+        uint256 chop = 113 * WAD / 100;      // TODO: Change this
+        uint256 dunk = 100 * THOUSAND * RAD; // TODO: Change this
 
         // TODO: Do we need oldFlip for anything anymore?
         // TODO: Determine chop/dunk values for each collateral type

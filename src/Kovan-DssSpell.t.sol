@@ -393,14 +393,11 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
         }
 
-        checkSystemValues(beforeSpell);
-
         bytes32[] memory ilks = reg.list();
         address[] memory oldFlips = new address[](ilks.length);
         address[] memory newFlips = new address[](ilks.length);
 
         for(uint i = 0; i < ilks.length; i++) {
-            checkCollateralValues(ilks[i],  beforeSpell);
             (address flip_address,,) = cat.ilks(ilks[i]);
             oldFlips[i] = flip_address;
         }
@@ -411,7 +408,6 @@ contract DssSpellTest is DSTest, DSMath {
 
         checkSystemValues(afterSpell);
 
-        bytes32[] memory ilks = reg.list();
         for(uint i = 0; i < ilks.length; i++) {
             checkCollateralValues(ilks[i],  afterSpell);
             (address flip_address,,) = cat.ilks(ilks[i]);
