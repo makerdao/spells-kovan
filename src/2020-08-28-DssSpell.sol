@@ -94,7 +94,7 @@ contract SpellAction {
         require(GemJoinAbstract(MCD_JOIN_USDT_A).vat() == MCD_VAT,  "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_USDT_A).ilk() == ilkUSDTA, "join-ilk-not-match");
         require(GemJoinAbstract(MCD_JOIN_USDT_A).gem() == USDT,     "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_USDT_A).dec() == 6,       "join-dec-not-match");
+        require(GemJoinAbstract(MCD_JOIN_USDT_A).dec() == 6,        "join-dec-not-match");
         require(FlipAbstract(MCD_FLIP_USDT_A).vat()    == MCD_VAT,  "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_USDT_A).ilk()    == ilkUSDTA, "flip-ilk-not-match");
 
@@ -131,7 +131,7 @@ contract SpellAction {
         // since we're adding 2 collateral types in this spell, global line is at beginning
         VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 10 * MILLION * RAD   ); // 10m debt ceiling
         VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 100 * RAD            ); // 100 Dai dust
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "lump", 50 * THOUSAND * WAD  ); // 500,000 lot size
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "lump", 50 * THOUSAND * WAD  ); // 50,000 lot size
         CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * RAY / 100      ); // 13% liq. penalty
         JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", EIGHT_PCT_RATE       ); // 8% stability fee
 
@@ -179,9 +179,9 @@ contract SpellAction {
         FlipAbstract(MCD_FLIP_PAXUSD_A).rely(FLIPPER_MOM);
 
         // TODO: update these, we still don't have variables yet
-        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "line"  , 5 * MILLION * RAD    ); // 1 MM debt ceiling
-        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 100 * RAD             ); // 20 Dai dust
-        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "lump"  , 50 * THOUSAND * WAD ); // 500,000 lot size
+        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "line"  , 5 * MILLION * RAD    ); // 5 MM debt ceiling
+        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 100 * RAD            ); // 100 Dai dust
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "lump"  , 50 * THOUSAND * WAD  ); // 50,000 lot size
         CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "chop"  , 113 * RAY / 100      ); // 13% liq. penalty
         JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , FOUR_PCT_RATE        ); // 12% stability fee
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "beg"   , 103 * WAD / 100      ); // 3% bid increase
@@ -192,7 +192,6 @@ contract SpellAction {
 
         // consequently, deny PAXUSD-A Flipper
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_PAXUSD_A);
-
     }
 }
 
