@@ -35,8 +35,6 @@ import "lib/dss-interfaces/src/dss/MkrAuthorityAbstract.sol";
 
 contract SpellAction {
 
-    string constant public description = "Kovan Spell Deploy 2020-08-21";
-
     // KOVAN ADDRESSES
     //
     // The contracts in this list should correspond to MCD core contracts, verify
@@ -45,12 +43,7 @@ contract SpellAction {
 
     address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
     address constant MCD_ADM             = 0xbBFFC76e94B34F72D96D054b31f6424249c1337d;
-    address constant MCD_VOW             = 0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b;
-    address constant MCD_JUG             = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
-    address constant ILK_REGISTRY        = 0x6618BD7bBaBFacC518Fdec43542E4a73629B0819;
-    address constant MCD_SPOT            = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
     address constant MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
-    address constant OSM_MOM             = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
 
     address constant FLIPPER_MOM         = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
     address constant FLIPPER_MOM_OLD     = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
@@ -96,19 +89,20 @@ contract SpellAction {
         bytes32 ilk;
         FlipAbstract newFlip;
         FlipAbstract oldFlip;
+        
 
         CatAbstract oldCat = CatAbstract(MCD_CAT_OLD);
         CatAbstract newCat = CatAbstract(MCD_CAT);
         VatAbstract    vat = VatAbstract(MCD_VAT);
-        VowAbstract    vow = VowAbstract(MCD_VOW);
+        VowAbstract    vow = VowAbstract(oldCat.vow());
         EndAbstract    end = EndAbstract(MCD_END);
 
         FlipperMomAbstract newMom = FlipperMomAbstract(FLIPPER_MOM);
         FlipperMomAbstract oldMom = FlipperMomAbstract(FLIPPER_MOM_OLD);
 
         uint256 box  = 10  * THOUSAND * RAD;
-        uint256 chop = 113 * WAD / 100;      // Set globally for this spell because constant across all ilks
         uint256 dunk = 500 * RAD;            // Set globally for this spell because constant across all ilks
+        uint256 oldChop;
         
         /*** Update Cat ***/
         newCat.file("vow", oldCat.vow());
@@ -131,7 +125,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_ETH_A_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -152,7 +147,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_BAT_A_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -173,7 +169,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_USDC_A_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -195,7 +192,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_USDC_B_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -217,7 +215,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_WBTC_A_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -238,7 +237,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_TUSD_A_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -260,7 +260,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_ZRX_A_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -281,7 +282,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_KNC_A_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -302,7 +304,8 @@ contract SpellAction {
         oldFlip = FlipAbstract(MCD_FLIP_MANA_A_OLD);
 
         newCat.file(ilk, "flip", address(newFlip));
-        newCat.file(ilk, "chop", chop);
+        (, oldChop,) = oldCat.ilks(ilk);
+        newCat.file(ilk, "chop", oldChop / 10 ** 9);
         newCat.file(ilk, "dunk", dunk);
         newCat.rely(address(newFlip));
 
@@ -328,6 +331,8 @@ contract DssSpell {
     uint256         public expiration;
     bool            public done;
 
+    string constant public description = "Kovan Spell Deploy 2020-08-28";
+
     constructor() public {
         sig = abi.encodeWithSignature("execute()");
         action = address(new SpellAction());
@@ -336,10 +341,6 @@ contract DssSpell {
         assembly { _tag := extcodehash(_action) }
         tag = _tag;
         expiration = now + 30 days;
-    }
-
-    function description() public view returns (string memory) {
-        return SpellAction(action).description();
     }
 
     function schedule() public {
