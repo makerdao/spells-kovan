@@ -6,9 +6,9 @@ import "lib/dss-interfaces/src/Interfaces.sol";
 
 import {DssSpell, SpellAction} from "./Kovan-DssSpell.sol";
 
-contract Hevm {
-    function warp(uint) public;
-    function store(address,bytes32,bytes32) public;
+interface Hevm {
+    function warp(uint) external;
+    function store(address,bytes32,bytes32) external;
 }
 
 contract DssSpellTest is DSTest, DSMath {
