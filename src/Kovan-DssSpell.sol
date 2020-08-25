@@ -98,6 +98,7 @@ contract SpellAction {
 
         require(newCat.vat() == oldCat.vat(), "non-matching-vat");
         require(newCat.vat() == address(vat), "non-matching-vat");
+        require(newCat.live() == 0,           "cat-not-live");
         require(FlipperMomAbstract(FLIPPER_MOM).cat() == address(newCat), "non-matching-cat");
 
         uint256 box  = 10  * THOUSAND * RAD;
