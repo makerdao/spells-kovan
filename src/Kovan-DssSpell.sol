@@ -97,9 +97,6 @@ contract SpellAction {
         VowAbstract    vow = VowAbstract(oldCat.vow());
         EndAbstract    end = EndAbstract(MCD_END);
 
-        FlipperMomAbstract newMom = FlipperMomAbstract(FLIPPER_MOM);
-        FlipperMomAbstract oldMom = FlipperMomAbstract(FLIPPER_MOM_OLD);
-
         uint256 box  = 10  * THOUSAND * RAD;
         uint256 dunk = 500 * RAD;            // Set globally for this spell because constant across all ilks
         uint256 oldChop;
@@ -115,9 +112,7 @@ contract SpellAction {
         newCat.file("box", box);
 
         /*** Set Auth in Flipper Mom ***/
-        newMom.setAuthority(MCD_ADM);
-        oldMom.setAuthority(address(0));
-        oldMom.setOwner(address(0));    
+        FlipperMomAbstract(FLIPPER_MOM).setAuthority(MCD_ADM); 
 
         /*** ETH-A Flip ***/
         ilk = "ETH-A";

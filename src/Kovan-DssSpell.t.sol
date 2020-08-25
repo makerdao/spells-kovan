@@ -57,7 +57,6 @@ contract DssSpellTest is DSTest, DSMath {
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
     FlipperMomAbstract  newMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
-    FlipperMomAbstract  oldMom = FlipperMomAbstract( 0xf3828caDb05E5F22844f6f9314D99516D68a0C84);
 
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
@@ -424,9 +423,6 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(end.cat(), address(newCat));
         assertEq(newCat.wards(address(end)), 1);
         assertEq(newCat.box(), 10 * THOUSAND * RAD);
-
-        assertEq(oldMom.owner(),     address(0));
-        assertEq(oldMom.authority(), address(0));
 
         require(
             ilks.length == newFlips.length && ilks.length == oldFlips.length,
