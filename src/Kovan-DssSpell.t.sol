@@ -11,10 +11,6 @@ contract Hevm {
     function store(address,bytes32,bytes32) public;
 }
 
-contract TestCat is CatAbstract {
-    function box() external returns (uint256);
-}
-
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
     address constant KOVAN_SPELL = address(0);
@@ -69,8 +65,8 @@ contract DssSpellTest is DSTest, DSMath {
     GemJoinAbstract   wethJoin = GemJoinAbstract(    0x775787933e92b709f2a3C70aa87999696e74A9F8);
     IlkRegistryAbstract    reg = IlkRegistryAbstract(0x6618BD7bBaBFacC518Fdec43542E4a73629B0819);
 
-    TestCat             newCat = TestCat(            0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
-    TestCat             oldCat = TestCat(            0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
+    CatAbstract         newCat = CatAbstract(        0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
+    CatAbstract         oldCat = CatAbstract(        0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
 
     DssSpell spell;
 
@@ -455,7 +451,6 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vow.wards(address(oldCat)), 0);
         assertEq(end.cat(), address(newCat));
         assertEq(newCat.wards(address(end)), 1);
-        assertEq(newCat.box(), 10 * THOUSAND * RAD);
 
         require(
             ilks.length == newFlips.length && ilks.length == oldFlips.length,
