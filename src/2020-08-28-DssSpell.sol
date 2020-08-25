@@ -78,10 +78,9 @@ contract SpellAction {
     // This should be modified weekly to provide a summary of the actions
     // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/cc819c75fc8f1b622cbe06acfd0d11bf64545622/governance/votes/Executive%20vote%20-%20July%2027%2C%202020%20.md -q -O - 2>/dev/null)"
     string constant public description =
-        "2020-08-24 MakerDAO Executive Spell | KOVAN DEPLOYMENT OF USDT-A & LRC-A";
+        "2020-08-24 MakerDAO Executive Spell | KOVAN DEPLOYMENT OF USDT-A & PAXUSD-A";
 
     function execute() external {
-        // TODO: UPDATE THIS IS A 6 MILLION ASSUMPTION
         VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 15 * MILLION * RAD));
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +182,7 @@ contract SpellAction {
         VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 100 * RAD            ); // 100 Dai dust
         CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "lump"  , 50 * THOUSAND * WAD  ); // 50,000 lot size
         CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "chop"  , 113 * RAY / 100      ); // 13% liq. penalty
-        JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , FOUR_PCT_RATE        ); // 12% stability fee
+        JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , FOUR_PCT_RATE        ); // 4% stability fee
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "beg"   , 103 * WAD / 100      ); // 3% bid increase
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "ttl"   , 6 hours              ); // 6 hours ttl
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "tau"   , 6 hours              ); // 6 hours tau
