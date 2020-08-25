@@ -6,9 +6,9 @@ import "lib/dss-interfaces/src/Interfaces.sol";
 
 import {DssSpell, SpellAction} from "./Kovan-DssSpell.sol";
 
-contract Hevm {
-    function warp(uint) public;
-    function store(address,bytes32,bytes32) public;
+interface Hevm {
+    function warp(uint) external;
+    function store(address,bytes32,bytes32) external;
 }
 
 contract DssSpellTest is DSTest, DSMath {
@@ -400,6 +400,8 @@ contract DssSpellTest is DSTest, DSMath {
         (address flip,,) = newCat.ilks(ilk);
 
         assertEq(flip, address(newFlip));
+
+        assertEq(newCat.wards(address(newFlip)), 1);
 
         assertEq(newFlip.wards(address(newCat)), (ilk == "USDC-A" || ilk == "USDC-B" || ilk == "TUSD-A") ? 0 : 1);
         assertEq(newFlip.wards(address(end)), 1);
