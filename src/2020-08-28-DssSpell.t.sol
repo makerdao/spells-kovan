@@ -47,7 +47,6 @@ contract DssSpellTest is DSTest, DSMath {
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
-    SystemValues beforeSpell;
     SystemValues afterSpell;
 
     Hevm hevm;
@@ -68,7 +67,7 @@ contract DssSpellTest is DSTest, DSMath {
 
     // USDT-A specific
     USDTAbstract usdt            = USDTAbstract(     0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
-    GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x1456addbb650b4c89aa61d59D19f5f4470b8102C);
+    GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x9237e9988e7a625fD60505D9aa8ff83935e06b01);
     OsmAbstract pipUSDT          = OsmAbstract(      0x3588A7973D41AaeA7B203549553C991C4311951e);
     FlipAbstract flipUSDTA       = FlipAbstract(     0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998);
     MedianAbstract medUSDTA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7);
@@ -144,7 +143,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             dsr: 1000000000000000000000000000,
             dsrPct: 0 * 1000,
-            Line: add(608 * MILLION * RAD, 15 * MILLION * RAD),
+            Line: 703 * MILLION * RAD,
             pauseDelay: 60
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({

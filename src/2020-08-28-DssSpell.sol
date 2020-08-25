@@ -44,7 +44,7 @@ contract SpellAction {
 
     // USDT-A TODO: update
     address constant USDT                = 0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86; // updated w/ 1bn supply
-    address constant MCD_JOIN_USDT_A     = 0x1456addbb650b4c89aa61d59D19f5f4470b8102C;
+    address constant MCD_JOIN_USDT_A     = 0x9237e9988e7a625fD60505D9aa8ff83935e06b01;
     address constant MCD_FLIP_USDT_A     = 0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998;
     address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
 
