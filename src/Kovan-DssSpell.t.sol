@@ -401,6 +401,8 @@ contract DssSpellTest is DSTest, DSMath {
 
         assertEq(flip, address(newFlip));
 
+        assertEq(newCat.wards(address(newFlip)), 1);
+
         assertEq(newFlip.wards(address(newCat)), (ilk == "USDC-A" || ilk == "USDC-B" || ilk == "TUSD-A") ? 0 : 1);
         assertEq(newFlip.wards(address(end)), 1);
         assertEq(newFlip.wards(address(newMom)), 1);
