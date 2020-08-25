@@ -46,7 +46,6 @@ contract SpellAction {
     address constant MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
 
     address constant FLIPPER_MOM         = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
-    address constant FLIPPER_MOM_OLD     = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
 
     address constant MCD_CAT             = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
     address constant MCD_CAT_OLD         = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
@@ -97,12 +96,16 @@ contract SpellAction {
         VowAbstract    vow = VowAbstract(oldCat.vow());
         EndAbstract    end = EndAbstract(MCD_END);
 
+        require(newCat.vat() == oldCat.vat(), "non-matching-vat");
+        require(newCat.vat() == address(vat), "non-matching-vat");
+        require(FlipperMomAbstract(FLIPPER_MOM).cat() == address(newCat), "non-matching-cat");
+
         uint256 box  = 10  * THOUSAND * RAD;
         uint256 dunk = 500 * RAD;            // Set globally for this spell because constant across all ilks
         uint256 oldChop;
         
         /*** Update Cat ***/
-        newCat.file("vow", oldCat.vow());
+        newCat.file("vow", address(vow));
         vat.rely(address(newCat));
         vat.deny(address(oldCat));
         vow.rely(address(newCat));
@@ -118,6 +121,11 @@ contract SpellAction {
         ilk = "ETH-A";
         newFlip = FlipAbstract(MCD_FLIP_ETH_A);
         oldFlip = FlipAbstract(MCD_FLIP_ETH_A_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -131,15 +139,16 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
-
 
         /*** BAT-A Flip ***/
         ilk = "BAT-A";
         newFlip = FlipAbstract(MCD_FLIP_BAT_A);
         oldFlip = FlipAbstract(MCD_FLIP_BAT_A_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -153,15 +162,17 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
         /*** USDC-A Flip ***/
         ilk = "USDC-A";
         newFlip = FlipAbstract(MCD_FLIP_USDC_A);
         oldFlip = FlipAbstract(MCD_FLIP_USDC_A_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -175,9 +186,7 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_A);
 
 
@@ -185,6 +194,11 @@ contract SpellAction {
         ilk = "USDC-B";
         newFlip = FlipAbstract(MCD_FLIP_USDC_B);
         oldFlip = FlipAbstract(MCD_FLIP_USDC_B_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -198,9 +212,7 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_B);
 
 
@@ -208,6 +220,11 @@ contract SpellAction {
         ilk = "WBTC-A";
         newFlip = FlipAbstract(MCD_FLIP_WBTC_A);
         oldFlip = FlipAbstract(MCD_FLIP_WBTC_A_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -221,15 +238,17 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
         /*** TUSD-A Flip ***/
         ilk = "TUSD-A";
         newFlip = FlipAbstract(MCD_FLIP_TUSD_A);
         oldFlip = FlipAbstract(MCD_FLIP_TUSD_A_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -243,9 +262,7 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_TUSD_A); 
 
 
@@ -253,6 +270,11 @@ contract SpellAction {
         ilk = "ZRX-A";
         newFlip = FlipAbstract(MCD_FLIP_ZRX_A);
         oldFlip = FlipAbstract(MCD_FLIP_ZRX_A_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -266,15 +288,17 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
         /*** KNC-A Flip ***/
         ilk = "KNC-A";
         newFlip = FlipAbstract(MCD_FLIP_KNC_A);
         oldFlip = FlipAbstract(MCD_FLIP_KNC_A_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -288,15 +312,17 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
 
         /*** MANA-A Flip ***/
         ilk = "MANA-A";
         newFlip = FlipAbstract(MCD_FLIP_MANA_A);
         oldFlip = FlipAbstract(MCD_FLIP_MANA_A_OLD);
+        require(newFlip.ilk() == oldFlip.ilk(), "non-matching-ilk");
+        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
+        require(newFlip.ilk() == ilk, "non-matching-ilk");
+        require(newFlip.cat() == address(newCat), "non-matching-cat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         newCat.file(ilk, "flip", address(newFlip));
         (, oldChop,) = oldCat.ilks(ilk);
@@ -310,9 +336,6 @@ contract SpellAction {
         newFlip.file("beg", oldFlip.beg());
         newFlip.file("ttl", oldFlip.ttl());
         newFlip.file("tau", oldFlip.tau());
-        require(newFlip.ilk() == ilk, "non-matching-ilk");
-        require(newFlip.cat() == address(newCat), "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
     }
 }
 
