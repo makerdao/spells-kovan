@@ -11,6 +11,10 @@ contract Hevm {
     function store(address,bytes32,bytes32) public;
 }
 
+contract TestCat is CatAbstract {
+    function box() external returns (uint256);
+}
+
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
     address constant KOVAN_SPELL = address(0);
@@ -21,7 +25,7 @@ contract DssSpellTest is DSTest, DSMath {
         uint dust;
         uint duty;
         uint chop;
-        uint lump;
+        uint dunk;
         uint pct;
         uint mat;
         uint beg;
@@ -49,11 +53,11 @@ contract DssSpellTest is DSTest, DSMath {
     DSChiefAbstract      chief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
     VatAbstract            vat = VatAbstract(        0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
     VowAbstract            vow = VowAbstract(        0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b);
-    CatAbstract            cat = CatAbstract(        0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
     PotAbstract            pot = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    address         flipperMom =                     0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
+    FlipperMomAbstract  newMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
+    FlipperMomAbstract  oldMom = FlipperMomAbstract( 0xf3828caDb05E5F22844f6f9314D99516D68a0C84);
 
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
@@ -61,6 +65,8 @@ contract DssSpellTest is DSTest, DSMath {
     GemJoinAbstract   wethJoin = GemJoinAbstract(    0x775787933e92b709f2a3C70aa87999696e74A9F8);
     IlkRegistryAbstract    reg = IlkRegistryAbstract(0x6618BD7bBaBFacC518Fdec43542E4a73629B0819);
 
+    TestCat             newCat = TestCat(            0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
+    TestCat             oldCat = TestCat(            0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
 
     DssSpell spell;
 
@@ -139,8 +145,8 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0 * 1000,
-            chop:         113 * RAY / 100,
-            lump:         1 * WAD,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          150 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
@@ -152,8 +158,8 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0 * 1000,
-            chop:         113 * RAY / 100,
-            lump:         1500 * WAD,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          150 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
@@ -165,8 +171,8 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0,
-            chop:         113 * RAY / 100,
-            lump:         500 * WAD,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          110 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
@@ -178,8 +184,8 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000011562757347033522598,
             pct:          44 * 1000,
-            chop:         113 * RAY / 100,
-            lump:         500 * WAD,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          120 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
@@ -191,8 +197,8 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0,
-            chop:         113 * RAY / 100,
-            lump:         1 * WAD / 100,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          150 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
@@ -204,21 +210,21 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0 * 1000,
-            chop:         113 * RAY / 100,
-            lump:         500 * WAD,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          120 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1 // This is an Error, liquidations should be off
+            liquidations: 0 
         });
         afterSpell.collaterals["KNC-A"] = CollateralValues({
             line:         5 * MILLION * RAD,
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0,
-            chop:         113 * RAY / 100,
-            lump:         50  * WAD,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          175 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
@@ -230,8 +236,8 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0,
-            chop:         113 * RAY / 100,
-            lump:         100 * WAD,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          175 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
@@ -243,8 +249,8 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000001847694957439350562,
             pct:          6 * 1000,
-            chop:         113 * RAY / 100,
-            lump:         500 * WAD,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
             mat:          175 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
@@ -332,19 +338,19 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(dust, values.collaterals[ilk].dust);
         assertTrue((dust >= RAD && dust < 10 * THOUSAND * RAD) || dust == 0); // eq 0 or gt eq 1 and lt 10k
 
-        (, uint chop, uint lump) = cat.ilks(ilk);
+        (, uint chop, uint dunk) = newCat.ilks(ilk);
         assertEq(chop, values.collaterals[ilk].chop);
         // make sure chop is less than 100%
-        assertTrue(chop >= RAY && chop < 2 * RAY);   // penalty gt eq 0% and lt 100%
-        assertEq(lump, values.collaterals[ilk].lump);
+        assertTrue(chop >= WAD && chop < 2 * WAD);   // penalty gt eq 0% and lt 100%
+        assertEq(dunk, values.collaterals[ilk].dunk);
         // put back in after LIQ-1.2
-        // assertTrue(lump >= WAD && lump < MILLION * WAD);
+        assertTrue(dunk >= RAD && dunk < MILLION * RAD);
 
         (,uint mat) = spot.ilks(ilk);
         assertEq(mat, values.collaterals[ilk].mat);
         assertTrue(mat >= RAY && mat < 10 * RAY);    // cr eq 100% and lt 1000%
 
-        (address flipper,,) = cat.ilks(ilk);
+        (address flipper,,) = newCat.ilks(ilk);
         FlipAbstract flip = FlipAbstract(flipper);
         assertEq(uint(flip.beg()), values.collaterals[ilk].beg);
         assertTrue(flip.beg() >= WAD && flip.beg() < 105 * WAD / 100);  // gt eq 0% and lt 5%
@@ -353,7 +359,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(uint(flip.tau()), values.collaterals[ilk].tau);
         assertTrue(flip.tau() >= 600 && flip.tau() <= 1 hours);          // gt eq 10 minutes and lt eq 1 hours
 
-        assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
+        assertEq(flip.wards(address(newCat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
     }
 
     function checkFlipValues(bytes32 ilk, address _newFlip, address _oldFlip) internal {
@@ -363,17 +369,13 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(newFlip.ilk(), ilk);
         assertEq(newFlip.vat(), address(vat));
 
-        (address flip,,) = cat.ilks(ilk);
+        (address flip,,) = newCat.ilks(ilk);
 
         assertEq(flip, address(newFlip));
 
-        assertEq(newFlip.wards(address(cat)), (ilk == "USDC-A" || ilk == "USDC-B" || ilk == "TUSD-A") ? 0 : 1);
+        assertEq(newFlip.wards(address(newCat)), (ilk == "USDC-A" || ilk == "USDC-B" || ilk == "TUSD-A") ? 0 : 1);
         assertEq(newFlip.wards(address(end)), 1);
-        assertEq(newFlip.wards(address(flipperMom)), 1);
-
-        assertEq(oldFlip.wards(address(cat)), 0);
-        assertEq(oldFlip.wards(address(end)), 0);
-        assertEq(oldFlip.wards(address(flipperMom)), 0);
+        assertEq(newFlip.wards(address(newMom)), 1);
 
         assertEq(uint256(newFlip.beg()), uint256(oldFlip.beg()));
         assertEq(uint256(newFlip.ttl()), uint256(oldFlip.ttl()));
@@ -398,7 +400,7 @@ contract DssSpellTest is DSTest, DSMath {
         address[] memory newFlips = new address[](ilks.length);
 
         for(uint i = 0; i < ilks.length; i++) {
-            (address flip_address,,) = cat.ilks(ilks[i]);
+            (address flip_address,,) = oldCat.ilks(ilks[i]);
             oldFlips[i] = flip_address;
         }
 
@@ -410,9 +412,21 @@ contract DssSpellTest is DSTest, DSMath {
 
         for(uint i = 0; i < ilks.length; i++) {
             checkCollateralValues(ilks[i],  afterSpell);
-            (address flip_address,,) = cat.ilks(ilks[i]);
+            (address flip_address,,) = newCat.ilks(ilks[i]);
             newFlips[i] = flip_address;
         }
+
+        assertEq(newCat.vow(), oldCat.vow());
+        assertEq(vat.wards(address(newCat)), 1);
+        assertEq(vat.wards(address(oldCat)), 0);
+        assertEq(vow.wards(address(newCat)), 1);
+        assertEq(vow.wards(address(oldCat)), 0);
+        assertEq(end.cat(), address(newCat));
+        assertEq(newCat.wards(address(end)), 1);
+        assertEq(newCat.box(), 10 * THOUSAND * RAD);
+
+        assertEq(oldMom.owner(),     address(0));
+        assertEq(oldMom.authority(), address(0));
 
         require(
             ilks.length == newFlips.length && ilks.length == oldFlips.length,
