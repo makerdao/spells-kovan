@@ -161,7 +161,7 @@ contract DssSpell {
     uint256         public expiration;
     bool            public done;
 
-    string constant public description = "Kovan Spell Deploy 2020-08-28";
+    string constant public description = "Kovan Spell Deploy";
 
     constructor() public {
         sig = abi.encodeWithSignature("execute()");
