@@ -17,6 +17,7 @@ pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
+import "lib/dss-interfaces/src/dss/VowAbstract.sol";
 import "lib/dss-interfaces/src/dss/CatAbstract.sol";
 import "lib/dss-interfaces/src/dss/EndAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
@@ -31,6 +32,8 @@ contract SpellAction {
     // against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.0.9/contracts.json
 
+    address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
+    address constant MCD_VOW             = 0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b;
     address constant MCD_ADM             = 0xbBFFC76e94B34F72D96D054b31f6424249c1337d;
     address constant MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
 
@@ -74,19 +77,20 @@ contract SpellAction {
     uint256 constant RAD      = 10 ** 45;
 
     function execute() external {
-        VatAbstract vat = VatAbstract(CatAbstract(MCD_CAT_OLD).vat());
-        VowAbstract vow = VowAbstract(CatAbstract(MCD_CAT_OLD).vow());
+        require(CatAbstract(MCD_CAT_OLD).vat() == MCD_VAT,          "non-matching-vat");
+        require(CatAbstract(MCD_CAT_OLD).vow() == MCD_VOW,          "non-matching-vow");
 
-        require(CatAbstract(MCD_CAT).vat() == address(vat),         "non-matching-vat");
+        require(CatAbstract(MCD_CAT).vat() == MCD_VAT,              "non-matching-vat");
         require(CatAbstract(MCD_CAT).live() == 1,                   "cat-not-live");
+
         require(FlipperMomAbstract(FLIPPER_MOM).cat() == MCD_CAT,   "non-matching-cat");
         
         /*** Update Cat ***/
-        CatAbstract(MCD_CAT).file("vow", address(vow));
-        vat.rely(MCD_CAT);
-        vat.deny(MCD_CAT_OLD);
-        vow.rely(MCD_CAT);
-        vow.deny(MCD_CAT_OLD);
+        CatAbstract(MCD_CAT).file("vow", MCD_VOW);
+        VatAbstract(MCD_VAT).rely(MCD_CAT);
+        VatAbstract(MCD_VAT).deny(MCD_CAT_OLD);
+        VowAbstract(MCD_VOW).rely(MCD_CAT);
+        VowAbstract(MCD_VOW).deny(MCD_CAT_OLD);
         EndAbstract(MCD_END).file("cat", MCD_CAT);
         CatAbstract(MCD_CAT).rely(MCD_END);
         CatAbstract(MCD_CAT).file("box", 10  * THOUSAND * RAD);
@@ -131,7 +135,7 @@ contract SpellAction {
         require(ilk == oldFlip.ilk(), "non-matching-ilk");
         require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
         require(newFlip.cat() == MCD_CAT, "non-matching-cat");
-        require(newFlip.vat() == CatAbstract(MCD_CAT).vat(), "non-matching-vat");
+        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
 
         CatAbstract(MCD_CAT).file(ilk, "flip", address(newFlip));
         (, uint oldChop,) = CatAbstract(MCD_CAT_OLD).ilks(ilk);
