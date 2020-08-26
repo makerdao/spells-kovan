@@ -22,7 +22,6 @@ import "lib/dss-interfaces/src/dss/CatAbstract.sol";
 import "lib/dss-interfaces/src/dss/EndAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
-import "lib/dss-interfaces/src/dss/VowAbstract.sol";
 
 contract SpellAction {
 
