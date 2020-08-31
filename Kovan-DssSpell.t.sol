@@ -4,7 +4,7 @@ import "ds-math/math.sol";
 import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 
-import {DssSpell, SpellAction} from "./2020-08-28-DssSpell.sol";
+import {DssSpell, SpellAction} from "./Kovan-DssSpell.sol";
 
 contract Hevm {
     function warp(uint256) public;
@@ -31,12 +31,13 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 dust;
         uint256 duty;
         uint256 chop;
-        uint256 lump;
+        uint256 dunk;
         uint256 pct;
         uint256 mat;
         uint256 beg;
         uint48 ttl;
         uint48 tau;
+        uint256 liquidations;
     }
 
     struct SystemValues {
@@ -56,27 +57,27 @@ contract DssSpellTest is DSTest, DSMath {
     address pauseProxy           =                   0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
     DSChiefAbstract chief        = DSChiefAbstract(  0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
     VatAbstract     vat          = VatAbstract(      0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
-    CatAbstract     cat          = CatAbstract(      0x0511674A67192FE51e86fE55Ed660eB4f995BDd6);
+    CatAbstract     cat          = CatAbstract(      0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
     PotAbstract     pot          = PotAbstract(      0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract     jug          = JugAbstract(      0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract    spot         = SpotAbstract(     0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
     DSTokenAbstract gov          = DSTokenAbstract(  0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract     end          = EndAbstract(      0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
-    FlipperMomAbstract flipMom   = FlipperMomAbstract(0xf3828caDb05E5F22844f6f9314D99516D68a0C84);
+    FlipperMomAbstract flipMom   = FlipperMomAbstract(0x50dC6120c67E456AdA2059cfADFF0601499cf681);
     OsmMomAbstract  osmMom       = OsmMomAbstract(   0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
 
     // USDT-A specific
     USDTAbstract usdt            = USDTAbstract(     0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
-    GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x9237e9988e7a625fD60505D9aa8ff83935e06b01);
+    GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226);
     OsmAbstract pipUSDT          = OsmAbstract(      0x3588A7973D41AaeA7B203549553C991C4311951e);
-    FlipAbstract flipUSDTA       = FlipAbstract(     0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998);
+    FlipAbstract flipUSDTA       = FlipAbstract(     0xAa61067AD34daF1D37848B6Ad6263E49b58C6282);
     MedianAbstract medUSDTA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7);
 
     // PAXUSD-A specific
     GemAbstract      paxusd      = GemAbstract(      0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D);
     GemJoinAbstract  joinPAXUSDA = GemJoinAbstract(  0x96831F3eC88874cf6B2cCe604e7531bF1B55171f);
     OsmAbstract      pipPAXUSD   = OsmAbstract(      0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749);
-    FlipAbstract     flipPAXUSDA = FlipAbstract(     0xa653B4C2F96f82811a117c0384675FDeb2d77B03);
+    FlipAbstract     flipPAXUSDA = FlipAbstract(     0xC9D25d53a051AAe4C036cEA6E3bDB919CFFc90a9);
 
     DssSpell spell;
 
@@ -86,6 +87,7 @@ contract DssSpellTest is DSTest, DSMath {
 
     uint256 constant THOUSAND   = 10 ** 3;
     uint256 constant MILLION    = 10 ** 6;
+    uint256 constant BILLION    = 10 ** 9;
     uint256 constant WAD        = 10 ** 18;
     uint256 constant RAY        = 10 ** 27;
     uint256 constant RAD        = 10 ** 45;
@@ -152,11 +154,12 @@ contract DssSpellTest is DSTest, DSMath {
             duty: 1000000002440418608258400030, // 8% SF
             pct: 8 * 1000,
             chop: 113 * RAY / 100,
-            lump: 50 * THOUSAND * WAD,
+            dunk: 50 * THOUSAND * WAD,
             mat: 150 * RAY / 100,
             beg: 103 * WAD / 100,
             ttl: 6 hours,
-            tau: 6 hours
+            tau: 6 hours,
+            liquidations: 1
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             line: 5 * MILLION * RAD,
@@ -164,11 +167,12 @@ contract DssSpellTest is DSTest, DSMath {
             duty: 1000000001243680656318820312, // 4% SF
             pct: 4 * 1000,
             chop: 113 * RAY / 100,
-            lump: 50 * THOUSAND * WAD,
+            dunk: 50 * THOUSAND * WAD,
             mat: 120 * RAY / 100,
             beg: 103 * WAD / 100,
             ttl: 6 hours,
-            tau: 6 hours
+            tau: 6 hours,
+            liquidations: 0
         });
     }
 
@@ -221,25 +225,65 @@ contract DssSpellTest is DSTest, DSMath {
     function checkCollateralValues(bytes32 ilk, SystemValues storage values) internal {
         (uint duty,)  = jug.ilks(ilk);
         assertEq(duty,   values.collaterals[ilk].duty);
+        // make sure duty is less than 1000% APR
+        // bc -l <<< 'scale=27; e( l(10.00)/(60 * 60 * 24 * 365) )'
+        // 1000000073014496989316680335
+        assertTrue(duty >= RAY && duty < 1000000073014496989316680335);  // gt 0 and lt 1000%
         assertTrue(diffCalc(expectedRate(values.collaterals[ilk].pct), yearlyYield(values.collaterals[ilk].duty)) <= TOLERANCE);
+        assertTrue(values.collaterals[ilk].pct < THOUSAND * THOUSAND);   // check value lt 1000%
 
-        (,,, uint256 line, uint256 dust) = vat.ilks(ilk);
+        (,,, uint line, uint dust) = vat.ilks(ilk);
         assertEq(line, values.collaterals[ilk].line);
+        assertTrue((line >= RAD && line < BILLION * RAD) || line == 0);  // eq 0 or gt eq 1 RAD and lt 1B
         assertEq(dust, values.collaterals[ilk].dust);
+        assertTrue((dust >= RAD && dust < 10 * THOUSAND * RAD) || dust == 0); // eq 0 or gt eq 1 and lt 10k
 
-        (, uint256 chop, uint256 lump) = cat.ilks(ilk);
+        (, uint chop, uint dunk) = cat.ilks(ilk);
         assertEq(chop, values.collaterals[ilk].chop);
-        assertEq(lump, values.collaterals[ilk].lump);
+        // make sure chop is less than 100%
+        assertTrue(chop >= WAD && chop < 2 * WAD);   // penalty gt eq 0% and lt 100%
+        assertEq(dunk, values.collaterals[ilk].dunk);
+        // put back in after LIQ-1.2
+        assertTrue(dunk >= RAD && dunk < MILLION * RAD);
 
-        (,uint256 mat) = spot.ilks(ilk);
+        (,uint mat) = spot.ilks(ilk);
         assertEq(mat, values.collaterals[ilk].mat);
+        assertTrue(mat >= RAY && mat < 10 * RAY);    // cr eq 100% and lt 1000%
 
         (address flipper,,) = cat.ilks(ilk);
         FlipAbstract flip = FlipAbstract(flipper);
-        assertEq(uint256(flip.beg()), values.collaterals[ilk].beg);
-        assertEq(uint256(flip.ttl()), values.collaterals[ilk].ttl);
-        assertEq(uint256(flip.tau()), values.collaterals[ilk].tau);
+        assertEq(uint(flip.beg()), values.collaterals[ilk].beg);
+        assertTrue(flip.beg() >= WAD && flip.beg() < 105 * WAD / 100);  // gt eq 0% and lt 5%
+        assertEq(uint(flip.ttl()), values.collaterals[ilk].ttl);
+        assertTrue(flip.ttl() >= 600 && flip.ttl() < 10 hours);         // gt eq 10 minutes and lt 10 hours
+        assertEq(uint(flip.tau()), values.collaterals[ilk].tau);
+        assertTrue(flip.tau() >= 600 && flip.tau() <= 1 hours);          // gt eq 10 minutes and lt eq 1 hours
+
+        assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
     }
+
+    // function checkCollateralValues(bytes32 ilk, SystemValues storage values) internal {
+    //     (uint duty,)  = jug.ilks(ilk);
+    //     assertEq(duty,   values.collaterals[ilk].duty);
+    //     assertTrue(diffCalc(expectedRate(values.collaterals[ilk].pct), yearlyYield(values.collaterals[ilk].duty)) <= TOLERANCE);
+
+    //     (,,, uint256 line, uint256 dust) = vat.ilks(ilk);
+    //     assertEq(line, values.collaterals[ilk].line);
+    //     assertEq(dust, values.collaterals[ilk].dust);
+
+    //     (, uint256 chop, uint256 dunk) = cat.ilks(ilk);
+    //     assertEq(chop, values.collaterals[ilk].chop);
+    //     assertEq(dunk, values.collaterals[ilk].dunk);
+
+    //     (,uint256 mat) = spot.ilks(ilk);
+    //     assertEq(mat, values.collaterals[ilk].mat);
+
+    //     (address flipper,,) = cat.ilks(ilk);
+    //     FlipAbstract flip = FlipAbstract(flipper);
+    //     assertEq(uint256(flip.beg()), values.collaterals[ilk].beg);
+    //     assertEq(uint256(flip.ttl()), values.collaterals[ilk].ttl);
+    //     assertEq(uint256(flip.tau()), values.collaterals[ilk].tau);
+    // }
 
     // this spell is intended to run as the MkrAuthority
     function canCall(address, address, bytes4) public pure returns (bool) {

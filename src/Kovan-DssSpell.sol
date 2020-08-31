@@ -35,23 +35,23 @@ contract SpellAction {
     // against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.0.9/contracts.json
     address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9; // kovan
-    address constant MCD_CAT             = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
+    address constant MCD_CAT             = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
     address constant MCD_JUG             = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
     address constant MCD_SPOT            = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
     address constant MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
-    address constant FLIPPER_MOM         = 0xf3828caDb05E5F22844f6f9314D99516D68a0C84;
+    address constant FLIPPER_MOM         = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
     address constant OSM_MOM             = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
 
     // USDT-A TODO: update
-    address constant USDT                = 0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86; // updated w/ 1bn supply
-    address constant MCD_JOIN_USDT_A     = 0x9237e9988e7a625fD60505D9aa8ff83935e06b01;
-    address constant MCD_FLIP_USDT_A     = 0x6F78aA55C3ad49786Ff3684C253EE3Bd0eA65998;
+    address constant USDT                = 0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86; 
+    address constant MCD_JOIN_USDT_A     = 0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226;
+    address constant MCD_FLIP_USDT_A     = 0xAa61067AD34daF1D37848B6Ad6263E49b58C6282;
     address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
 
     // PAXUSD specific addresses
     address constant MCD_JOIN_PAXUSD_A   = 0x96831F3eC88874cf6B2cCe604e7531bF1B55171f;
     address constant PIP_PAXUSD          = 0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749;
-    address constant MCD_FLIP_PAXUSD_A   = 0xa653B4C2F96f82811a117c0384675FDeb2d77B03;
+    address constant MCD_FLIP_PAXUSD_A   = 0xC9D25d53a051AAe4C036cEA6E3bDB919CFFc90a9;
     address constant PAXUSD              = 0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D;
 
     // Decimals & precision
@@ -130,7 +130,8 @@ contract SpellAction {
         // since we're adding 2 collateral types in this spell, global line is at beginning
         VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 10 * MILLION * RAD   ); // 10m debt ceiling
         VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 100 * RAD            ); // 100 Dai dust
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "lump", 50 * THOUSAND * WAD  ); // 50,000 lot size
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "box" , 30 * THOUSAND * WAD  ); // 30,000 box
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "dunk", 50 * THOUSAND * WAD  ); // 50,000 dunk
         CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * RAY / 100      ); // 13% liq. penalty
         JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", EIGHT_PCT_RATE       ); // 8% stability fee
 
@@ -180,8 +181,9 @@ contract SpellAction {
         // TODO: update these, we still don't have variables yet
         VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "line"  , 5 * MILLION * RAD    ); // 5 MM debt ceiling
         VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 100 * RAD            ); // 100 Dai dust
-        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "lump"  , 50 * THOUSAND * WAD  ); // 50,000 lot size
         CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "chop"  , 113 * RAY / 100      ); // 13% liq. penalty
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "box"   , 30 * THOUSAND * WAD  ); // 30,000 box
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "dunk"  , 50 * THOUSAND * WAD  ); // 50,000 dunk
         JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , FOUR_PCT_RATE        ); // 4% stability fee
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "beg"   , 103 * WAD / 100      ); // 3% bid increase
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "ttl"   , 6 hours              ); // 6 hours ttl
