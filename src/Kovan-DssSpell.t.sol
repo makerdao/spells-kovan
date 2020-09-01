@@ -6,23 +6,23 @@ import "lib/dss-interfaces/src/Interfaces.sol";
 
 import {DssSpell, SpellAction} from "./Kovan-DssSpell.sol";
 
-contract Hevm {
-    function warp(uint256) public;
-    function store(address,bytes32,bytes32) public;
+interface Hevm {
+    function warp(uint) external;
+    function store(address,bytes32,bytes32) external;
 }
 
-contract USDTAbstract {
-    function totalSupply() public view returns (uint256);
-    function balanceOf(address) public view returns (uint256);
-    function allowance(address, address) public view returns (uint256);
-    function approve(address, uint256) public;               // nonstandard
-    function transfer(address, uint256) public;              // nonstandard
-    function transferFrom(address, address, uint256) public; // nonstandard
+interface USDTAbstract {
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address) external view returns (uint256);
+    function allowance(address, address) external view returns (uint256);
+    function approve(address, uint256) external;               // nonstandard
+    function transfer(address, uint256) external;              // nonstandard
+    function transferFrom(address, address, uint256) external; // nonstandard
 }
 
 contract DssSpellTest is DSTest, DSMath {
-    // populate with mainnet spell if needed
-    address constant MAINNET_SPELL = address(0);
+    // populate with kovan spell if needed
+    address constant KOVAN_SPELL = address(0);
     // this needs to be updated
     uint256 constant SPELL_CREATED = 1595258877;
 
@@ -41,10 +41,16 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     struct SystemValues {
-        uint256 dsr;
-        uint256 dsrPct;
-        uint256 Line;
-        uint256 pauseDelay;
+        uint256 pot_dsr;
+        uint256 pot_dsrPct;
+        uint256 vat_Line;
+        uint256 pause_delay;
+        uint256 vow_wait;
+        uint256 vow_dump;
+        uint256 vow_sump;
+        uint256 vow_bump;
+        uint256 vow_hump;
+        uint256 cat_box;
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
@@ -53,18 +59,26 @@ contract DssSpellTest is DSTest, DSMath {
     Hevm hevm;
 
     // KOVAN ADDRESSES
-    DSPauseAbstract pause        = DSPauseAbstract(  0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
-    address pauseProxy           =                   0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
-    DSChiefAbstract chief        = DSChiefAbstract(  0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
-    VatAbstract     vat          = VatAbstract(      0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
-    CatAbstract     cat          = CatAbstract(      0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
-    PotAbstract     pot          = PotAbstract(      0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
-    JugAbstract     jug          = JugAbstract(      0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
-    SpotAbstract    spot         = SpotAbstract(     0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    DSTokenAbstract gov          = DSTokenAbstract(  0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
-    EndAbstract     end          = EndAbstract(      0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
-    FlipperMomAbstract flipMom   = FlipperMomAbstract(0x50dC6120c67E456AdA2059cfADFF0601499cf681);
-    OsmMomAbstract  osmMom       = OsmMomAbstract(   0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
+    DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
+    address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
+    DSChiefAbstract      chief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
+    VatAbstract            vat = VatAbstract(        0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
+    CatAbstract            cat = CatAbstract(        0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
+    VowAbstract            vow = VowAbstract(        0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b);
+    PotAbstract            pot = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
+    JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
+    SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
+    FlipperMomAbstract  newMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
+
+    DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
+    EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
+    DSTokenAbstract       weth = DSTokenAbstract(    0xd0A1E359811322d97991E03f863a0C30C2cF029C);
+    GemJoinAbstract   wethJoin = GemJoinAbstract(    0x775787933e92b709f2a3C70aa87999696e74A9F8);
+    IlkRegistryAbstract    reg = IlkRegistryAbstract(0x6618BD7bBaBFacC518Fdec43542E4a73629B0819);
+
+    OsmMomAbstract      osmMom = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
+    FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
+
 
     // USDT-A specific
     USDTAbstract usdt            = USDTAbstract(     0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
@@ -85,6 +99,7 @@ contract DssSpellTest is DSTest, DSMath {
     bytes20 constant CHEAT_CODE =
         bytes20(uint160(uint256(keccak256('hevm cheat code'))));
 
+    uint256 constant HUNDRED    = 10 ** 2;
     uint256 constant THOUSAND   = 10 ** 3;
     uint256 constant MILLION    = 10 ** 6;
     uint256 constant BILLION    = 10 ** 9;
@@ -134,19 +149,143 @@ contract DssSpellTest is DSTest, DSMath {
     function setUp() public {
         hevm = Hevm(address(CHEAT_CODE));
 
-        spell = MAINNET_SPELL != address(0) ? DssSpell(MAINNET_SPELL) : new DssSpell();
+        spell = KOVAN_SPELL != address(0) ? DssSpell(KOVAN_SPELL) : new DssSpell();
 
-        hevm.store(
-            address(gov),
-            keccak256(abi.encode(address(this), uint256(1))),
-            bytes32(uint256(999999999999 ether))
-        );
-
+        //
+        // Test for all system configuration changes
+        //
         afterSpell = SystemValues({
-            dsr: 1000000000000000000000000000,
-            dsrPct: 0 * 1000,
-            Line: 703 * MILLION * RAD,
-            pauseDelay: 60
+            pot_dsr: 1000000000000000000000000000,
+            pot_dsrPct: 0 * 1000,
+            vat_Line: 703 * MILLION * RAD,
+            pause_delay: 60,
+            vow_wait: 3600,
+            vow_dump: 2 * WAD,
+            vow_sump: 50 * RAD,
+            vow_bump: 10 * RAD,
+            vow_hump: 500 * RAD,
+            cat_box: 10 * THOUSAND * RAD
+        });
+
+        //
+        // Test for all collateral based changes here
+        //
+        afterSpell.collaterals["ETH-A"] = CollateralValues({
+            line:         420 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000002440418608258400030,
+            pct:          8 * 1000,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          150 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
+        afterSpell.collaterals["BAT-A"] = CollateralValues({
+            line:         5 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000000000000000000000000,
+            pct:          0 * 1000,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          150 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
+        afterSpell.collaterals["USDC-A"] = CollateralValues({
+            line:         140 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000000000000000000000000,
+            pct:          0,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          110 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 0
+        });
+        afterSpell.collaterals["USDC-B"] = CollateralValues({
+            line:         30 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000011562757347033522598,
+            pct:          44 * 1000,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          120 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 0
+        });
+        afterSpell.collaterals["WBTC-A"] = CollateralValues({
+            line:         80 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000000000000000000000000,
+            pct:          0,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          150 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
+        afterSpell.collaterals["TUSD-A"] = CollateralValues({
+            line:         2 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000000000000000000000000,
+            pct:          0 * 1000,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          120 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 0
+        });
+        afterSpell.collaterals["KNC-A"] = CollateralValues({
+            line:         5 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000000000000000000000000,
+            pct:          0,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          175 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
+        afterSpell.collaterals["ZRX-A"] = CollateralValues({
+            line:         5 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000000000000000000000000,
+            pct:          0,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          175 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
+        afterSpell.collaterals["MANA-A"] = CollateralValues({
+            line:         1 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000001847694957439350562,
+            pct:          6 * 1000,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          175 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             line: 10 * MILLION * RAD,
@@ -211,78 +350,95 @@ contract DssSpellTest is DSTest, DSMath {
 
     function checkSystemValues(SystemValues storage values) internal {
         // dsr
-        assertEq(pot.dsr(), values.dsr);
-        assertTrue(diffCalc(expectedRate(values.dsrPct), yearlyYield(values.dsr)) <= TOLERANCE);
+        assertEq(pot.dsr(), values.pot_dsr);
+        // make sure dsr is less than 100% APR
+        // bc -l <<< 'scale=27; e( l(2.00)/(60 * 60 * 24 * 365) )'
+        // 1000000021979553151239153027
+        assertTrue(
+            pot.dsr() >= RAY && pot.dsr() < 1000000021979553151239153027
+        );
+        assertTrue(diffCalc(expectedRate(values.pot_dsrPct), yearlyYield(values.pot_dsr)) <= TOLERANCE);
 
         // Line
-        assertEq(vat.Line(), values.Line);
+        assertEq(vat.Line(), values.vat_Line);
+        assertTrue(
+            (vat.Line() >= RAD && vat.Line() < BILLION * RAD) ||
+            vat.Line() == 0
+        );
 
         // Pause delay
-        assertEq(pause.delay(), values.pauseDelay);
+        assertEq(pause.delay(), values.pause_delay);
 
+        // wait
+        assertEq(vow.wait(), values.vow_wait);
+
+        // dump
+        assertEq(vow.dump(), values.vow_dump);
+        assertTrue(
+            (vow.dump() >= WAD && vow.dump() < 2 * THOUSAND * WAD) ||
+            vow.dump() == 0
+        );
+
+        // sump
+        assertEq(vow.sump(), values.vow_sump);
+        assertTrue(
+            (vow.sump() >= RAD && vow.sump() < 500 * THOUSAND * RAD) ||
+            vow.sump() == 0
+        );
+
+        // bump
+        assertEq(vow.bump(), values.vow_bump);
+        assertTrue(
+            (vow.bump() >= RAD && vow.bump() < HUNDRED * THOUSAND * RAD) ||
+            vow.bump() == 0
+        );
+
+        // hump
+        assertEq(vow.hump(), values.vow_hump);
+        assertTrue(
+            (vow.hump() >= RAD && vow.hump() < HUNDRED * MILLION * RAD) ||
+            vow.hump() == 0
+        );
     }
-
-    // function checkCollateralValues(bytes32 ilk, SystemValues storage values) internal {
-    //     (uint duty,)  = jug.ilks(ilk);
-    //     assertEq(duty,   values.collaterals[ilk].duty);
-    //     // make sure duty is less than 1000% APR
-    //     // bc -l <<< 'scale=27; e( l(10.00)/(60 * 60 * 24 * 365) )'
-    //     // 1000000073014496989316680335
-    //     assertTrue(duty >= RAY && duty < 1000000073014496989316680335);  // gt 0 and lt 1000%
-    //     assertTrue(diffCalc(expectedRate(values.collaterals[ilk].pct), yearlyYield(values.collaterals[ilk].duty)) <= TOLERANCE);
-    //     assertTrue(values.collaterals[ilk].pct < THOUSAND * THOUSAND);   // check value lt 1000%
-
-    //     (,,, uint line, uint dust) = vat.ilks(ilk);
-    //     assertEq(line, values.collaterals[ilk].line);
-    //     assertTrue((line >= RAD && line < BILLION * RAD) || line == 0);  // eq 0 or gt eq 1 RAD and lt 1B
-    //     assertEq(dust, values.collaterals[ilk].dust);
-    //     assertTrue((dust >= RAD && dust < 10 * THOUSAND * RAD) || dust == 0); // eq 0 or gt eq 1 and lt 10k
-
-    //     (, uint chop, uint dunk) = cat.ilks(ilk);
-    //     assertEq(chop, values.collaterals[ilk].chop);
-    //     // make sure chop is less than 100%
-    //     assertTrue(chop >= WAD && chop < 2 * WAD);   // penalty gt eq 0% and lt 100%
-    //     assertEq(dunk, values.collaterals[ilk].dunk);
-    //     // put back in after LIQ-1.2
-    //     assertTrue(dunk >= RAD && dunk < MILLION * RAD);
-
-    //     (,uint mat) = spot.ilks(ilk);
-    //     assertEq(mat, values.collaterals[ilk].mat);
-    //     assertTrue(mat >= RAY && mat < 10 * RAY);    // cr eq 100% and lt 1000%
-
-    //     (address flipper,,) = cat.ilks(ilk);
-    //     FlipAbstract flip = FlipAbstract(flipper);
-    //     assertEq(uint(flip.beg()), values.collaterals[ilk].beg);
-    //     assertTrue(flip.beg() >= WAD && flip.beg() < 105 * WAD / 100);  // gt eq 0% and lt 5%
-    //     assertEq(uint(flip.ttl()), values.collaterals[ilk].ttl);
-    //     assertTrue(flip.ttl() >= 600 && flip.ttl() < 10 hours);         // gt eq 10 minutes and lt 10 hours
-    //     assertEq(uint(flip.tau()), values.collaterals[ilk].tau);
-    //     assertTrue(flip.tau() >= 600 && flip.tau() <= 1 hours);          // gt eq 10 minutes and lt eq 1 hours
-
-    //     assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
-    // }
 
     function checkCollateralValues(bytes32 ilk, SystemValues storage values) internal {
         (uint duty,)  = jug.ilks(ilk);
         assertEq(duty,   values.collaterals[ilk].duty);
+        // make sure duty is less than 1000% APR
+        // bc -l <<< 'scale=27; e( l(10.00)/(60 * 60 * 24 * 365) )'
+        // 1000000073014496989316680335
+        assertTrue(duty >= RAY && duty < 1000000073014496989316680335);  // gt 0 and lt 1000%
         assertTrue(diffCalc(expectedRate(values.collaterals[ilk].pct), yearlyYield(values.collaterals[ilk].duty)) <= TOLERANCE);
+        assertTrue(values.collaterals[ilk].pct < THOUSAND * THOUSAND);   // check value lt 1000%
 
-        (,,, uint256 line, uint256 dust) = vat.ilks(ilk);
+        (,,, uint line, uint dust) = vat.ilks(ilk);
         assertEq(line, values.collaterals[ilk].line);
+        assertTrue((line >= RAD && line < BILLION * RAD) || line == 0);  // eq 0 or gt eq 1 RAD and lt 1B
         assertEq(dust, values.collaterals[ilk].dust);
+        assertTrue((dust >= RAD && dust < 10 * THOUSAND * RAD) || dust == 0); // eq 0 or gt eq 1 and lt 10k
 
-        (, uint256 chop, uint256 dunk) = cat.ilks(ilk);
+        (, uint chop, uint dunk) = cat.ilks(ilk);
         assertEq(chop, values.collaterals[ilk].chop);
+        // make sure chop is less than 100%
+        assertTrue(chop >= WAD && chop < 2 * WAD);   // penalty gt eq 0% and lt 100%
         assertEq(dunk, values.collaterals[ilk].dunk);
+        // put back in after LIQ-1.2
+        assertTrue(dunk >= RAD && dunk < MILLION * RAD);
 
-        (,uint256 mat) = spot.ilks(ilk);
+        (,uint mat) = spot.ilks(ilk);
         assertEq(mat, values.collaterals[ilk].mat);
+        assertTrue(mat >= RAY && mat < 10 * RAY);    // cr eq 100% and lt 1000%
 
         (address flipper,,) = cat.ilks(ilk);
         FlipAbstract flip = FlipAbstract(flipper);
-        assertEq(uint256(flip.beg()), values.collaterals[ilk].beg);
-        assertEq(uint256(flip.ttl()), values.collaterals[ilk].ttl);
-        assertEq(uint256(flip.tau()), values.collaterals[ilk].tau);
+        assertEq(uint(flip.beg()), values.collaterals[ilk].beg);
+        assertTrue(flip.beg() >= WAD && flip.beg() < 105 * WAD / 100);  // gt eq 0% and lt 5%
+        assertEq(uint(flip.ttl()), values.collaterals[ilk].ttl);
+        assertTrue(flip.ttl() >= 600 && flip.ttl() < 10 hours);         // gt eq 10 minutes and lt 10 hours
+        assertEq(uint(flip.tau()), values.collaterals[ilk].tau);
+        assertTrue(flip.tau() >= 600 && flip.tau() <= 1 hours);          // gt eq 10 minutes and lt eq 1 hours
+
+        assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
     }
 
     // this spell is intended to run as the MkrAuthority
@@ -291,14 +447,14 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast() public {
-        string memory description = new SpellAction().description();
+        string memory description = new DssSpell().description();
         assertTrue(bytes(description).length > 0);
         // DS-Test can't handle strings directly, so cast to a bytes32.
         assertEq(stringToBytes32(spell.description()),
                 stringToBytes32(description));
 
-        if(address(spell) != address(MAINNET_SPELL)) {
-            assertEq(spell.expiration(), (now + 4 days + 2 hours));
+        if(address(spell) != address(KOVAN_SPELL)) {
+            assertEq(spell.expiration(), (now + 30 days));
         } else {
             assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
         }
@@ -309,8 +465,10 @@ contract DssSpellTest is DSTest, DSMath {
 
         checkSystemValues(afterSpell);
 
-        checkCollateralValues("USDT-A", afterSpell);
-        checkCollateralValues("PAXUSD-A", afterSpell);
+        bytes32[] memory ilks = reg.list();
+        for(uint i = 0; i < ilks.length; i++) {
+            checkCollateralValues(ilks[i],  afterSpell);
+        }
     }
 
     function testSpellIsCast_USDTA_INTEGRATION() public {
