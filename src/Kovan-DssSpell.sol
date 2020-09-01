@@ -17,10 +17,14 @@ pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
-import "lib/dss-interfaces/src/dss/VowAbstract.sol";
 import "lib/dss-interfaces/src/dss/CatAbstract.sol";
-import "lib/dss-interfaces/src/dss/EndAbstract.sol";
+import "lib/dss-interfaces/src/dss/JugAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
+import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
+import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
 
 contract SpellAction {
@@ -30,43 +34,25 @@ contract SpellAction {
     // The contracts in this list should correspond to MCD core contracts, verify
     // against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.0.9/contracts.json
-
-    address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
-    address constant MCD_VOW             = 0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b;
-    address constant MCD_ADM             = 0xbBFFC76e94B34F72D96D054b31f6424249c1337d;
-    address constant MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
-
-    address constant FLIPPER_MOM         = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
-
+    address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9; // kovan
     address constant MCD_CAT             = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
-    address constant MCD_CAT_OLD         = 0x0511674A67192FE51e86fE55Ed660eB4f995BDd6;
+    address constant MCD_JUG             = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
+    address constant MCD_SPOT            = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
+    address constant MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
+    address constant FLIPPER_MOM         = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
+    address constant OSM_MOM             = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
 
-    address constant MCD_FLIP_ETH_A      = 0x750295A8db0580F32355f97de7918fF538c818F1;
-    address constant MCD_FLIP_ETH_A_OLD  = 0xc78EdADA7e8bEa29aCc3a31bBA1D516339deD350;
+    // USDT-A TODO: update
+    address constant USDT                = 0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86; 
+    address constant MCD_JOIN_USDT_A     = 0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226;
+    address constant MCD_FLIP_USDT_A     = 0x1C5dce9d7583F3da2b787d694342D125731aE099;
+    address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
 
-    address constant MCD_FLIP_BAT_A      = 0x44Acf0eb2C7b9F0B55723e5289437AefE8ef7a1c;
-    address constant MCD_FLIP_BAT_A_OLD  = 0xc0126c3383777bDc175E659A51020E56307dDe21;
-
-    address constant MCD_FLIP_USDC_A     = 0x17C144eaC1B3D6777eF2C3fA1F98e3BC3c18DB4F;
-    address constant MCD_FLIP_USDC_A_OLD = 0xc29Ad1913C3B415497fdA1eA15c132502B8fa372;
-
-    address constant MCD_FLIP_USDC_B     = 0x6DCd745D91AB422e962d08Ed1a9242adB47D8d0C;
-    address constant MCD_FLIP_USDC_B_OLD = 0x3c9eF711B68882d9732F60758e7891AcEae2Aa7c;
-
-    address constant MCD_FLIP_WBTC_A     = 0x80Fb08f2EF268f491D6B58438326a3006C1a0e09;
-    address constant MCD_FLIP_WBTC_A_OLD = 0x28dd4263e1FcE04A9016Bd7BF71a4f0F7aB93810;
-
-    address constant MCD_FLIP_ZRX_A      = 0x798eB3126f1d5cb54743E3e93D3512C58f461084;
-    address constant MCD_FLIP_ZRX_A_OLD  = 0xe07F1219f7d6ccD59431a6b151179A9181e3902c;
-
-    address constant MCD_FLIP_KNC_A      = 0xF2c21882Bd14A5F7Cb46291cf3c86E53057FaD06;
-    address constant MCD_FLIP_KNC_A_OLD  = 0x644699674D06cF535772D0DC19Ad5EA695000F51;
-
-    address constant MCD_FLIP_TUSD_A     = 0x867711f695e11663eC8adCFAAD2a152eFBA56dfD;
-    address constant MCD_FLIP_TUSD_A_OLD = 0xD4A145d161729A4B43B7Ab7DD683cB9A16E01a1b;
-
-    address constant MCD_FLIP_MANA_A     = 0xb2B7430D49D2D2e7abb6a6B4699B2659c141A2a6;
-    address constant MCD_FLIP_MANA_A_OLD = 0x5CB9D33A9fE5244019e6F5f45e68F18600805264;
+    // PAXUSD specific addresses
+    address constant PAXUSD              = 0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D;
+    address constant MCD_JOIN_PAXUSD_A   = 0x96831F3eC88874cf6B2cCe604e7531bF1B55171f;
+    address constant PIP_PAXUSD          = 0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749;
+    address constant MCD_FLIP_PAXUSD_A   = 0x0815f202BC307F5c4097Cf57E23F1a86a8bf59D6;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -75,84 +61,141 @@ contract SpellAction {
     uint256 constant RAY      = 10 ** 27;
     uint256 constant RAD      = 10 ** 45;
 
-    function execute() external {
-        require(CatAbstract(MCD_CAT_OLD).vat() == MCD_VAT,          "non-matching-vat");
-        require(CatAbstract(MCD_CAT_OLD).vow() == MCD_VOW,          "non-matching-vow");
-
-        require(CatAbstract(MCD_CAT).vat() == MCD_VAT,              "non-matching-vat");
-        require(CatAbstract(MCD_CAT).live() == 1,                   "cat-not-live");
-
-        require(FlipperMomAbstract(FLIPPER_MOM).cat() == MCD_CAT,   "non-matching-cat");
-        
-        /*** Update Cat ***/
-        CatAbstract(MCD_CAT).file("vow", MCD_VOW);
-        VatAbstract(MCD_VAT).rely(MCD_CAT);
-        VatAbstract(MCD_VAT).deny(MCD_CAT_OLD);
-        VowAbstract(MCD_VOW).rely(MCD_CAT);
-        VowAbstract(MCD_VOW).deny(MCD_CAT_OLD);
-        EndAbstract(MCD_END).file("cat", MCD_CAT);
-        CatAbstract(MCD_CAT).rely(MCD_END);
-        CatAbstract(MCD_CAT).file("box", 10  * THOUSAND * RAD);
-
-        /*** Set Auth in Flipper Mom ***/
-        FlipperMomAbstract(FLIPPER_MOM).setAuthority(MCD_ADM); 
-
-        /*** ETH-A Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_ETH_A), FlipAbstract(MCD_FLIP_ETH_A_OLD));
-
-        /*** BAT-A Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_BAT_A), FlipAbstract(MCD_FLIP_BAT_A_OLD));
-
-        /*** USDC-A Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_USDC_A), FlipAbstract(MCD_FLIP_USDC_A_OLD));
-        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_A); // Auctions disabled
-
-        /*** USDC-B Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_USDC_B), FlipAbstract(MCD_FLIP_USDC_B_OLD));
-        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_B); // Auctions disabled
-
-        /*** WBTC-A Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_WBTC_A), FlipAbstract(MCD_FLIP_WBTC_A_OLD));
-
-        /*** TUSD-A Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_TUSD_A), FlipAbstract(MCD_FLIP_TUSD_A_OLD));
-        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_TUSD_A); // Auctions disabled
-
-        /*** ZRX-A Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_ZRX_A), FlipAbstract(MCD_FLIP_ZRX_A_OLD));
-
-        /*** KNC-A Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_KNC_A), FlipAbstract(MCD_FLIP_KNC_A_OLD));
-
-        /*** MANA-A Flip ***/
-        _changeFlip(FlipAbstract(MCD_FLIP_MANA_A), FlipAbstract(MCD_FLIP_MANA_A_OLD));
-
+    function add(uint x, uint y) internal pure returns (uint z) {
+        require((z = x + y) >= x, "ds-math-add-overflow");
     }
 
-    function _changeFlip(FlipAbstract newFlip, FlipAbstract oldFlip) internal {
-        bytes32 ilk = newFlip.ilk();
-        require(ilk == oldFlip.ilk(), "non-matching-ilk");
-        require(newFlip.vat() == oldFlip.vat(), "non-matching-vat");
-        require(newFlip.cat() == MCD_CAT, "non-matching-cat");
-        require(newFlip.vat() == MCD_VAT, "non-matching-vat");
+    // Many of the settings that change weekly rely on the rate accumulator
+    // described at https://docs.makerdao.com/smart-contract-modules/rates-module
+    // To check this yourself, use the following rate calculation (example 8%):
+    //
+    // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
+    //
+    uint256 constant FOUR_PCT_RATE    = 1000000001243680656318820312;
+    uint256 constant EIGHT_PCT_RATE   = 1000000002440418608258400030;
 
-        CatAbstract(MCD_CAT).file(ilk, "flip", address(newFlip));
-        (, uint oldChop,) = CatAbstract(MCD_CAT_OLD).ilks(ilk);
-        CatAbstract(MCD_CAT).file(ilk, "chop", oldChop / 10 ** 9);
-        CatAbstract(MCD_CAT).file(ilk, "dunk", 500 * RAD);
-        CatAbstract(MCD_CAT).rely(address(newFlip));
+    // Provides a descriptive tag for bot consumption
+    // This should be modified weekly to provide a summary of the actions
+    // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/cc819c75fc8f1b622cbe06acfd0d11bf64545622/governance/votes/Executive%20vote%20-%20July%2027%2C%202020%20.md -q -O - 2>/dev/null)"
+    string constant public description =
+        "2020-08-24 MakerDAO Executive Spell | KOVAN DEPLOYMENT OF USDT-A & PAXUSD-A";
 
-        newFlip.rely(MCD_CAT);
-        newFlip.rely(MCD_END);
-        newFlip.rely(FLIPPER_MOM);
-        newFlip.file("beg", oldFlip.beg());
-        newFlip.file("ttl", oldFlip.ttl());
-        newFlip.file("tau", oldFlip.tau());
+    function execute() external {
+        VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 15 * MILLION * RAD));
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // USDT-A collateral deploy
+
+        // Set ilk bytes32 variable
+        bytes32 ilkUSDTA = "USDT-A";
+
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_USDT_A).vat() == MCD_VAT,  "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_USDT_A).ilk() == ilkUSDTA, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_USDT_A).gem() == USDT,     "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_USDT_A).dec() == 6,        "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_USDT_A).vat()    == MCD_VAT,  "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_USDT_A).ilk()    == ilkUSDTA, "flip-ilk-not-match");
+
+        // Set price feed for USDT-A
+        SpotAbstract(MCD_SPOT).file(ilkUSDTA, "pip", PIP_USDT);
+
+        // Set the USDT-A flipper in the cat
+        CatAbstract(MCD_CAT).file(ilkUSDTA, "flip", MCD_FLIP_USDT_A);
+
+        // Init USDT-A in Vat 
+        VatAbstract(MCD_VAT).init(ilkUSDTA);
+        // Init USDT-A in Jug
+        JugAbstract(MCD_JUG).init(ilkUSDTA);
+
+        // Allow USDT-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_USDT_A);
+
+        // Allow cat to kick auctions in USDT-A Flipper
+        FlipAbstract(MCD_FLIP_USDT_A).rely(MCD_CAT);
+
+        // Allow End to yank auctions in USDT-A Flipper
+        FlipAbstract(MCD_FLIP_USDT_A).rely(MCD_END);
+
+        // Allow FlipperMom to access the USDT-A Flipper
+        FlipAbstract(MCD_FLIP_USDT_A).rely(FLIPPER_MOM);
+
+        // Update OSM
+        OsmAbstract(PIP_USDT).rely(OSM_MOM);
+        MedianAbstract(OsmAbstract(PIP_USDT).src()).kiss(PIP_USDT);
+        OsmAbstract(PIP_USDT).kiss(MCD_SPOT);
+        OsmAbstract(PIP_USDT).kiss(MCD_END);
+        OsmMomAbstract(OSM_MOM).setOsm(ilkUSDTA, PIP_USDT);
+
+        // since we're adding 2 collateral types in this spell, global line is at beginning
+        VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 10 * MILLION * RAD   ); // 10m debt ceiling
+        VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 100 * RAD            ); // 100 Dai dust
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "dunk", 50 * THOUSAND * RAD  ); // 50,000 dunk
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * WAD / 100      ); // 13% liq. penalty
+        JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", EIGHT_PCT_RATE       ); // 8% stability fee
+
+        FlipAbstract(MCD_FLIP_USDT_A).file(  "beg" , 103 * WAD / 100      ); // 3% bid increase
+        FlipAbstract(MCD_FLIP_USDT_A).file(  "ttl" , 6 hours              ); // 6 hours ttl
+        FlipAbstract(MCD_FLIP_USDT_A).file(  "tau" , 6 hours              ); // 6 hours tau
+
+        SpotAbstract(MCD_SPOT).file(ilkUSDTA, "mat",  150 * RAY / 100     ); // 150% coll. ratio
+        SpotAbstract(MCD_SPOT).poke(ilkUSDTA);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // PAXUSD-A collateral deploy
+        // Set ilk bytes32 variable
+        bytes32 ilkPAXUSDA = "PAXUSD-A";
+
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).vat() == MCD_VAT,    "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).ilk() == ilkPAXUSDA, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).gem() == PAXUSD,     "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).dec() == 18,         "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_PAXUSD_A).vat()    == MCD_VAT,    "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_PAXUSD_A).ilk()    == ilkPAXUSDA, "flip-ilk-not-match");
+
+        // Set price feed for PAXUSD-A
+        SpotAbstract(MCD_SPOT).file(ilkPAXUSDA, "pip", PIP_PAXUSD);
+
+        // Set the PAXUSD-A flipper in the cat
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA, "flip", MCD_FLIP_PAXUSD_A);
+
+        // Init PAXUSD-A in Vat & Jug
+        VatAbstract(MCD_VAT).init(ilkPAXUSDA);
+        JugAbstract(MCD_JUG).init(ilkPAXUSDA);
+
+        // Allow PAXUSD-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_PAXUSD_A);
+
+        // Allow cat to kick auctions in PAXUSD-A Flipper
+        // NOTE: this will be reverse later in spell, and is done only for explicitness.
+        FlipAbstract(MCD_FLIP_PAXUSD_A).rely(MCD_CAT);
+
+        // Allow End to yank auctions in PAXUSD-A Flipper
+        FlipAbstract(MCD_FLIP_PAXUSD_A).rely(MCD_END);
+
+        // Allow FlipperMom to access the PAXUSD-A Flipper
+        FlipAbstract(MCD_FLIP_PAXUSD_A).rely(FLIPPER_MOM);
+
+        // TODO: update these, we still don't have variables yet
+        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "line"  , 5 * MILLION * RAD    ); // 5 MM debt ceiling
+        VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 100 * RAD            ); // 100 Dai dust
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "dunk"  , 50 * THOUSAND * RAD  ); // 50,000 dunk
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "chop"  , 113 * WAD / 100      ); // 13% liq. penalty
+        JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , FOUR_PCT_RATE        ); // 4% stability fee
+        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "beg"   , 103 * WAD / 100      ); // 3% bid increase
+        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "ttl"   , 6 hours              ); // 6 hours ttl
+        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "tau"   , 6 hours              ); // 6 hours tau
+        SpotAbstract(MCD_SPOT).file(ilkPAXUSDA, "mat"   , 120 * RAY / 100      ); // 120% coll. ratio
+        SpotAbstract(MCD_SPOT).poke(ilkPAXUSDA);
+
+        // consequently, deny PAXUSD-A Flipper
+        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_PAXUSD_A);
     }
 }
 
 contract DssSpell {
-    DSPauseAbstract public pause =
+    DSPauseAbstract public pause = 
         DSPauseAbstract(0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         public action;
     bytes32         public tag;
@@ -161,8 +204,6 @@ contract DssSpell {
     uint256         public expiration;
     bool            public done;
 
-    string constant public description = "Kovan Spell Deploy";
-
     constructor() public {
         sig = abi.encodeWithSignature("execute()");
         action = address(new SpellAction());
@@ -170,7 +211,20 @@ contract DssSpell {
         address _action = action;
         assembly { _tag := extcodehash(_action) }
         tag = _tag;
-        expiration = now + 30 days;
+        // Extra window of 2 hours to get the spell set up in the Governance Portal and communicated
+        expiration = now + 4 days + 2 hours; 
+    }
+
+    modifier officeHours {
+        uint day = (now / 1 days + 3) % 7;
+        require(day < 5, "Can only be cast on a weekday");
+        uint hour = now / 1 hours % 24;
+        require(hour >= 14 && hour < 21, "Outside office hours");
+        _;
+    }
+
+    function description() public view returns (string memory) {
+        return SpellAction(action).description();
     }
 
     function schedule() public {
@@ -180,6 +234,7 @@ contract DssSpell {
         pause.plot(action, tag, sig, eta);
     }
 
+    // removing office hours for kovan deploy
     function cast() public {
         require(!done, "spell-already-cast");
         done = true;
