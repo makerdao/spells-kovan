@@ -47,13 +47,13 @@ contract SpellAction {
     // USDT-A TODO: update
     address constant USDT                = 0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86;
     address constant MCD_JOIN_USDT_A     = 0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226;
-    address constant MCD_FLIP_USDT_A     = 0x1C5dce9d7583F3da2b787d694342D125731aE099;
+    address constant MCD_FLIP_USDT_A     = 0x113733e00804e61D5fd8b107Ca11b4569B6DA95D;
     address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
 
     // PAXUSD specific addresses
     address constant PAXUSD              = 0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D;
     address constant MCD_JOIN_PAXUSD_A   = 0x96831F3eC88874cf6B2cCe604e7531bF1B55171f;
-    address constant MCD_FLIP_PAXUSD_A   = 0x0815f202BC307F5c4097Cf57E23F1a86a8bf59D6;
+    address constant MCD_FLIP_PAXUSD_A   = 0x88001b9C8192cbf43e14323B809Ae6C4e815E12E;
     address constant PIP_PAXUSD          = 0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749;
 
     // Decimals & precision
