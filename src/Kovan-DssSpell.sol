@@ -45,14 +45,14 @@ contract SpellAction {
     // USDT-A TODO: update
     address constant USDT                = 0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86; 
     address constant MCD_JOIN_USDT_A     = 0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226;
-    address constant MCD_FLIP_USDT_A     = 0xAa61067AD34daF1D37848B6Ad6263E49b58C6282;
+    address constant MCD_FLIP_USDT_A     = 0x1C5dce9d7583F3da2b787d694342D125731aE099;
     address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
 
     // PAXUSD specific addresses
+    address constant PAXUSD              = 0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D;
     address constant MCD_JOIN_PAXUSD_A   = 0x96831F3eC88874cf6B2cCe604e7531bF1B55171f;
     address constant PIP_PAXUSD          = 0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749;
-    address constant MCD_FLIP_PAXUSD_A   = 0xC9D25d53a051AAe4C036cEA6E3bDB919CFFc90a9;
-    address constant PAXUSD              = 0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D;
+    address constant MCD_FLIP_PAXUSD_A   = 0x0815f202BC307F5c4097Cf57E23F1a86a8bf59D6;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -130,9 +130,9 @@ contract SpellAction {
         // since we're adding 2 collateral types in this spell, global line is at beginning
         VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 10 * MILLION * RAD   ); // 10m debt ceiling
         VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 100 * RAD            ); // 100 Dai dust
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "box" , 30 * THOUSAND * WAD  ); // 30,000 box
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "dunk", 50 * THOUSAND * WAD  ); // 50,000 dunk
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * RAY / 100      ); // 13% liq. penalty
+        CatAbstract(MCD_CAT).file( "box"   , 30 * THOUSAND * RAD          ); // 30,000 box
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "dunk", 50 * THOUSAND * RAD  ); // 50,000 dunk
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * WAD / 100      ); // 13% liq. penalty
         JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", EIGHT_PCT_RATE       ); // 8% stability fee
 
         FlipAbstract(MCD_FLIP_USDT_A).file(  "beg" , 103 * WAD / 100      ); // 3% bid increase
@@ -148,11 +148,11 @@ contract SpellAction {
         bytes32 ilkPAXUSDA = "PAXUSD-A";
 
         // Sanity checks
-        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).vat() == MCD_VAT,    "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).ilk() == ilkPAXUSDA, "join-ilk-not-match");
-        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).gem() == PAXUSD, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).dec() == 18, "join-dec-not-match");
-        require(FlipAbstract(MCD_FLIP_PAXUSD_A).vat()    == MCD_VAT, "flip-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).gem() == PAXUSD,     "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_PAXUSD_A).dec() == 18,         "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_PAXUSD_A).vat()    == MCD_VAT,    "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_PAXUSD_A).ilk()    == ilkPAXUSDA, "flip-ilk-not-match");
 
         // Set price feed for PAXUSD-A
@@ -181,9 +181,9 @@ contract SpellAction {
         // TODO: update these, we still don't have variables yet
         VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "line"  , 5 * MILLION * RAD    ); // 5 MM debt ceiling
         VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 100 * RAD            ); // 100 Dai dust
-        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "chop"  , 113 * RAY / 100      ); // 13% liq. penalty
-        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "box"   , 30 * THOUSAND * WAD  ); // 30,000 box
-        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "dunk"  , 50 * THOUSAND * WAD  ); // 50,000 dunk
+        CatAbstract(MCD_CAT).file("box"                 , 30 * THOUSAND * RAD  ); // 30,000 box
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "dunk"  , 50 * THOUSAND * RAD  ); // 50,000 dunk
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "chop"  , 113 * WAD / 100      ); // 13% liq. penalty
         JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , FOUR_PCT_RATE        ); // 4% stability fee
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "beg"   , 103 * WAD / 100      ); // 3% bid increase
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "ttl"   , 6 hours              ); // 6 hours ttl
