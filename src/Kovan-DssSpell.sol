@@ -157,8 +157,9 @@ contract SpellAction {
         // Set the PAXUSD-A flipper in the cat
         CatAbstract(MCD_CAT).file(ilkPAXUSDA, "flip", MCD_FLIP_PAXUSD_A);
 
-        // Init PAXUSD-A in Vat & Jug
+        // Init PAXUSD-A in Vat
         VatAbstract(MCD_VAT).init(ilkPAXUSDA);
+        // Init PAXUSD-A in Jug
         JugAbstract(MCD_JUG).init(ilkPAXUSDA);
 
         // Allow PAXUSD-A Join to modify Vat registry
@@ -188,7 +189,7 @@ contract SpellAction {
 
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_PAXUSD_A);
 
-        // consequently, deny PAXUSD-A Flipper
+        // Consequently, deny PAXUSD-A Flipper
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_PAXUSD_A);
     }
 }
