@@ -26,26 +26,27 @@ import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
 import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 
 contract SpellAction {
-
     // KOVAN ADDRESSES
     //
     // The contracts in this list should correspond to MCD core contracts, verify
     // against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.0.9/contracts.json
-    address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9; 
+    address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
     address constant MCD_CAT             = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
     address constant MCD_JUG             = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
     address constant MCD_SPOT            = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
     address constant MCD_END             = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
     address constant FLIPPER_MOM         = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
     address constant OSM_MOM             = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
+    address constant ILK_REGISTRY        = 0xedE45A0522CA19e979e217064629778d6Cc2d9Ea;
 
     // USDT-A TODO: update
-    address constant USDT                = 0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86; 
+    address constant USDT                = 0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86;
     address constant MCD_JOIN_USDT_A     = 0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226;
-    address constant MCD_FLIP_USDT_A     = 0x1C5dce9d7583F3da2b787d694342D125731aE099;
+    address constant MCD_FLIP_USDT_A     = 0x113733e00804e61D5fd8b107Ca11b4569B6DA95D;
     address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
 
     // PAXUSD specific addresses
@@ -74,14 +75,8 @@ contract SpellAction {
     uint256 constant FOUR_PCT_RATE    = 1000000001243680656318820312;
     uint256 constant EIGHT_PCT_RATE   = 1000000002440418608258400030;
 
-    // Provides a descriptive tag for bot consumption
-    // This should be modified weekly to provide a summary of the actions
-    // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/cc819c75fc8f1b622cbe06acfd0d11bf64545622/governance/votes/Executive%20vote%20-%20July%2027%2C%202020%20.md -q -O - 2>/dev/null)"
-    string constant public description =
-        "2020-08-24 MakerDAO Executive Spell | KOVAN DEPLOYMENT OF USDT-A & PAXUSD-A";
-
     function execute() external {
-        VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 15 * MILLION * RAD));
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 15 * MILLION * RAD);
 
         ////////////////////////////////////////////////////////////////////////////////
         // USDT-A collateral deploy
@@ -103,7 +98,7 @@ contract SpellAction {
         // Set the USDT-A flipper in the cat
         CatAbstract(MCD_CAT).file(ilkUSDTA, "flip", MCD_FLIP_USDT_A);
 
-        // Init USDT-A in Vat 
+        // Init USDT-A in Vat
         VatAbstract(MCD_VAT).init(ilkUSDTA);
         // Init USDT-A in Jug
         JugAbstract(MCD_JUG).init(ilkUSDTA);
@@ -130,7 +125,7 @@ contract SpellAction {
         // since we're adding 2 collateral types in this spell, global line is at beginning
         VatAbstract(MCD_VAT).file( ilkUSDTA, "line", 10 * MILLION * RAD   ); // 10m debt ceiling
         VatAbstract(MCD_VAT).file( ilkUSDTA, "dust", 100 * RAD            ); // 100 Dai dust
-        CatAbstract(MCD_CAT).file( ilkUSDTA, "dunk", 50 * THOUSAND * RAD  ); // 50,000 dunk
+        CatAbstract(MCD_CAT).file( ilkUSDTA, "dunk", 500 * RAD            ); // 50,000 dunk
         CatAbstract(MCD_CAT).file( ilkUSDTA, "chop", 113 * WAD / 100      ); // 13% liq. penalty
         JugAbstract(MCD_JUG).file( ilkUSDTA, "duty", EIGHT_PCT_RATE       ); // 8% stability fee
 
@@ -140,6 +135,8 @@ contract SpellAction {
 
         SpotAbstract(MCD_SPOT).file(ilkUSDTA, "mat",  150 * RAY / 100     ); // 150% coll. ratio
         SpotAbstract(MCD_SPOT).poke(ilkUSDTA);
+
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_USDT_A);
 
         ////////////////////////////////////////////////////////////////////////////////
         // PAXUSD-A collateral deploy
@@ -160,8 +157,9 @@ contract SpellAction {
         // Set the PAXUSD-A flipper in the cat
         CatAbstract(MCD_CAT).file(ilkPAXUSDA, "flip", MCD_FLIP_PAXUSD_A);
 
-        // Init PAXUSD-A in Vat & Jug
+        // Init PAXUSD-A in Vat
         VatAbstract(MCD_VAT).init(ilkPAXUSDA);
+        // Init PAXUSD-A in Jug
         JugAbstract(MCD_JUG).init(ilkPAXUSDA);
 
         // Allow PAXUSD-A Join to modify Vat registry
@@ -180,7 +178,7 @@ contract SpellAction {
         // TODO: update these, we still don't have variables yet
         VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "line"  , 5 * MILLION * RAD    ); // 5 MM debt ceiling
         VatAbstract(MCD_VAT).file(ilkPAXUSDA,   "dust"  , 100 * RAD            ); // 100 Dai dust
-        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "dunk"  , 50 * THOUSAND * RAD  ); // 50,000 dunk
+        CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "dunk"  , 500 * RAD            ); // 50,000 dunk
         CatAbstract(MCD_CAT).file(ilkPAXUSDA,   "chop"  , 113 * WAD / 100      ); // 13% liq. penalty
         JugAbstract(MCD_JUG).file(ilkPAXUSDA,   "duty"  , FOUR_PCT_RATE        ); // 4% stability fee
         FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "beg"   , 103 * WAD / 100      ); // 3% bid increase
@@ -189,13 +187,15 @@ contract SpellAction {
         SpotAbstract(MCD_SPOT).file(ilkPAXUSDA, "mat"   , 120 * RAY / 100      ); // 120% coll. ratio
         SpotAbstract(MCD_SPOT).poke(ilkPAXUSDA);
 
-        // consequently, deny PAXUSD-A Flipper
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_PAXUSD_A);
+
+        // Consequently, deny PAXUSD-A Flipper
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_PAXUSD_A);
     }
 }
 
 contract DssSpell {
-    DSPauseAbstract public pause = 
+    DSPauseAbstract public pause =
         DSPauseAbstract(0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         public action;
     bytes32         public tag;
@@ -204,6 +204,8 @@ contract DssSpell {
     uint256         public expiration;
     bool            public done;
 
+    string constant public description = "Kovan Spell Deploy";
+
     constructor() public {
         sig = abi.encodeWithSignature("execute()");
         action = address(new SpellAction());
@@ -211,8 +213,7 @@ contract DssSpell {
         address _action = action;
         assembly { _tag := extcodehash(_action) }
         tag = _tag;
-        // Extra window of 2 hours to get the spell set up in the Governance Portal and communicated
-        expiration = now + 4 days + 2 hours; 
+        expiration = now + 30 days;
     }
 
     modifier officeHours {
@@ -223,10 +224,6 @@ contract DssSpell {
         _;
     }
 
-    function description() public view returns (string memory) {
-        return SpellAction(action).description();
-    }
-
     function schedule() public {
         require(now <= expiration, "This contract has expired");
         require(eta == 0, "This spell has already been scheduled");
@@ -234,8 +231,8 @@ contract DssSpell {
         pause.plot(action, tag, sig, eta);
     }
 
-    // removing office hours for kovan deploy
-    function cast() public {
+    // TODO: removing office hours for kovan deploy, fix for mainnet
+    function cast() public /*officeHours*/ {
         require(!done, "spell-already-cast");
         done = true;
         pause.exec(action, tag, sig, eta);
