@@ -74,8 +74,8 @@ contract DssSpellTest is DSTest, DSMath {
     MedianAbstract medUSDTA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7);
 
     // PAXUSD-A specific
-    GemAbstract      paxusd      = GemAbstract(      0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D);
-    GemJoinAbstract  joinPAXUSDA = GemJoinAbstract(  0x96831F3eC88874cf6B2cCe604e7531bF1B55171f);
+    GemAbstract      paxusd      = GemAbstract(      0xa6383AF46c36219a472b9549d70E4768dfA8894c);
+    GemJoinAbstract  joinPAXUSDA = GemJoinAbstract(  0x3d6a14C9542B429a4e3d255F6687754d4898D897);
     OsmAbstract      pipPAXUSD   = OsmAbstract(      0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749);
     FlipAbstract     flipPAXUSDA = FlipAbstract(     0x0815f202BC307F5c4097Cf57E23F1a86a8bf59D6);
 

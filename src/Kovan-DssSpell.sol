@@ -34,7 +34,7 @@ contract SpellAction {
     // The contracts in this list should correspond to MCD core contracts, verify
     // against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.0.9/contracts.json
-    address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9; // kovan
+    address constant MCD_VAT             = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9; 
     address constant MCD_CAT             = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
     address constant MCD_JUG             = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
     address constant MCD_SPOT            = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
@@ -49,8 +49,8 @@ contract SpellAction {
     address constant PIP_USDT            = 0x3588A7973D41AaeA7B203549553C991C4311951e;
 
     // PAXUSD specific addresses
-    address constant PAXUSD              = 0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D;
-    address constant MCD_JOIN_PAXUSD_A   = 0x96831F3eC88874cf6B2cCe604e7531bF1B55171f;
+    address constant PAXUSD              = 0xa6383AF46c36219a472b9549d70E4768dfA8894c;
+    address constant MCD_JOIN_PAXUSD_A   = 0x3d6a14C9542B429a4e3d255F6687754d4898D897;
     address constant MCD_FLIP_PAXUSD_A   = 0x0815f202BC307F5c4097Cf57E23F1a86a8bf59D6;
     address constant PIP_PAXUSD          = 0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749;
 
