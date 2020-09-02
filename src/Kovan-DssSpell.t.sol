@@ -84,14 +84,14 @@ contract DssSpellTest is DSTest, DSMath {
     USDTAbstract usdt            = USDTAbstract(     0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
     GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226);
     OsmAbstract pipUSDT          = OsmAbstract(      0x3588A7973D41AaeA7B203549553C991C4311951e);
-    FlipAbstract flipUSDTA       = FlipAbstract(     0x1C5dce9d7583F3da2b787d694342D125731aE099);
+    FlipAbstract flipUSDTA       = FlipAbstract(     0x113733e00804e61D5fd8b107Ca11b4569B6DA95D);
     MedianAbstract medUSDTA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7);
 
     // PAXUSD-A specific
     GemAbstract      paxusd      = GemAbstract(      0x4e4209e4981C54a6CB99aC20432E67C7cCC9794D);
     GemJoinAbstract  joinPAXUSDA = GemJoinAbstract(  0x96831F3eC88874cf6B2cCe604e7531bF1B55171f);
     OsmAbstract      pipPAXUSD   = OsmAbstract(      0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749);
-    FlipAbstract     flipPAXUSDA = FlipAbstract(     0x0815f202BC307F5c4097Cf57E23F1a86a8bf59D6);
+    FlipAbstract     flipPAXUSDA = FlipAbstract(     0x88001b9C8192cbf43e14323B809Ae6C4e815E12E);
 
     DssSpell spell;
 
