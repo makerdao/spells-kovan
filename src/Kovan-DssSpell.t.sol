@@ -441,11 +441,6 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
     }
 
-    // this spell is intended to run as the MkrAuthority
-    function canCall(address, address, bytes4) public pure returns (bool) {
-        return true;
-    }
-
     function testSpellIsCast() public {
         string memory description = new DssSpell().description();
         assertTrue(bytes(description).length > 0);
