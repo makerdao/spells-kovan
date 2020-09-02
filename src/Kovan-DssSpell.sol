@@ -76,7 +76,7 @@ contract SpellAction {
     uint256 constant EIGHT_PCT_RATE   = 1000000002440418608258400030;
 
     function execute() external {
-        VatAbstract(MCD_VAT).file("Line", add(VatAbstract(MCD_VAT).Line(), 15 * MILLION * RAD));
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 15 * MILLION * RAD);
 
         ////////////////////////////////////////////////////////////////////////////////
         // USDT-A collateral deploy
@@ -204,11 +204,7 @@ contract DssSpell {
     uint256         public expiration;
     bool            public done;
 
-    // Provides a descriptive tag for bot consumption
-    // This should be modified weekly to provide a summary of the actions
-    // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/cc819c75fc8f1b622cbe06acfd0d11bf64545622/governance/votes/Executive%20vote%20-%20July%2027%2C%202020%20.md -q -O - 2>/dev/null)"
-    string constant public description =
-        "2020-08-24 MakerDAO Executive Spell | KOVAN DEPLOYMENT OF USDT-A & PAXUSD-A";
+    string constant public description = "Kovan Spell Deploy";
 
     constructor() public {
         sig = abi.encodeWithSignature("execute()");
