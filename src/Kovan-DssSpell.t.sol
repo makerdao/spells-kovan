@@ -540,6 +540,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
 
         // Authorization
+
         assertEq(joinPAXUSDA.wards(pauseProxy), 1);
         assertEq(vat.wards(address(joinPAXUSDA)), 1);
         assertEq(flipPAXUSDA.wards(address(end)), 1);

@@ -52,7 +52,7 @@ contract SpellAction {
     // PAXUSD specific addresses
     address constant PAXUSD              = 0xa6383AF46c36219a472b9549d70E4768dfA8894c;
     address constant MCD_JOIN_PAXUSD_A   = 0x3d6a14C9542B429a4e3d255F6687754d4898D897;
-    address constant MCD_FLIP_PAXUSD_A   = 0x0815f202BC307F5c4097Cf57E23F1a86a8bf59D6;
+    address constant MCD_FLIP_PAXUSD_A   = 0x88001b9C8192cbf43e14323B809Ae6C4e815E12E;
     address constant PIP_PAXUSD          = 0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749;
 
     // Decimals & precision
