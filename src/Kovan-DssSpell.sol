@@ -29,7 +29,6 @@ import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 
 contract SpellAction {
-
     // KOVAN ADDRESSES
     //
     // The contracts in this list should correspond to MCD core contracts, verify
