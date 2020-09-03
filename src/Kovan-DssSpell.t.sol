@@ -90,7 +90,7 @@ contract DssSpellTest is DSTest, DSMath {
     // PAXUSD-A specific
     GemAbstract      paxusd      = GemAbstract(      0xa6383AF46c36219a472b9549d70E4768dfA8894c);
     GemJoinAbstract  joinPAXUSDA = GemJoinAbstract(  0x3d6a14C9542B429a4e3d255F6687754d4898D897);
-    OsmAbstract      pipPAXUSD   = OsmAbstract(      0xd2b75a3F7a9a627783d1c7934EC324c3d1B10749);
+    OsmAbstract      pipPAXUSD   = OsmAbstract(      0xD01fefed46eb21cd057bAa14Ff466842C31a0Cd9);
     FlipAbstract     flipPAXUSDA = FlipAbstract(     0x88001b9C8192cbf43e14323B809Ae6C4e815E12E);
 
     DssSpell spell;
