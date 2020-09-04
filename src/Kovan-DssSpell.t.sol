@@ -22,9 +22,9 @@ interface USDTAbstract {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0);
+    address constant KOVAN_SPELL = address(0x7aa252CA9284E8acc860EA0d44d98D8e2f25afe7);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1599139568;
+    uint256 constant SPELL_CREATED = 1599255572;
 
     struct CollateralValues {
         uint256 line;
