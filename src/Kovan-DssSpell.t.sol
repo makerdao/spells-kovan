@@ -22,7 +22,7 @@ interface USDTAbstract {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0xE64bcAeAe0dfa8CdD8D2aDf48e8AdFd7a343512A);
+    address constant KOVAN_SPELL = address(0);
     // this needs to be updated
     uint256 constant SPELL_CREATED = 1599139568;
 
@@ -60,7 +60,6 @@ contract DssSpellTest is DSTest, DSMath {
 
     // KOVAN ADDRESSES
     DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
-    address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
     DSChiefAbstract      chief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
     VatAbstract            vat = VatAbstract(        0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
     CatAbstract            cat = CatAbstract(        0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
@@ -68,30 +67,8 @@ contract DssSpellTest is DSTest, DSMath {
     PotAbstract            pot = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    FlipperMomAbstract  newMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
-
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
-    EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
-    DSTokenAbstract       weth = DSTokenAbstract(    0xd0A1E359811322d97991E03f863a0C30C2cF029C);
-    GemJoinAbstract   wethJoin = GemJoinAbstract(    0x775787933e92b709f2a3C70aa87999696e74A9F8);
     IlkRegistryAbstract    reg = IlkRegistryAbstract(0x6618BD7bBaBFacC518Fdec43542E4a73629B0819);
-
-    OsmMomAbstract      osmMom = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
-    FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
-
-
-    // USDT-A specific
-    USDTAbstract usdt            = USDTAbstract(     0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
-    GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226);
-    OsmAbstract pipUSDT          = OsmAbstract(      0x3588A7973D41AaeA7B203549553C991C4311951e);
-    FlipAbstract flipUSDTA       = FlipAbstract(     0x113733e00804e61D5fd8b107Ca11b4569B6DA95D);
-    MedianAbstract medUSDTA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7);
-
-    // PAXUSD-A specific
-    GemAbstract      paxusd      = GemAbstract(      0xa6383AF46c36219a472b9549d70E4768dfA8894c);
-    GemJoinAbstract  joinPAXUSDA = GemJoinAbstract(  0x3d6a14C9542B429a4e3d255F6687754d4898D897);
-    OsmAbstract      pipPAXUSD   = OsmAbstract(      0xD01fefed46eb21cd057bAa14Ff466842C31a0Cd9);
-    FlipAbstract     flipPAXUSDA = FlipAbstract(     0x88001b9C8192cbf43e14323B809Ae6C4e815E12E);
 
     DssSpell spell;
 
@@ -290,8 +267,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             line:         10 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000002440418608258400030, // 8% SF
-            pct:          8 * 1000,
+            duty:         1000000001847694957439350562, // 6% SF
+            pct:          6 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          150 * RAY / 100,
@@ -303,8 +280,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             line:         5 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000001243680656318820312, // 4% SF
-            pct:          4 * 1000,
+            duty:         1000000000627937192491029810, // 2% SF
+            pct:          2 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          120 * RAY / 100,
@@ -466,113 +443,4 @@ contract DssSpellTest is DSTest, DSMath {
         }
     }
 
-    function testSpellIsCast_USDTA_INTEGRATION() public {
-        vote();
-        scheduleWaitAndCast();
-        // spell done
-        assertTrue(spell.done());
-
-        pipUSDT.poke();
-        hevm.warp(now + 3601);
-        pipUSDT.poke();
-        spot.poke("USDT-A");
-
-        hevm.store(
-            address(usdt),
-            keccak256(abi.encode(address(this), uint256(2))),
-            bytes32(uint256(600 * 10 ** 6))
-        );
-
-        // check median matches pip.src()
-        assertEq(pipUSDT.src(), address(medUSDTA));
-
-        // Authorization
-        assertEq(joinUSDTA.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(joinUSDTA)), 1);
-        assertEq(flipUSDTA.wards(address(end)), 1);
-        assertEq(flipUSDTA.wards(address(flipMom)), 1);
-        assertEq(pipUSDT.wards(address(osmMom)), 1);
-        assertEq(pipUSDT.bud(address(spot)), 1);
-        assertEq(pipUSDT.bud(address(end)), 1);
-        assertEq(MedianAbstract(pipUSDT.src()).bud(address(pipUSDT)), 1);
-
-        // Join to adapter
-        assertEq(usdt.balanceOf(address(this)), 600 * 10 ** 6);
-        assertEq(vat.gem("USDT-A", address(this)), 0);
-        usdt.approve(address(joinUSDTA), 600 * 10 ** 6);
-        joinUSDTA.join(address(this), 600 * 10 ** 6);
-        assertEq(usdt.balanceOf(address(this)), 0);
-        assertEq(vat.gem("USDT-A", address(this)), 600 * WAD);
-
-        // Deposit collateral, generate DAI
-        assertEq(vat.dai(address(this)), 0);
-        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(100 * WAD));
-        assertEq(vat.gem("USDT-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), 100 * RAD);
-
-        // Payback DAI, withdraw collateral
-        vat.frob("USDT-A", address(this), address(this), address(this), -int(600 * WAD), -int(100 * WAD));
-        assertEq(vat.gem("USDT-A", address(this)), 600 * WAD);
-        assertEq(vat.dai(address(this)), 0);
-
-        // Withdraw from adapter
-        joinUSDTA.exit(address(this), 600 * 10 ** 6);
-        assertEq(usdt.balanceOf(address(this)), 600 * 10 ** 6);
-        assertEq(vat.gem("USDT-A", address(this)), 0);
-
-        // Generate new DAI to force a liquidation
-        usdt.approve(address(joinUSDTA), 600 * 10 ** 6);
-        joinUSDTA.join(address(this), 600 * 10 ** 6);
-        (,,uint256 spotV,,) = vat.ilks("USDT-A");
-        // dart max amount of DAI
-        vat.frob("USDT-A", address(this), address(this), address(this), int(600 * WAD), int(mul(600 * WAD, spotV) / RAY));
-        hevm.warp(now + 1);
-        jug.drip("USDT-A");
-        assertEq(flipUSDTA.kicks(), 0);
-        cat.bite("USDT-A", address(this));
-        assertEq(flipUSDTA.kicks(), 1);
-    }
-
-    function testSpellIsCast_PAXUSDA_INTEGRATION() public {
-        vote();
-        scheduleWaitAndCast();
-        // spell done
-        assertTrue(spell.done());
-
-        // Authorization
-
-        assertEq(joinPAXUSDA.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(joinPAXUSDA)), 1);
-        assertEq(flipPAXUSDA.wards(address(end)), 1);
-        assertEq(flipPAXUSDA.wards(address(flipMom)), 1);
-
-        // Join to adapter
-        hevm.store(
-            address(paxusd),
-            keccak256(abi.encode(address(this), uint256(1))),
-            bytes32(uint256(600 * WAD))
-        );
-        assertEq(paxusd.balanceOf(address(this)), 600 * WAD);
-        assertEq(vat.gem("PAXUSD-A", address(this)), 0);
-        paxusd.approve(address(joinPAXUSDA), 600 * WAD);
-        joinPAXUSDA.join(address(this), 600 * WAD);
-        assertEq(paxusd.balanceOf(address(this)), 0);
-        assertEq(vat.gem("PAXUSD-A", address(this)), 600 * WAD);
-
-        // Deposit collateral, generate DAI
-        assertEq(vat.dai(address(this)), 0);
-        vat.frob("PAXUSD-A", address(this), address(this), address(this), int(600 * WAD), int(100 * WAD));
-        assertEq(vat.gem("PAXUSD-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), 100 * RAD);
-
-        // Payback DAI, withdraw collateral
-        vat.frob("PAXUSD-A", address(this), address(this), address(this), -int(600 * WAD), -int(100 * WAD));
-        assertEq(vat.gem("PAXUSD-A", address(this)), 600 * WAD);
-        assertEq(vat.dai(address(this)), 0);
-
-        // Withdraw from adapter
-        joinPAXUSDA.exit(address(this), 600 * 10 ** 18);
-        assertEq(paxusd.balanceOf(address(this)), 600 * 10 ** 18);
-        assertEq(vat.gem("PAXUSD-A", address(this)), 0);
-    }
 }
