@@ -16,6 +16,7 @@
 pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
+import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
