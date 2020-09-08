@@ -16,6 +16,8 @@
 pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
+import "lib/dss-interfaces/src/dss/CatAbstract.sol";
+import "lib/dss-interfaces/src/dss/JugAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
@@ -23,6 +25,9 @@ contract SpellAction {
     // The contracts in this list should correspond to MCD core contracts, verify
     // against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.1.1/contracts.json
+    address constant MCD_CAT           = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
+    address constant MCD_JUG           = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
+
 
     // USDT flip
     address constant MCD_FLIP_USDT_A   = 0x113733e00804e61D5fd8b107Ca11b4569B6DA95D;
@@ -47,17 +52,20 @@ contract SpellAction {
     uint256 constant SIX_PCT_RATE   = 1000000001847694957439350562;
 
     function execute() external {
-        // set USDT flipper ttl & tau
-        // prev ttl/tau: 6 hours
-        // new tt/tau: 1 hour
-        FlipAbstract(MCD_FLIP_USDT_A).file(     "ttl" , 1 hours    ); // 1 hours ttl
-        FlipAbstract(MCD_FLIP_USDT_A).file(     "tau" , 1 hours    ); // 1 hours tau
+        // Set the USDT-A stability fee
+        // Previous: 8%
+        // New: 6%
+        JugAbstract(MCD_JUG).drip("USDT-A");
+        JugAbstract(MCD_JUG).file("USDT-A", "duty", SIX_PCT_RATE);
 
-        // set PAXUSD flipper ttl & tau to 1 hour
-        // prev ttl/tau: 6 hours
-        // new tt/tau: 1 hour
-        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "ttl"   , 1 hours  ); // 1 hours ttl
-        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "tau"   , 1 hours  ); // 1 hours tau
+        // Set the PAXUSD-A stability fee
+        // Previous: 4%
+        // New: 2%
+        JugAbstract(MCD_JUG).drip("PAXUSD-A");
+        JugAbstract(MCD_JUG).file("PAXUSD-A", "duty", TWO_PCT_RATE);
+
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_USDT_A);
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_PAXUSD_A);
     }
 }
 

@@ -22,7 +22,7 @@ interface USDTAbstract {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0);
+    address constant KOVAN_SPELL = address(0x7aa252CA9284E8acc860EA0d44d98D8e2f25afe7);
     // this needs to be updated
     uint256 constant SPELL_CREATED = 1599255572;
 
@@ -273,8 +273,8 @@ contract DssSpellTest is DSTest, DSMath {
             dunk:         500 * RAD,
             mat:          150 * RAY / 100,
             beg:          103 * WAD / 100,
-            ttl:          1 hours,
-            tau:          1 hours,
+            ttl:          6 hours,
+            tau:          6 hours,
             liquidations: 1
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
@@ -286,8 +286,8 @@ contract DssSpellTest is DSTest, DSMath {
             dunk:         500 * RAD,
             mat:          120 * RAY / 100,
             beg:          103 * WAD / 100,
-            ttl:          1 hours,
-            tau:          1 hours,
+            ttl:          6 hours,
+            tau:          6 hours,
             liquidations: 0
         });
     }
