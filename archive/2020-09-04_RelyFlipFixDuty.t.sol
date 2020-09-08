@@ -22,9 +22,9 @@ interface USDTAbstract {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0);
+    address constant KOVAN_SPELL = address(0x7aa252CA9284E8acc860EA0d44d98D8e2f25afe7);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1599139568;
+    uint256 constant SPELL_CREATED = 1599255572;
 
     struct CollateralValues {
         uint256 line;
@@ -69,23 +69,6 @@ contract DssSpellTest is DSTest, DSMath {
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     IlkRegistryAbstract    reg = IlkRegistryAbstract(0x6618BD7bBaBFacC518Fdec43542E4a73629B0819);
-
-    OsmMomAbstract      osmMom = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
-    FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
-
-
-    // USDT-A specific
-    USDTAbstract usdt            = USDTAbstract(     0x9245BD36FA20fcD292F4765c4b5dF83Dc3fD5e86);
-    GemJoinAbstract joinUSDTA    = GemJoinAbstract(  0x9B011a74a690dFd9a1e4996168d3EcBDE73c2226);
-    OsmAbstract pipUSDT          = OsmAbstract(      0x3588A7973D41AaeA7B203549553C991C4311951e);
-    FlipAbstract flipUSDTA       = FlipAbstract(     0x113733e00804e61D5fd8b107Ca11b4569B6DA95D);
-    MedianAbstract medUSDTA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7);
-
-    // PAXUSD-A specific
-    GemAbstract      paxusd      = GemAbstract(      0xa6383AF46c36219a472b9549d70E4768dfA8894c);
-    GemJoinAbstract  joinPAXUSDA = GemJoinAbstract(  0x3d6a14C9542B429a4e3d255F6687754d4898D897);
-    OsmAbstract      pipPAXUSD   = OsmAbstract(      0xD01fefed46eb21cd057bAa14Ff466842C31a0Cd9);
-    FlipAbstract     flipPAXUSDA = FlipAbstract(     0x88001b9C8192cbf43e14323B809Ae6C4e815E12E);
 
     DssSpell spell;
 
@@ -284,29 +267,27 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             line:         10 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000002440418608258400030, // 8% SF
-            pct:          8 * 1000,
+            duty:         1000000001847694957439350562, // 6% SF
+            pct:          6 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          150 * RAY / 100,
             beg:          103 * WAD / 100,
-            ttl:          1 hours,
-            tau:          1 hours,
-
+            ttl:          6 hours,
+            tau:          6 hours,
             liquidations: 1
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             line:         5 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000001243680656318820312, // 4% SF
-            pct:          4 * 1000,
+            duty:         1000000000627937192491029810, // 2% SF
+            pct:          2 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          120 * RAY / 100,
             beg:          103 * WAD / 100,
-            ttl:          1 hours,
-            tau:          1 hours,
-
+            ttl:          6 hours,
+            tau:          6 hours,
             liquidations: 0
         });
     }

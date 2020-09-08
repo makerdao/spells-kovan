@@ -16,21 +16,24 @@
 pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
-import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
-
+import "lib/dss-interfaces/src/dss/CatAbstract.sol";
+import "lib/dss-interfaces/src/dss/JugAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
     //
     // The contracts in this list should correspond to MCD core contracts, verify
     // against the current release list at:
-    //     https://changelog.makerdao.com/releases/kovan/1.0.9/contracts.json
+    //     https://changelog.makerdao.com/releases/kovan/1.1.1/contracts.json
+    address constant MCD_CAT           = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
+    address constant MCD_JUG           = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
 
-    // USDT-A flipper
-    address constant MCD_FLIP_USDT_A     = 0x113733e00804e61D5fd8b107Ca11b4569B6DA95D;
 
-    // PAXUSD-A flipper
-    address constant MCD_FLIP_PAXUSD_A   = 0x88001b9C8192cbf43e14323B809Ae6C4e815E12E;
+    // USDT flip
+    address constant MCD_FLIP_USDT_A   = 0x113733e00804e61D5fd8b107Ca11b4569B6DA95D;
+
+    // PAXUSD flip
+    address constant MCD_FLIP_PAXUSD_A = 0x88001b9C8192cbf43e14323B809Ae6C4e815E12E;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -38,10 +41,6 @@ contract SpellAction {
     uint256 constant WAD      = 10 ** 18;
     uint256 constant RAY      = 10 ** 27;
     uint256 constant RAD      = 10 ** 45;
-    
-    function add(uint x, uint y) internal pure returns (uint z) {
-        require((z = x + y) >= x, "ds-math-add-overflow");
-    }
 
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
@@ -49,15 +48,24 @@ contract SpellAction {
     //
     // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
     //
+    uint256 constant TWO_PCT_RATE   = 1000000000627937192491029810;
+    uint256 constant SIX_PCT_RATE   = 1000000001847694957439350562;
 
     function execute() external {
-        // set USDT flipper ttl & tau to 1 hour
-        FlipAbstract(MCD_FLIP_USDT_A).file(     "ttl" , 1 hours    ); // 6 hours ttl
-        FlipAbstract(MCD_FLIP_USDT_A).file(     "tau" , 1 hours    ); // 6 hours tau
+        // Set the USDT-A stability fee
+        // Previous: 8%
+        // New: 6%
+        JugAbstract(MCD_JUG).drip("USDT-A");
+        JugAbstract(MCD_JUG).file("USDT-A", "duty", SIX_PCT_RATE);
 
-        // set PAXUSD flipper ttl & tau to 1 hour
-        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "ttl"   , 1 hours  ); // 6 hours ttl
-        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "tau"   , 1 hours  ); // 6 hours tau
+        // Set the PAXUSD-A stability fee
+        // Previous: 4%
+        // New: 2%
+        JugAbstract(MCD_JUG).drip("PAXUSD-A");
+        JugAbstract(MCD_JUG).file("PAXUSD-A", "duty", TWO_PCT_RATE);
+
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_USDT_A);
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_PAXUSD_A);
     }
 }
 
@@ -83,14 +91,6 @@ contract DssSpell {
         expiration = now + 30 days;
     }
 
-    modifier officeHours {
-        uint day = (now / 1 days + 3) % 7;
-        require(day < 5, "Can only be cast on a weekday");
-        uint hour = now / 1 hours % 24;
-        require(hour >= 14 && hour < 21, "Outside office hours");
-        _;
-    }
-
     function schedule() public {
         require(now <= expiration, "This contract has expired");
         require(eta == 0, "This spell has already been scheduled");
@@ -98,8 +98,7 @@ contract DssSpell {
         pause.plot(action, tag, sig, eta);
     }
 
-    // TODO: removing office hours for kovan deploy, fix for mainnet
-    function cast() public /*officeHours*/ {
+    function cast() public {
         require(!done, "spell-already-cast");
         done = true;
         pause.exec(action, tag, sig, eta);
