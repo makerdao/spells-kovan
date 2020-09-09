@@ -11,7 +11,7 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
-interface USDTAbstract {
+interface COMPAbstract {
     function totalSupply() external view returns (uint256);
     function balanceOf(address) external view returns (uint256);
     function allowance(address, address) external view returns (uint256);
@@ -60,6 +60,7 @@ contract DssSpellTest is DSTest, DSMath {
 
     // KOVAN ADDRESSES
     DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
+    address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
     DSChiefAbstract      chief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
     VatAbstract            vat = VatAbstract(        0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
     CatAbstract            cat = CatAbstract(        0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
@@ -67,8 +68,21 @@ contract DssSpellTest is DSTest, DSMath {
     PotAbstract            pot = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
+    FlipperMomAbstract  newMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
+
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
+    EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     IlkRegistryAbstract    reg = IlkRegistryAbstract(0xedE45A0522CA19e979e217064629778d6Cc2d9Ea);
+
+    OsmMomAbstract      osmMom = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
+    FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
+
+    // COMP-A specific
+    COMPAbstract comp          = COMPAbstract(       0x1dDe24ACE93F9F638Bfd6fCE1B38b842703Ea1Aa);
+    GemJoinAbstract joinCOMPA  = GemJoinAbstract(    0x16D567c1F6824ffFC460A11d48F61E010ae43766);
+    OsmAbstract pipCOMP        = OsmAbstract(        0x08F29dCC1f4e6FD194c163FC9398742B3fF2BbE0);
+    FlipAbstract flipCOMPA     = FlipAbstract(       0x2917a962BC45ED48497de85821bddD065794DF6C);
+    // MedianAbstract medCOMPA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7); // TODO: Add back in
 
     DssSpell spell;
 
@@ -134,7 +148,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             pot_dsr: 1000000000000000000000000000,
             pot_dsrPct: 0 * 1000,
-            vat_Line: 710 * MILLION * RAD,
+            vat_Line: 770 * MILLION * RAD,
             pause_delay: 60,
             vow_wait: 3600,
             vow_dump: 2 * WAD,
@@ -431,6 +445,68 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
     }
 
+    function checkNewlyOnboardedCollateral_COMP_A() public {
+        // pipCOMP.poke();
+        // hevm.warp(now + 3601); // TODO: Add back
+        // pipCOMP.poke();
+        spot.poke("COMP-A");
+
+        hevm.store(
+            address(comp),
+            keccak256(abi.encode(address(this), uint256(1))),
+            bytes32(uint256(1 * THOUSAND * WAD))
+        );
+
+        // check median matches pip.src()
+        // assertEq(pipCOMP.src(), address(medCOMPA)); // TODO: Add back
+
+        // Authorization
+        assertEq(joinCOMPA.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinCOMPA)), 1);
+        assertEq(flipCOMPA.wards(address(end)), 1);
+        assertEq(flipCOMPA.wards(address(flipMom)), 1);
+        // assertEq(pipCOMP.wards(address(osmMom)), 1);
+        // assertEq(pipCOMP.bud(address(spot)), 1);
+        // assertEq(pipCOMP.bud(address(end)), 1);
+        // assertEq(MedianAbstract(pipCOMP.src()).bud(address(pipCOMP)), 1);
+
+        // Join to adapter
+        assertEq(comp.balanceOf(address(this)), 1 * THOUSAND * WAD);
+        assertEq(vat.gem("COMP-A", address(this)), 0);
+        comp.approve(address(joinCOMPA), 1 * THOUSAND * WAD);
+        joinCOMPA.join(address(this), 1 * THOUSAND * WAD);
+        assertEq(comp.balanceOf(address(this)), 0);
+        assertEq(vat.gem("COMP-A", address(this)), 1 * THOUSAND * WAD);
+
+        // Deposit collateral, generate DAI
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob("COMP-A", address(this), address(this), address(this), int(1 * THOUSAND * WAD), int(100 * WAD));
+        assertEq(vat.gem("COMP-A", address(this)), 0);
+        assertEq(vat.dai(address(this)), 100 * RAD);
+
+        // Payback DAI, withdraw collateral
+        vat.frob("COMP-A", address(this), address(this), address(this), -int(1 * THOUSAND * WAD), -int(100 * WAD));
+        assertEq(vat.gem("COMP-A", address(this)), 1 * THOUSAND * WAD);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        joinCOMPA.exit(address(this), 1 * THOUSAND * WAD);
+        assertEq(comp.balanceOf(address(this)), 1 * THOUSAND * WAD);
+        assertEq(vat.gem("COMP-A", address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        comp.approve(address(joinCOMPA), 1 * THOUSAND * WAD);
+        joinCOMPA.join(address(this), 1 * THOUSAND * WAD);
+        (,,uint256 spotV,,) = vat.ilks("COMP-A");
+        // dart max amount of DAI
+        vat.frob("COMP-A", address(this), address(this), address(this), int(1 * THOUSAND * WAD), int(mul(1 * THOUSAND * WAD, spotV) / RAY));
+        hevm.warp(now + 1);
+        jug.drip("COMP-A");
+        assertEq(flipCOMPA.kicks(), 0);
+        cat.bite("COMP-A", address(this));
+        assertEq(flipCOMPA.kicks(), 1);
+    }
+
     function testSpellIsCast() public {
         string memory description = new DssSpell().description();
         assertTrue(bytes(description).length > 0);
@@ -454,6 +530,8 @@ contract DssSpellTest is DSTest, DSMath {
         for(uint i = 0; i < ilks.length; i++) {
             checkCollateralValues(ilks[i],  afterSpell);
         }
+
+        checkNewlyOnboardedCollateral_COMP_A();
     }
 
 }
