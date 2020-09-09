@@ -16,7 +16,7 @@
 pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
-import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
+import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
@@ -25,11 +25,7 @@ contract SpellAction {
     // against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.1.1/contracts.json
 
-    // USDT flip
-    address constant MCD_FLIP_USDT_A   = 0x113733e00804e61D5fd8b107Ca11b4569B6DA95D;
-
-    // PAXUSD flip
-    address constant MCD_FLIP_PAXUSD_A = 0x88001b9C8192cbf43e14323B809Ae6C4e815E12E;
+    address constant MCD_VAT  = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -38,27 +34,20 @@ contract SpellAction {
     uint256 constant RAY      = 10 ** 27;
     uint256 constant RAD      = 10 ** 45;
 
-    // Many of the settings that change weekly rely on the rate accumulator
-    // described at https://docs.makerdao.com/smart-contract-modules/rates-module
-    // To check this yourself, use the following rate calculation (example 8%):
-    //
-    // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
-    //
-    uint256 constant TWO_PCT_RATE   = 1000000000627937192491029810;
-    uint256 constant SIX_PCT_RATE   = 1000000001847694957439350562;
-
     function execute() external {
-        // set USDT flipper ttl & tau
-        // prev ttl/tau: 6 hours
-        // new tt/tau: 1 hour
-        FlipAbstract(MCD_FLIP_USDT_A).file(     "ttl" , 1 hours    ); // 1 hours ttl
-        FlipAbstract(MCD_FLIP_USDT_A).file(     "tau" , 1 hours    ); // 1 hours tau
+        VatAbstract vat = VatAbstract(MCD_VAT);
 
-        // set PAXUSD flipper ttl & tau to 1 hour
-        // prev ttl/tau: 6 hours
-        // new tt/tau: 1 hour
-        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "ttl"   , 1 hours  ); // 1 hours ttl
-        FlipAbstract(MCD_FLIP_PAXUSD_A).file(   "tau"   , 1 hours  ); // 1 hours tau
+        // Update Debt Ceiling from 703 million => 763 million
+        vat.file("Line", vat.Line() + 60 * MILLION * RAD);
+
+        // Update ETH-A DC from 420 million => 540 million
+        vat.file("ETH-A", "line", 540 * MILLION * RAD);
+
+        // Update USDC-A DC from 120 million => 40 million
+        vat.file("USDC-A", "line", 40 * MILLION * RAD);
+
+        // Update WTBC-A DC from 80 million => 120 million
+        vat.file("WBTC-A", "line", 120 * MILLION * RAD);
     }
 }
 

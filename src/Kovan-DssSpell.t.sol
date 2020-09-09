@@ -22,9 +22,9 @@ interface USDTAbstract {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0x8Ffa7bD28deca89E2f164176cd1fA721EF1a8eD2);
+    address constant KOVAN_SPELL = address(0);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1599572832;
+    uint256 constant SPELL_CREATED = 0;
 
     struct CollateralValues {
         uint256 line;
@@ -134,7 +134,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             pot_dsr: 1000000000000000000000000000,
             pot_dsrPct: 0 * 1000,
-            vat_Line: 703 * MILLION * RAD,
+            vat_Line: 763 * MILLION * RAD,
             pause_delay: 60,
             vow_wait: 3600,
             vow_dump: 2 * WAD,
@@ -148,7 +148,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all collateral based changes here
         //
         afterSpell.collaterals["ETH-A"] = CollateralValues({
-            line:         420 * MILLION * RAD,
+            line:         540 * MILLION * RAD,
             dust:         100 * RAD,
             duty:         1000000002440418608258400030,
             pct:          8 * 1000,
@@ -174,7 +174,7 @@ contract DssSpellTest is DSTest, DSMath {
             liquidations: 1
         });
         afterSpell.collaterals["USDC-A"] = CollateralValues({
-            line:         140 * MILLION * RAD,
+            line:         40 * MILLION * RAD,
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0,
@@ -200,7 +200,7 @@ contract DssSpellTest is DSTest, DSMath {
             liquidations: 0
         });
         afterSpell.collaterals["WBTC-A"] = CollateralValues({
-            line:         80 * MILLION * RAD,
+            line:         120 * MILLION * RAD,
             dust:         100 * RAD,
             duty:         1000000000000000000000000000,
             pct:          0,
