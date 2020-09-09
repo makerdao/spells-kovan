@@ -22,9 +22,9 @@ interface USDTAbstract {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0x926a84Dec4ad3e8f07fBDbaF1a4503c9A506DD15);
+    address constant KOVAN_SPELL = address(0);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1599676692;
+    uint256 constant SPELL_CREATED = 0;
 
     struct CollateralValues {
         uint256 line;
@@ -68,7 +68,7 @@ contract DssSpellTest is DSTest, DSMath {
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
-    IlkRegistryAbstract    reg = IlkRegistryAbstract(0x6618BD7bBaBFacC518Fdec43542E4a73629B0819);
+    IlkRegistryAbstract    reg = IlkRegistryAbstract(0xedE45A0522CA19e979e217064629778d6Cc2d9Ea);
 
     DssSpell spell;
 
@@ -134,7 +134,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             pot_dsr: 1000000000000000000000000000,
             pot_dsrPct: 0 * 1000,
-            vat_Line: 763 * MILLION * RAD,
+            vat_Line: 710 * MILLION * RAD,
             pause_delay: 60,
             vow_wait: 3600,
             vow_dump: 2 * WAD,
@@ -289,6 +289,19 @@ contract DssSpellTest is DSTest, DSMath {
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 0
+        });
+        afterSpell.collaterals["COMP-A"] = CollateralValues({
+            line:         7 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000000315522921573372069, // 1% SF
+            pct:          1 * 1000,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          175 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
         });
     }
 
