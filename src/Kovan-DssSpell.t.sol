@@ -11,14 +11,6 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
-interface COMPAbstract {
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address) external view returns (uint256);
-    function allowance(address, address) external view returns (uint256);
-    function approve(address, uint256) external;               // nonstandard
-    function transfer(address, uint256) external;              // nonstandard
-    function transferFrom(address, address, uint256) external; // nonstandard
-}
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
@@ -68,7 +60,6 @@ contract DssSpellTest is DSTest, DSMath {
     PotAbstract            pot = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    FlipperMomAbstract  newMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
 
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
@@ -78,7 +69,7 @@ contract DssSpellTest is DSTest, DSMath {
     FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
 
     // COMP-A specific
-    COMPAbstract comp          = COMPAbstract(       0x1dDe24ACE93F9F638Bfd6fCE1B38b842703Ea1Aa);
+    DSTokenAbstract comp       = DSTokenAbstract(    0x1dDe24ACE93F9F638Bfd6fCE1B38b842703Ea1Aa);
     GemJoinAbstract joinCOMPA  = GemJoinAbstract(    0x16D567c1F6824ffFC460A11d48F61E010ae43766);
     OsmAbstract pipCOMP        = OsmAbstract(        0x08F29dCC1f4e6FD194c163FC9398742B3fF2BbE0);
     FlipAbstract flipCOMPA     = FlipAbstract(       0x2917a962BC45ED48497de85821bddD065794DF6C);
