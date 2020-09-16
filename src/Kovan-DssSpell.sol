@@ -100,16 +100,12 @@ contract SpellAction {
         FlipAbstract(MCD_FLIP_COMP_A).rely(FLIPPER_MOM);
 
         // Allow OsmMom to access to the COMP Osm
-        // !!!!!!!! Only if PIP_COMP = Osm and hasn't been already relied due a previous deployed ilk 
         OsmAbstract(PIP_COMP).rely(OSM_MOM);
         // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
-        // !!!!!!!! Only if PIP_COMP = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk 
         MedianAbstract(OsmAbstract(PIP_COMP).src()).kiss(PIP_COMP);
         // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
-        // !!!!!!!! Only if PIP_COMP = Osm or PIP_COMP = Median and hasn't been already whitelisted due a previous deployed ilk 
         OsmAbstract(PIP_COMP).kiss(MCD_SPOT);
         // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
-        // !!!!!!!! Only if PIP_COMP = Osm or PIP_COMP = Median and hasn't been already whitelisted due a previous deployed ilk 
         OsmAbstract(PIP_COMP).kiss(MCD_END);
         // Set COMP Osm in the OsmMom for new ilk
         // !!!!!!!! Only if PIP_COMP = Osm
