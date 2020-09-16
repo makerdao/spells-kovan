@@ -48,7 +48,7 @@ contract SpellAction {
     address constant COMP            = 0x1dDe24ACE93F9F638Bfd6fCE1B38b842703Ea1Aa;
     address constant MCD_JOIN_COMP_A = 0x16D567c1F6824ffFC460A11d48F61E010ae43766;
     address constant MCD_FLIP_COMP_A = 0x2917a962BC45ED48497de85821bddD065794DF6C;
-    address constant PIP_COMP        = 0x08F29dCC1f4e6FD194c163FC9398742B3fF2BbE0;
+    address constant PIP_COMP        = 0xcc10b1C53f4BFFEE19d0Ad00C40D7E36a454D5c4;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -99,21 +99,21 @@ contract SpellAction {
         // Allow FlipperMom to access to the COMP-A Flipper
         FlipAbstract(MCD_FLIP_COMP_A).rely(FLIPPER_MOM);
 
-        // // Allow OsmMom to access to the TOKEN Osm
-        // // !!!!!!!! Only if PIP_TOKEN = Osm and hasn't been already relied due a previous deployed ilk 
-        // OsmAbstract(PIP_TOKEN).rely(OSM_MOM);
-        // // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
-        // // !!!!!!!! Only if PIP_TOKEN = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk 
-        // MedianAbstract(OsmAbstract(PIP_TOKEN).src()).kiss(PIP_TOKEN);
-        // // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
-        // // !!!!!!!! Only if PIP_TOKEN = Osm or PIP_TOKEN = Median and hasn't been already whitelisted due a previous deployed ilk 
-        // OsmAbstract(PIP_TOKEN).kiss(MCD_SPOT);
-		// 		// Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
-        // // !!!!!!!! Only if PIP_TOKEN = Osm or PIP_TOKEN = Median and hasn't been already whitelisted due a previous deployed ilk 
-        // OsmAbstract(PIP_TOKEN).kiss(MCD_END);
-        // // Set TOKEN Osm in the OsmMom for new ilk
-        // // !!!!!!!! Only if PIP_TOKEN = Osm
-        // OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_TOKEN);
+        // Allow OsmMom to access to the COMP Osm
+        // !!!!!!!! Only if PIP_COMP = Osm and hasn't been already relied due a previous deployed ilk 
+        OsmAbstract(PIP_COMP).rely(OSM_MOM);
+        // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_COMP = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk 
+        MedianAbstract(OsmAbstract(PIP_COMP).src()).kiss(PIP_COMP);
+        // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_COMP = Osm or PIP_COMP = Median and hasn't been already whitelisted due a previous deployed ilk 
+        OsmAbstract(PIP_COMP).kiss(MCD_SPOT);
+        // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_COMP = Osm or PIP_COMP = Median and hasn't been already whitelisted due a previous deployed ilk 
+        OsmAbstract(PIP_COMP).kiss(MCD_END);
+        // Set COMP Osm in the OsmMom for new ilk
+        // !!!!!!!! Only if PIP_COMP = Osm
+        OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_COMP);
 
         // Set the global debt ceiling
         VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 7 * MILLION * RAD);

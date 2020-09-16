@@ -69,11 +69,11 @@ contract DssSpellTest is DSTest, DSMath {
     FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
 
     // COMP-A specific
-    DSTokenAbstract comp       = DSTokenAbstract(    0x1dDe24ACE93F9F638Bfd6fCE1B38b842703Ea1Aa);
-    GemJoinAbstract joinCOMPA  = GemJoinAbstract(    0x16D567c1F6824ffFC460A11d48F61E010ae43766);
-    OsmAbstract pipCOMP        = OsmAbstract(        0x08F29dCC1f4e6FD194c163FC9398742B3fF2BbE0);
-    FlipAbstract flipCOMPA     = FlipAbstract(       0x2917a962BC45ED48497de85821bddD065794DF6C);
-    // MedianAbstract medCOMPA      = MedianAbstract(   0x074EcAe0CD5c37f59D9b91E2994407418aCe05B7); // TODO: Add back in
+    DSTokenAbstract       comp = DSTokenAbstract(    0x1dDe24ACE93F9F638Bfd6fCE1B38b842703Ea1Aa);
+    GemJoinAbstract  joinCOMPA = GemJoinAbstract(    0x16D567c1F6824ffFC460A11d48F61E010ae43766);
+    OsmAbstract        pipCOMP = OsmAbstract(        0xcc10b1C53f4BFFEE19d0Ad00C40D7E36a454D5c4);
+    FlipAbstract     flipCOMPA = FlipAbstract(       0x2917a962BC45ED48497de85821bddD065794DF6C);
+    MedianAbstract    medCOMPA = MedianAbstract(     0x18746A1CED49Ff06432400b8EdDcf77876EcA6f8); 
 
     DssSpell spell;
 
@@ -437,9 +437,9 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function checkNewlyOnboardedCollateral_COMP_A() public {
-        // pipCOMP.poke();
-        // hevm.warp(now + 3601); // TODO: Add back
-        // pipCOMP.poke();
+        pipCOMP.poke();
+        hevm.warp(now + 3601); 
+        pipCOMP.poke();
         spot.poke("COMP-A");
 
         hevm.store(
@@ -449,17 +449,17 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // check median matches pip.src()
-        // assertEq(pipCOMP.src(), address(medCOMPA)); // TODO: Add back
+        assertEq(pipCOMP.src(), address(medCOMPA)); 
 
         // Authorization
         assertEq(joinCOMPA.wards(pauseProxy), 1);
         assertEq(vat.wards(address(joinCOMPA)), 1);
         assertEq(flipCOMPA.wards(address(end)), 1);
         assertEq(flipCOMPA.wards(address(flipMom)), 1);
-        // assertEq(pipCOMP.wards(address(osmMom)), 1);
-        // assertEq(pipCOMP.bud(address(spot)), 1);
-        // assertEq(pipCOMP.bud(address(end)), 1);
-        // assertEq(MedianAbstract(pipCOMP.src()).bud(address(pipCOMP)), 1);
+        assertEq(pipCOMP.wards(address(osmMom)), 1);
+        assertEq(pipCOMP.bud(address(spot)), 1);
+        assertEq(pipCOMP.bud(address(end)), 1);
+        assertEq(MedianAbstract(pipCOMP.src()).bud(address(pipCOMP)), 1);
 
         // Join to adapter
         assertEq(comp.balanceOf(address(this)), 1 * THOUSAND * WAD);
