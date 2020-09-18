@@ -56,6 +56,12 @@ contract SpellAction {
     address constant MCD_FLIP_LRC_A  = 0xfC9496337538235669F4a19781234122c9455897;
     address constant PIP_LRC         = 0xcEE47Bb8989f625b5005bC8b9f9A0B0892339721;
 
+    // LINK specific addresses
+    address constant LINK            = 0xa36085F69e2889c224210F603D836748e7dC0088;
+    address constant MCD_JOIN_LINK_A = 0xF4Df626aE4fb446e2Dcce461338dEA54d2b9e09b;
+    address constant MCD_FLIP_LINK_A = 0xfbDCDF5Bd98f68cEfc3f37829189b97B602eCFF2;
+    address constant PIP_LINK        = 0x20D5A457e49D05fac9729983d9701E0C3079Efac;
+
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
     uint256 constant MILLION  = 10 ** 6;
@@ -70,6 +76,7 @@ contract SpellAction {
     // $ bc -l <<< 'scale=27; e( l(1.01)/(60 * 60 * 24 * 365) )'
     //
     uint256 constant ONE_PERCENT_RATE   = 1000000000315522921573372069;
+    uint256 constant TWO_PERCENT_RATE   = 1000000000627937192491029810;
     uint256 constant THREE_PERCENT_RATE = 1000000000937303470807876289;
 
     function execute() external {
@@ -222,6 +229,80 @@ contract SpellAction {
 
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_LRC_A);
+
+
+        /************************************/
+        /*** LINK-A COLLATERAL ONBOARDING ***/
+        /************************************/
+        // Set ilk bytes32 variable
+        bytes32 linkIlk = "LINK-A";
+
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_LINK_A).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_LINK_A).ilk() == linkIlk, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_LINK_A).gem() == LINK,    "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_LINK_A).dec() == 18,      "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_LINK_A).vat() == MCD_VAT,    "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_LINK_A).cat() == MCD_CAT,    "flip-cat-not-match");
+        require(FlipAbstract(MCD_FLIP_LINK_A).ilk() == linkIlk,    "flip-ilk-not-match");
+
+        // Set the LINK PIP in the Spotter
+        SpotAbstract(MCD_SPOT).file(linkIlk, "pip", PIP_LINK);
+
+        // Set the LINK-A Flipper in the Cat
+        CatAbstract(MCD_CAT).file(linkIlk, "flip", MCD_FLIP_LINK_A);
+
+        // Init LINK-A ilk in Vat & Jug
+        VatAbstract(MCD_VAT).init(linkIlk);
+        JugAbstract(MCD_JUG).init(linkIlk);
+
+        // Allow LINK-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_LINK_A);
+        // Allow the LINK-A Flipper to reduce the Cat litterbox on deal()
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_LINK_A);
+        // Allow Cat to kick auctions in LINK-A Flipper
+        FlipAbstract(MCD_FLIP_LINK_A).rely(MCD_CAT);
+        // Allow End to yank auctions in LINK-A Flipper
+        FlipAbstract(MCD_FLIP_LINK_A).rely(MCD_END);
+        // Allow FlipperMom to access to the LINK-A Flipper
+        FlipAbstract(MCD_FLIP_LINK_A).rely(FLIPPER_MOM);
+
+        // Allow OsmMom to access to the LINK Osm
+        OsmAbstract(PIP_LINK).rely(OSM_MOM);
+        // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
+        MedianAbstract(OsmAbstract(PIP_LINK).src()).kiss(PIP_LINK);
+        // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        OsmAbstract(PIP_LINK).kiss(MCD_SPOT);
+        // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        OsmAbstract(PIP_LINK).kiss(MCD_END);
+        // Set LINK Osm in the OsmMom for new ilk
+        // !!!!!!!! Only if PIP_LINK = Osm
+        OsmMomAbstract(OSM_MOM).setOsm(linkIlk, PIP_LINK);
+
+        // Set the LINK-A debt ceiling
+        VatAbstract(MCD_VAT).file(linkIlk, "line", 5 * MILLION * RAD);
+        // Set the LINK-A dust
+        VatAbstract(MCD_VAT).file(linkIlk, "dust", 100 * RAD);
+        // Set the LINK-A dunk
+        CatAbstract(MCD_CAT).file(linkIlk, "dunk", 500 * RAD);
+        // Set the LINK-A liquidation penalty 
+        CatAbstract(MCD_CAT).file(linkIlk, "chop", 113 * WAD / 100);
+        // Set the LINK-A stability fee 
+        JugAbstract(MCD_JUG).file(linkIlk, "duty", TWO_PERCENT_RATE);
+        // Set the LINK-A percentage between bids 
+        FlipAbstract(MCD_FLIP_LINK_A).file("beg", 103 * WAD / 100);
+        // Set the LINK-A time max time between bids
+        FlipAbstract(MCD_FLIP_LINK_A).file("ttl", 1 hours);
+        // Set the LINK-A max auction duration to
+        FlipAbstract(MCD_FLIP_LINK_A).file("tau", 1 hours);
+        // Set the LINK-A min collateralization ratio 
+        SpotAbstract(MCD_SPOT).file(linkIlk, "mat", 175 * RAY / 100);
+
+        // Update LINK-A spot value in Vat
+        SpotAbstract(MCD_SPOT).poke(linkIlk);
+
+        // Add new ilk to the IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_LINK_A);
     }
 }
 

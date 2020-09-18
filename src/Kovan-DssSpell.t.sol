@@ -81,6 +81,13 @@ contract DssSpellTest is DSTest, DSMath {
     OsmAbstract         pipLRC = OsmAbstract(        0xcEE47Bb8989f625b5005bC8b9f9A0B0892339721);
     FlipAbstract      flipLRCA = FlipAbstract(       0xfC9496337538235669F4a19781234122c9455897);
     MedianAbstract     medLRCA = MedianAbstract(     0x2aab6aDb9d202e411D2B29a6be1da80F648230f2);
+    
+    // LINK-A specific
+    DSTokenAbstract       link = DSTokenAbstract(    0xa36085F69e2889c224210F603D836748e7dC0088);
+    GemJoinAbstract  joinLINKA = GemJoinAbstract(    0xF4Df626aE4fb446e2Dcce461338dEA54d2b9e09b);
+    OsmAbstract        pipLINK = OsmAbstract(        0x20D5A457e49D05fac9729983d9701E0C3079Efac);
+    FlipAbstract     flipLINKA = FlipAbstract(       0xfbDCDF5Bd98f68cEfc3f37829189b97B602eCFF2);
+    MedianAbstract    medLINKA = MedianAbstract(     0x7cb395DF9f1534cF528470e2F1AE2D1867d6253f); 
 
     DssSpell spell;
 
@@ -320,6 +327,19 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             duty:         1000000000937303470807876289, // 3% SF
             pct:          3 * 1000,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          175 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
+        afterSpell.collaterals["LINK-A"] = CollateralValues({
+            line:         5 * MILLION * RAD,
+            dust:         100 * RAD,
+            duty:         1000000000627937192491029810, // 2% SF
+            pct:          2 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          175 * RAY / 100,
@@ -586,6 +606,72 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flipLRCA.kicks(), 0);
         cat.bite("LRC-A", address(this));
         assertEq(flipLRCA.kicks(), 1);
+    }
+
+    function testSpellIsCast_LINK_INTEGRATION() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        pipLINK.poke();
+        hevm.warp(now + 3601); 
+        pipLINK.poke();
+        spot.poke("LINK-A");
+
+        hevm.store(
+            address(link),
+            keccak256(abi.encode(address(this), uint256(1))),
+            bytes32(uint256(1 * THOUSAND * WAD))
+        );
+
+        // check median matches pip.src()
+        assertEq(pipLINK.src(), address(medLINKA)); 
+
+        // Authorization
+        assertEq(joinLINKA.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinLINKA)), 1);
+        assertEq(flipLINKA.wards(address(end)), 1);
+        assertEq(flipLINKA.wards(address(flipMom)), 1);
+        assertEq(pipLINK.wards(address(osmMom)), 1);
+        assertEq(pipLINK.bud(address(spot)), 1);
+        assertEq(pipLINK.bud(address(end)), 1);
+        assertEq(MedianAbstract(pipLINK.src()).bud(address(pipLINK)), 1);
+
+        // Join to adapter
+        assertEq(link.balanceOf(address(this)), 1 * THOUSAND * WAD);
+        assertEq(vat.gem("LINK-A", address(this)), 0);
+        link.approve(address(joinLINKA), 1 * THOUSAND * WAD);
+        joinLINKA.join(address(this), 1 * THOUSAND * WAD);
+        assertEq(link.balanceOf(address(this)), 0);
+        assertEq(vat.gem("LINK-A", address(this)), 1 * THOUSAND * WAD);
+
+        // Deposit collateral, generate DAI
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob("LINK-A", address(this), address(this), address(this), int(1 * THOUSAND * WAD), int(100 * WAD));
+        assertEq(vat.gem("LINK-A", address(this)), 0);
+        assertEq(vat.dai(address(this)), 100 * RAD);
+
+        // Payback DAI, withdraw collateral
+        vat.frob("LINK-A", address(this), address(this), address(this), -int(1 * THOUSAND * WAD), -int(100 * WAD));
+        assertEq(vat.gem("LINK-A", address(this)), 1 * THOUSAND * WAD);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        joinLINKA.exit(address(this), 1 * THOUSAND * WAD);
+        assertEq(link.balanceOf(address(this)), 1 * THOUSAND * WAD);
+        assertEq(vat.gem("LINK-A", address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        link.approve(address(joinLINKA), 1 * THOUSAND * WAD);
+        joinLINKA.join(address(this), 1 * THOUSAND * WAD);
+        (,,uint256 spotV,,) = vat.ilks("LINK-A");
+        // dart max amount of DAI
+        vat.frob("LINK-A", address(this), address(this), address(this), int(1 * THOUSAND * WAD), int(mul(1 * THOUSAND * WAD, spotV) / RAY));
+        hevm.warp(now + 1);
+        jug.drip("LINK-A");
+        assertEq(flipLINKA.kicks(), 0);
+        cat.bite("LINK-A", address(this));
+        assertEq(flipLINKA.kicks(), 1);
     }
 
     function testSpellIsCast() public {
