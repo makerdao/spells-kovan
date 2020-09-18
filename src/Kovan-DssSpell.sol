@@ -44,11 +44,17 @@ contract SpellAction {
     address constant OSM_MOM         = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
     address constant ILK_REGISTRY    = 0xedE45A0522CA19e979e217064629778d6Cc2d9Ea;
 
-    // COMP specific addresses
+    // COMP-A specific addresses
     address constant COMP            = 0x1dDe24ACE93F9F638Bfd6fCE1B38b842703Ea1Aa;
     address constant MCD_JOIN_COMP_A = 0x16D567c1F6824ffFC460A11d48F61E010ae43766;
     address constant MCD_FLIP_COMP_A = 0x2917a962BC45ED48497de85821bddD065794DF6C;
     address constant PIP_COMP        = 0xcc10b1C53f4BFFEE19d0Ad00C40D7E36a454D5c4;
+
+    // LRC-A specific addresses
+    address constant LRC             = 0xF070662e48843934b5415f150a18C250d4D7B8aB;
+    address constant MCD_JOIN_LRC_A  = 0x436286788C5dB198d632F14A20890b0C4D236800;
+    address constant MCD_FLIP_LRC_A  = 0xfC9496337538235669F4a19781234122c9455897;
+    address constant PIP_LRC         = 0xcEE47Bb8989f625b5005bC8b9f9A0B0892339721;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -63,9 +69,18 @@ contract SpellAction {
     //
     // $ bc -l <<< 'scale=27; e( l(1.01)/(60 * 60 * 24 * 365) )'
     //
-    uint256 constant public ONE_PERCENT_RATE = 1000000000315522921573372069;
+    uint256 constant ONE_PERCENT_RATE   = 1000000000315522921573372069;
+    uint256 constant THREE_PERCENT_RATE = 1000000000937303470807876289;
 
     function execute() external {
+        /*** Risk Parameter Adjustments ***/
+
+        // Set the global debt ceiling
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 10 * MILLION * RAD);
+
+        /************************************/
+        /*** COMP-A COLLATERAL ONBOARDING ***/
+        /************************************/
         // Set ilk bytes32 variable
         bytes32 ilk = "COMP-A";
 
@@ -108,11 +123,8 @@ contract SpellAction {
         // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
         OsmAbstract(PIP_COMP).kiss(MCD_END);
         // Set COMP Osm in the OsmMom for new ilk
-        // !!!!!!!! Only if PIP_COMP = Osm
         OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_COMP);
 
-        // Set the global debt ceiling
-        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 7 * MILLION * RAD);
         // Set the COMP-A debt ceiling
         VatAbstract(MCD_VAT).file(ilk, "line", 7 * MILLION * RAD);
         // Set the COMP-A dust
@@ -137,6 +149,79 @@ contract SpellAction {
 
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_COMP_A);
+
+
+        /***********************************/
+        /*** LRC-A COLLATERAL ONBOARDING ***/
+        /***********************************/
+        // Set ilk bytes32 variable
+        ilk = "LRC-A";
+
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_LRC_A).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_LRC_A).ilk() == ilk,     "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_LRC_A).gem() == LRC,     "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_LRC_A).dec() == 18,      "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_LRC_A).vat() == MCD_VAT,    "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_LRC_A).cat() == MCD_CAT,    "flip-cat-not-match");
+        require(FlipAbstract(MCD_FLIP_LRC_A).ilk() == ilk,        "flip-ilk-not-match");
+
+        // Set the LRC PIP in the Spotter
+        SpotAbstract(MCD_SPOT).file(ilk, "pip", PIP_LRC);
+
+        // Set the LRC-A Flipper in the Cat
+        CatAbstract(MCD_CAT).file(ilk, "flip", MCD_FLIP_LRC_A);
+
+        // Init LRC-A ilk in Vat & Jug
+        VatAbstract(MCD_VAT).init(ilk);
+        JugAbstract(MCD_JUG).init(ilk);
+
+        // Allow LRC-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_LRC_A);
+        // Allow the LRC-A Flipper to reduce the Cat litterbox on deal()
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_LRC_A);
+        // Allow Cat to kick auctions in LRC-A Flipper
+        FlipAbstract(MCD_FLIP_LRC_A).rely(MCD_CAT);
+        // Allow End to yank auctions in LRC-A Flipper
+        FlipAbstract(MCD_FLIP_LRC_A).rely(MCD_END);
+        // Allow FlipperMom to access to the LRC-A Flipper
+        FlipAbstract(MCD_FLIP_LRC_A).rely(FLIPPER_MOM);
+
+        // Allow OsmMom to access to the LRC Osm
+        OsmAbstract(PIP_LRC).rely(OSM_MOM);
+        // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
+        MedianAbstract(OsmAbstract(PIP_LRC).src()).kiss(PIP_LRC);
+        // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        OsmAbstract(PIP_LRC).kiss(MCD_SPOT);
+        // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        OsmAbstract(PIP_LRC).kiss(MCD_END);
+        // Set LRC Osm in the OsmMom for new ilk
+        OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_LRC);
+
+        // Set the LRC-A debt ceiling
+        VatAbstract(MCD_VAT).file(ilk, "line", 3 * MILLION * RAD);
+        // Set the LRC-A dust
+        VatAbstract(MCD_VAT).file(ilk, "dust", 100 * RAD);
+        // Set the LRC-A dunk
+        CatAbstract(MCD_CAT).file(ilk, "dunk", 500 * RAD);
+        // Set the LRC-A liquidation penalty 
+        CatAbstract(MCD_CAT).file(ilk, "chop", 113 * WAD / 100);
+        // Set the LRC-A stability fee 
+        JugAbstract(MCD_JUG).file(ilk, "duty", THREE_PERCENT_RATE);
+        // Set the LRC-A percentage between bids 
+        FlipAbstract(MCD_FLIP_LRC_A).file("beg", 103 * WAD / 100);
+        // Set the LRC-A time max time between bids
+        FlipAbstract(MCD_FLIP_LRC_A).file("ttl", 1 hours);
+        // Set the LRC-A max auction duration to
+        FlipAbstract(MCD_FLIP_LRC_A).file("tau", 1 hours);
+        // Set the LRC-A min collateralization ratio 
+        SpotAbstract(MCD_SPOT).file(ilk, "mat", 175 * RAY / 100);
+
+        // Update LRC-A spot value in Vat
+        SpotAbstract(MCD_SPOT).poke(ilk);
+
+        // Add new ilk to the IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_LRC_A);
     }
 }
 
