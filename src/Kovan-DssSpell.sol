@@ -75,15 +75,87 @@ contract SpellAction {
     //
     // $ bc -l <<< 'scale=27; e( l(1.01)/(60 * 60 * 24 * 365) )'
     //
-    uint256 constant ONE_PERCENT_RATE   = 1000000000315522921573372069;
-    uint256 constant TWO_PERCENT_RATE   = 1000000000627937192491029810;
-    uint256 constant THREE_PERCENT_RATE = 1000000000937303470807876289;
+    uint256 constant   ZERO_PERCENT_RATE = 1000000000000000000000000000;
+    uint256 constant    ONE_PERCENT_RATE = 1000000000315522921573372069;
+    uint256 constant    TWO_PERCENT_RATE = 1000000000627937192491029810;
+    uint256 constant  THREE_PERCENT_RATE = 1000000000937303470807876289;
+    uint256 constant   FOUR_PERCENT_RATE = 1000000001243680656318820312;
+    uint256 constant  EIGHT_PERCENT_RATE = 1000000002440418608258400030;
+    uint256 constant TWELVE_PERCENT_RATE = 1000000003593629043335673582;
+    uint256 constant  FIFTY_PERCENT_RATE = 1000000012857214317438491659;
 
     function execute() external {
         /*** Risk Parameter Adjustments ***/
+        
+        /*** ETH-A ***/
+        // Set Stability Fee to 0%
+        JugAbstract(MCD_JUG).drip("ETH-A");
+        JugAbstract(MCD_JUG).file("ETH-A", "duty", ZERO_PERCENT_RATE);
+
+        /*** BAT-A ***/
+        // Set Stability Fee to 4%
+        JugAbstract(MCD_JUG).drip("BAT-A");
+        JugAbstract(MCD_JUG).file("BAT-A", "duty", FOUR_PERCENT_RATE);
+
+        /*** USDC-A ***/
+        // Set Stability Fee to 0%
+        JugAbstract(MCD_JUG).drip("USDC-A");
+        JugAbstract(MCD_JUG).file("USDC-A", "duty", FOUR_PERCENT_RATE);
+        // Set Debt Ceiling to $400 million
+        VatAbstract(MCD_VAT).file("USDC-A", "line", 400 * MILLION * RAD);
+        // Set Liquidation Ratio to 101%
+        SpotAbstract(MCD_SPOT).file("USDC-A", "mat", 101 * RAY / 100);
+
+        /*** USDC-B ***/
+        // Set Stability Fee to 50%
+        JugAbstract(MCD_JUG).drip("USDC-B");
+        JugAbstract(MCD_JUG).file("USDC-B", "duty", FIFTY_PERCENT_RATE);
+
+        /*** WBTC-A ***/
+        // Set Stability Fee to 4%
+        JugAbstract(MCD_JUG).drip("WBTC-A");
+        JugAbstract(MCD_JUG).file("WBTC-A", "duty", FOUR_PERCENT_RATE);
+
+        /*** TUSD-A ***/
+        // Set Stability Fee to 0%
+        JugAbstract(MCD_JUG).drip("TUSD-A");
+        JugAbstract(MCD_JUG).file("TUSD-A", "duty", FOUR_PERCENT_RATE);
+        // Set Debt Ceiling to $400 million
+        VatAbstract(MCD_VAT).file("TUSD-A", "line", 50 * MILLION * RAD);
+        // Set Liquidation Ratio to 101%
+        SpotAbstract(MCD_SPOT).file("TUSD-A", "mat", 101 * RAY / 100);
+
+        /*** KNC-A ***/
+        // Set Stability Fee to 4%
+        JugAbstract(MCD_JUG).drip("KNC-A");
+        JugAbstract(MCD_JUG).file("KNC-A", "duty", FOUR_PERCENT_RATE);
+
+        /*** ZRX-A ***/
+        // Set Stability Fee to 4%
+        JugAbstract(MCD_JUG).drip("ZRX-A");
+        JugAbstract(MCD_JUG).file("ZRX-A", "duty", FOUR_PERCENT_RATE);
+
+        /*** MANA-A ***/
+        // Set Stability Fee to 12%
+        JugAbstract(MCD_JUG).drip("MANA-A");
+        JugAbstract(MCD_JUG).file("MANA-A", "duty", TWELVE_PERCENT_RATE);
+
+        /*** USDT-A ***/
+        // Set Stability Fee to 8%
+        JugAbstract(MCD_JUG).drip("USDT-A");
+        JugAbstract(MCD_JUG).file("USDT-A", "duty", EIGHT_PERCENT_RATE);
+
+        /*** PAXUSD-A ***/
+        // Set Stability Fee to 0%
+        JugAbstract(MCD_JUG).drip("PAXUSD-A");
+        JugAbstract(MCD_JUG).file("PAXUSD-A", "duty", FOUR_PERCENT_RATE);
+        // Set Debt Ceiling to $400 million
+        VatAbstract(MCD_VAT).file("PAXUSD-A", "line", 5 * MILLION * RAD);
+        // Set Liquidation Ratio to 101%
+        SpotAbstract(MCD_SPOT).file("PAXUSD-A", "mat", 101 * RAY / 100);
 
         // Set the global debt ceiling
-        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 10 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file("Line", 1196 * MILLION * RAD);
 
         /************************************/
         /*** COMP-A COLLATERAL ONBOARDING ***/

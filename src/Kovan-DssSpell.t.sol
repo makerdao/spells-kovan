@@ -103,6 +103,21 @@ contract DssSpellTest is DSTest, DSMath {
     uint256 constant RAY        = 10 ** 27;
     uint256 constant RAD        = 10 ** 45;
 
+    // Many of the settings that change weekly rely on the rate accumulator
+    // described at https://docs.makerdao.com/smart-contract-modules/rates-module
+    // To check this yourself, use the following rate calculation (example 8%):
+    //
+    // $ bc -l <<< 'scale=27; e( l(1.01)/(60 * 60 * 24 * 365) )'
+    //
+    uint256 constant   ZERO_PERCENT_RATE = 1000000000000000000000000000;
+    uint256 constant    ONE_PERCENT_RATE = 1000000000315522921573372069;
+    uint256 constant    TWO_PERCENT_RATE = 1000000000627937192491029810;
+    uint256 constant  THREE_PERCENT_RATE = 1000000000937303470807876289;
+    uint256 constant   FOUR_PERCENT_RATE = 1000000001243680656318820312;
+    uint256 constant  EIGHT_PERCENT_RATE = 1000000002440418608258400030;
+    uint256 constant TWELVE_PERCENT_RATE = 1000000003593629043335673582;
+    uint256 constant  FIFTY_PERCENT_RATE = 1000000012857214317438491659;
+
     // not provided in DSMath
     function rpow(uint x, uint n, uint b) internal pure returns (uint z) {
       assembly {
@@ -153,7 +168,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             pot_dsr: 1000000000000000000000000000,
             pot_dsrPct: 0 * 1000,
-            vat_Line: 773 * MILLION * RAD,
+            vat_Line: 1196 * MILLION * RAD,
             pause_delay: 60,
             vow_wait: 3600,
             vow_dump: 2 * WAD,
@@ -169,8 +184,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["ETH-A"] = CollateralValues({
             line:         540 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000002440418608258400030,
-            pct:          8 * 1000,
+            duty:         ZERO_PERCENT_RATE,
+            pct:          0 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          150 * RAY / 100,
@@ -182,8 +197,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["BAT-A"] = CollateralValues({
             line:         5 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000000000000000000000,
-            pct:          0 * 1000,
+            duty:         FOUR_PERCENT_RATE,
+            pct:          4 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          150 * RAY / 100,
@@ -193,13 +208,13 @@ contract DssSpellTest is DSTest, DSMath {
             liquidations: 1
         });
         afterSpell.collaterals["USDC-A"] = CollateralValues({
-            line:         40 * MILLION * RAD,
+            line:         400 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000000000000000000000,
-            pct:          0,
+            duty:         FOUR_PERCENT_RATE,
+            pct:          4 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
-            mat:          110 * RAY / 100,
+            mat:          101 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
             tau:          1 hours,
@@ -208,8 +223,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["USDC-B"] = CollateralValues({
             line:         30 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000011562757347033522598,
-            pct:          44 * 1000,
+            duty:         FIFTY_PERCENT_RATE,
+            pct:          50 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          120 * RAY / 100,
@@ -221,8 +236,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["WBTC-A"] = CollateralValues({
             line:         120 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000000000000000000000,
-            pct:          0,
+            duty:         FOUR_PERCENT_RATE,
+            pct:          4 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          150 * RAY / 100,
@@ -232,13 +247,13 @@ contract DssSpellTest is DSTest, DSMath {
             liquidations: 1
         });
         afterSpell.collaterals["TUSD-A"] = CollateralValues({
-            line:         2 * MILLION * RAD,
+            line:         50 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000000000000000000000,
-            pct:          0 * 1000,
+            duty:         FOUR_PERCENT_RATE,
+            pct:          4 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
-            mat:          120 * RAY / 100,
+            mat:          101 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
             tau:          1 hours,
@@ -247,8 +262,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["KNC-A"] = CollateralValues({
             line:         5 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000000000000000000000,
-            pct:          0,
+            duty:         FOUR_PERCENT_RATE,
+            pct:          4 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          175 * RAY / 100,
@@ -260,8 +275,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["ZRX-A"] = CollateralValues({
             line:         5 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000000000000000000000,
-            pct:          0,
+            duty:         FOUR_PERCENT_RATE,
+            pct:          4 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          175 * RAY / 100,
@@ -273,8 +288,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["MANA-A"] = CollateralValues({
             line:         1 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000001847694957439350562,
-            pct:          6 * 1000,
+            duty:         TWELVE_PERCENT_RATE,
+            pct:          12 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          175 * RAY / 100,
@@ -286,8 +301,8 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             line:         10 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000001847694957439350562, // 6% SF
-            pct:          6 * 1000,
+            duty:         EIGHT_PERCENT_RATE, 
+            pct:          8 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          150 * RAY / 100,
@@ -299,11 +314,11 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             line:         5 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000627937192491029810, // 2% SF
-            pct:          2 * 1000,
+            duty:         FOUR_PERCENT_RATE, 
+            pct:          4 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
-            mat:          120 * RAY / 100,
+            mat:          101 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
             tau:          1 hours,
@@ -312,7 +327,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["COMP-A"] = CollateralValues({
             line:         7 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000315522921573372069, // 1% SF
+            duty:         ONE_PERCENT_RATE, 
             pct:          1 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
@@ -325,7 +340,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["LRC-A"] = CollateralValues({
             line:         3 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000937303470807876289, // 3% SF
+            duty:         THREE_PERCENT_RATE, 
             pct:          3 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
@@ -338,7 +353,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell.collaterals["LINK-A"] = CollateralValues({
             line:         5 * MILLION * RAD,
             dust:         100 * RAD,
-            duty:         1000000000627937192491029810, // 2% SF
+            duty:         TWO_PERCENT_RATE, 
             pct:          2 * 1000,
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
@@ -397,7 +412,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Line
         assertEq(vat.Line(), values.vat_Line);
         assertTrue(
-            (vat.Line() >= RAD && vat.Line() < BILLION * RAD) ||
+            (vat.Line() >= RAD && vat.Line() < 100 * BILLION * RAD) ||
             vat.Line() == 0
         );
 
