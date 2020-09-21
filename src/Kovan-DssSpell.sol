@@ -276,7 +276,6 @@ contract SpellAction {
         // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
         OsmAbstract(PIP_LINK).kiss(MCD_END);
         // Set LINK Osm in the OsmMom for new ilk
-        // !!!!!!!! Only if PIP_LINK = Osm
         OsmMomAbstract(OSM_MOM).setOsm(linkIlk, PIP_LINK);
 
         // Set the LINK-A debt ceiling
