@@ -27,6 +27,10 @@ import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 
+interface FaucetAbstract {
+    function setAmt(address, uint256) external;
+}
+
 contract SpellAction {
     // KOVAN ADDRESSES
     //
@@ -43,6 +47,7 @@ contract SpellAction {
     address constant FLIPPER_MOM     = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
     address constant OSM_MOM         = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
     address constant ILK_REGISTRY    = 0xedE45A0522CA19e979e217064629778d6Cc2d9Ea;
+    address constant FAUCET          = 0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3;
 
     // COMP-A specific addresses
     address constant COMP            = 0x1dDe24ACE93F9F638Bfd6fCE1B38b842703Ea1Aa;
@@ -229,6 +234,9 @@ contract SpellAction {
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_COMP_A);
 
+        // Set Faucet amount
+        FaucetAbstract(FAUCET).setAmt(COMP, 2 * WAD);
+
 
         /***********************************/
         /*** LRC-A COLLATERAL ONBOARDING ***/
@@ -302,6 +310,9 @@ contract SpellAction {
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_LRC_A);
 
+        // Set Faucet amount
+        FaucetAbstract(FAUCET).setAmt(LRC, 2000 * WAD);
+
 
         /************************************/
         /*** LINK-A COLLATERAL ONBOARDING ***/
@@ -374,6 +385,9 @@ contract SpellAction {
 
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_LINK_A);
+
+        // Set Faucet amount
+        FaucetAbstract(FAUCET).setAmt(LINK, 30 * WAD);
     }
 }
 
