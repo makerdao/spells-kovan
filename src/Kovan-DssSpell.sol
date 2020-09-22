@@ -155,7 +155,7 @@ contract SpellAction {
         JugAbstract(MCD_JUG).drip("PAXUSD-A");
         JugAbstract(MCD_JUG).file("PAXUSD-A", "duty", FOUR_PERCENT_RATE);
         // Set Debt Ceiling to $400 million
-        VatAbstract(MCD_VAT).file("PAXUSD-A", "line", 5 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file("PAXUSD-A", "line", 30 * MILLION * RAD);
         // Set Liquidation Ratio to 101%
         SpotAbstract(MCD_SPOT).file("PAXUSD-A", "mat", 101 * RAY / 100);
 

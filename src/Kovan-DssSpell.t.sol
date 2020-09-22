@@ -318,7 +318,7 @@ contract DssSpellTest is DSTest, DSMath {
             liquidations: 1
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
-            line:         5 * MILLION * RAD,
+            line:         30 * MILLION * RAD,
             dust:         100 * RAD,
             duty:         FOUR_PERCENT_RATE, 
             pct:          4 * 1000,
