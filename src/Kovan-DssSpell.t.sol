@@ -11,6 +11,9 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
+interface FaucetAbstract {
+    function amt(address) external view returns (uint256);
+}
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
@@ -73,7 +76,7 @@ contract DssSpellTest is DSTest, DSMath {
     GemJoinAbstract  joinCOMPA = GemJoinAbstract(    0x16D567c1F6824ffFC460A11d48F61E010ae43766);
     OsmAbstract        pipCOMP = OsmAbstract(        0xcc10b1C53f4BFFEE19d0Ad00C40D7E36a454D5c4);
     FlipAbstract     flipCOMPA = FlipAbstract(       0x2917a962BC45ED48497de85821bddD065794DF6C);
-    MedianAbstract    medCOMPA = MedianAbstract(     0x18746A1CED49Ff06432400b8EdDcf77876EcA6f8); 
+    MedianAbstract    medCOMPA = MedianAbstract(     0x18746A1CED49Ff06432400b8EdDcf77876EcA6f8);
 
     // LRC-A specific
     GemAbstract            lrc = GemAbstract(        0xF070662e48843934b5415f150a18C250d4D7B8aB);
@@ -87,7 +90,10 @@ contract DssSpellTest is DSTest, DSMath {
     GemJoinAbstract  joinLINKA = GemJoinAbstract(    0xF4Df626aE4fb446e2Dcce461338dEA54d2b9e09b);
     OsmAbstract        pipLINK = OsmAbstract(        0x20D5A457e49D05fac9729983d9701E0C3079Efac);
     FlipAbstract     flipLINKA = FlipAbstract(       0xfbDCDF5Bd98f68cEfc3f37829189b97B602eCFF2);
-    MedianAbstract    medLINKA = MedianAbstract(     0x7cb395DF9f1534cF528470e2F1AE2D1867d6253f); 
+    MedianAbstract    medLINKA = MedianAbstract(     0x7cb395DF9f1534cF528470e2F1AE2D1867d6253f);
+
+    // Faucet
+    FaucetAbstract      faucet = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
 
     DssSpell spell;
 
@@ -507,7 +513,10 @@ contract DssSpellTest is DSTest, DSMath {
             bytes32(uint256(1 * THOUSAND * WAD))
         );
 
-        // check median matches pip.src()
+        // Check faucet amount
+        assertEq(faucet.amt(address(comp)), 2 * WAD);
+
+        // Check median matches pip.src()
         assertEq(pipCOMP.src(), address(medCOMPA)); 
 
         // Authorization
@@ -573,7 +582,10 @@ contract DssSpellTest is DSTest, DSMath {
             bytes32(uint256(1 * THOUSAND * WAD))
         );
 
-        // check median matches pip.src()
+        // Check faucet amount
+        assertEq(faucet.amt(address(lrc)), 2000 * WAD);
+
+        // Check median matches pip.src()
         assertEq(pipLRC.src(), address(medLRCA)); 
 
         // Authorization
@@ -639,7 +651,10 @@ contract DssSpellTest is DSTest, DSMath {
             bytes32(uint256(1 * THOUSAND * WAD))
         );
 
-        // check median matches pip.src()
+        // Check faucet amount
+        assertEq(faucet.amt(address(link)), 30 * WAD);
+
+        // Check median matches pip.src()
         assertEq(pipLINK.src(), address(medLINKA)); 
 
         // Authorization
