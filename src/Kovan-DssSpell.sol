@@ -128,7 +128,7 @@ contract SpellAction {
         OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_ETH);
 
         // Set the global debt ceiling
-        VatAbstract(MCD_VAT).file("Line", 1216 * MILLION * RAD);  // FIXME
+        VatAbstract(MCD_VAT).file("Line", 1216 * MILLION * RAD);
         // Set the TOKEN-LETTER debt ceiling
         VatAbstract(MCD_VAT).file(ilk, "line", 20 * MILLION * RAD);
         // Set the TOKEN-LETTER dust
