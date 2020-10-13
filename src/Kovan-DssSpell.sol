@@ -84,7 +84,7 @@ contract SpellAction {
         require(GemJoinAbstract(MCD_JOIN_ETH_B).gem() == ETH, "join-gem-not-match");
         require(GemJoinAbstract(MCD_JOIN_ETH_B).dec() == 18, "join-dec-not-match");
         require(FlipAbstract(MCD_FLIP_ETH_B).vat() == MCD_VAT, "flip-vat-not-match");
-				require(FlipAbstract(MCD_FLIP_ETH_B).cat() == MCD_CAT, "flip-cat-not-match");
+        require(FlipAbstract(MCD_FLIP_ETH_B).cat() == MCD_CAT, "flip-cat-not-match");
         require(FlipAbstract(MCD_FLIP_ETH_B).ilk() == ilk, "flip-ilk-not-match");
 
         // Set the TOKEN PIP in the Spotter
@@ -99,16 +99,16 @@ contract SpellAction {
 
         // Allow TOKEN-LETTER Join to modify Vat registry
         VatAbstract(MCD_VAT).rely(MCD_JOIN_ETH_B);
-				// Allow the TOKEN-LETTER Flipper to reduce the Cat litterbox on deal()
-				CatAbstract(MCD_CAT).rely(MCD_FLIP_ETH_B);
+        // Allow the TOKEN-LETTER Flipper to reduce the Cat litterbox on deal()
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_ETH_B);
         // Allow Cat to kick auctions in TOKEN-LETTER Flipper
         FlipAbstract(MCD_FLIP_ETH_B).rely(MCD_CAT);
         // Allow End to yank auctions in TOKEN-LETTER Flipper
         FlipAbstract(MCD_FLIP_ETH_B).rely(MCD_END);
         // Allow FlipperMom to access to the TOKEN-LETTER Flipper
         FlipAbstract(MCD_FLIP_ETH_B).rely(FLIPPER_MOM);
-				// Disallow Cat to kick auctions in TOKEN-LETTER Flipper
-				// !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
+        // Disallow Cat to kick auctions in TOKEN-LETTER Flipper
+        // !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
         //FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_ETH_B);
 
         // Allow OsmMom to access to the TOKEN Osm
@@ -120,7 +120,7 @@ contract SpellAction {
         // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
         // !!!!!!!! Only if PIP_TOKEN = Osm or PIP_TOKEN = Median and hasn't been already whitelisted due a previous deployed ilk
         //OsmAbstract(PIP_TOKEN).kiss(MCD_SPOT);
-				// Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
         // !!!!!!!! Only if PIP_TOKEN = Osm or PIP_TOKEN = Median and hasn't been already whitelisted due a previous deployed ilk
         //OsmAbstract(PIP_TOKEN).kiss(MCD_END);
         // Set TOKEN Osm in the OsmMom for new ilk
