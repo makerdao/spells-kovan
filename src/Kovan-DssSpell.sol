@@ -153,7 +153,6 @@ contract SpellAction {
 
 				// Add new ilk to the IlkRegistry
 				IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_ETH_B);
-
     }
 }
 
