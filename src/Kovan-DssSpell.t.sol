@@ -116,14 +116,7 @@ contract DssSpellTest is DSTest, DSMath {
     //
     // $ bc -l <<< 'scale=27; e( l(1.01)/(60 * 60 * 24 * 365) )'
     //
-    uint256 constant   ZERO_PERCENT_RATE = 1000000000000000000000000000;
-    uint256 constant    ONE_PERCENT_RATE = 1000000000315522921573372069;
-    uint256 constant    TWO_PERCENT_RATE = 1000000000627937192491029810;
-    uint256 constant  THREE_PERCENT_RATE = 1000000000937303470807876289;
-    uint256 constant   FOUR_PERCENT_RATE = 1000000001243680656318820312;
-    uint256 constant  EIGHT_PERCENT_RATE = 1000000002440418608258400030;
-    uint256 constant TWELVE_PERCENT_RATE = 1000000003593629043335673582;
-    uint256 constant  FIFTY_PERCENT_RATE = 1000000012857214317438491659;
+    // Rates table is in ./test/rates.sol
 
     // not provided in DSMath
     function rpow(uint x, uint n, uint b) internal pure returns (uint z) {
@@ -176,7 +169,7 @@ contract DssSpellTest is DSTest, DSMath {
         afterSpell = SystemValues({
             pot_dsr: 1000000000000000000000000000,
             pot_dsrPct: 0 * 1000,
-            vat_Line: 1196 * MILLION * RAD,
+            vat_Line: 1216 * MILLION * RAD,
             pause_delay: 60,
             vow_wait: 3600,
             vow_dump: 2 * WAD,
@@ -196,6 +189,18 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         113 * WAD / 100,
             dunk:         500 * RAD,
             mat:          150 * RAY / 100,
+            beg:          103 * WAD / 100,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
+        afterSpell.collaterals["ETH-B"] = CollateralValues({
+            line:         20 * MILLION * RAD,
+            dust:         100 * RAD,
+            pct:          6 * 1000,
+            chop:         113 * WAD / 100,
+            dunk:         500 * RAD,
+            mat:          130 * RAY / 100,
             beg:          103 * WAD / 100,
             ttl:          1 hours,
             tau:          1 hours,
