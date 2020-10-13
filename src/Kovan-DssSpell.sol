@@ -151,8 +151,8 @@ contract SpellAction {
         // Update TOKEN-LETTER spot value in Vat
         SpotAbstract(MCD_SPOT).poke(ilk);
 
-				// Add new ilk to the IlkRegistry
-				IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_ETH_B);
+        // Add new ilk to the IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_ETH_B);
     }
 }
 
