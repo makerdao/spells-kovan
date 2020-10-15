@@ -18,9 +18,11 @@ interface FaucetAbstract {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0);
+    address constant KOVAN_SPELL = address(
+        0x79e92D6e1f041A98df60D7D5540D1A1697021398
+    );
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1600956188;
+    uint256 constant SPELL_CREATED = 1602770824;
 
     struct CollateralValues {
         uint256 line;
