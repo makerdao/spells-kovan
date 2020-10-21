@@ -187,7 +187,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          0,        // In basis points
             chop:         1300,     // In basis points
-            dunk:         500 * RAD,
+            dunk:         500,      // In whole Dai
             mat:          15000,    // In basis points
             beg:          10300,    // In basis points
             ttl:          1 hours,  // In seconds
@@ -199,7 +199,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          600,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          13000,
             beg:          10300,
             ttl:          1 hours,
@@ -211,7 +211,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          400,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          15000,
             beg:          10300,
             ttl:          1 hours,
@@ -223,7 +223,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          400,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          10100,
             beg:          10300,
             ttl:          1 hours,
@@ -235,7 +235,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          5000,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          12000,
             beg:          10300,
             ttl:          1 hours,
@@ -247,7 +247,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          400,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          15000,
             beg:          10300,
             ttl:          1 hours,
@@ -259,7 +259,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          400,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          10100,
             beg:          10300,
             ttl:          1 hours,
@@ -271,7 +271,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          400,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          17500,
             beg:          10300,
             ttl:          1 hours,
@@ -283,7 +283,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          400,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          17500,
             beg:          10300,
             ttl:          1 hours,
@@ -295,7 +295,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          1200,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          17500,
             beg:          10300,
             ttl:          1 hours,
@@ -307,7 +307,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          800,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          15000,
             beg:          10300,
             ttl:          1 hours,
@@ -319,7 +319,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          400,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          10100,
             beg:          10300,
             ttl:          1 hours,
@@ -331,7 +331,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          100,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          17500,
             beg:          10300,
             ttl:          1 hours,
@@ -343,7 +343,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          300,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          17500,
             beg:          10300,
             ttl:          1 hours,
@@ -355,7 +355,7 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100 * RAD,
             pct:          200,
             chop:         1300,
-            dunk:         500 * RAD,
+            dunk:         500,
             mat:          17500,
             beg:          10300,
             ttl:          1 hours,
@@ -472,7 +472,9 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(chop, normalizedTestChop);
         // make sure chop is less than 100%
         assertTrue(chop >= WAD && chop < 2 * WAD);   // penalty gt eq 0% and lt 100%
-        assertEq(dunk, values.collaterals[ilk].dunk);
+        // Convert whole Dai units to expected RAD
+        uint normalizedTestDunk = values.collaterals[ilk].dunk * RAD;
+        assertEq(dunk, normalizedTestDunk);
         // put back in after LIQ-1.2
         assertTrue(dunk >= RAD && dunk < MILLION * RAD);
         }
