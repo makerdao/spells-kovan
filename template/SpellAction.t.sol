@@ -14,7 +14,7 @@
             chop:         1300,
             dunk:         500,
             mat:          17500,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
