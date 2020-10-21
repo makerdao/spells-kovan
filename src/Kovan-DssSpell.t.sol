@@ -192,7 +192,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,            // In basis points
             dunk:         500,             // In whole Dai units
             mat:          15000,           // In basis points
-            beg:          10300,           // In basis points
+            beg:          300,             // In basis points
             ttl:          1 hours,         // In seconds
             tau:          1 hours,         // In seconds
             liquidations: 1                // 1 if enabled
@@ -204,7 +204,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          13000,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -216,7 +216,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          15000,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -228,7 +228,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          10100,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 0
@@ -240,7 +240,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          12000,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 0
@@ -252,7 +252,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          15000,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -264,7 +264,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          10100,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 0
@@ -276,7 +276,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          17500,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -288,7 +288,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          17500,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -300,7 +300,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          17500,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -312,7 +312,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          15000,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -324,7 +324,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          10100,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 0
@@ -336,7 +336,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          17500,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -348,7 +348,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          17500,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -360,7 +360,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          17500,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -372,7 +372,7 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          17500,
-            beg:          10300,
+            beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
@@ -528,7 +528,7 @@ contract DssSpellTest is DSTest, DSMath {
         (address flipper,,) = cat.ilks(ilk);
         FlipAbstract flip = FlipAbstract(flipper);
         // Convert BP to system expected value
-        uint normalizedTestBeg = values.collaterals[ilk].beg * 10**14;
+        uint normalizedTestBeg = (values.collaterals[ilk].beg + 10000)  * 10**14;
         assertEq(uint(flip.beg()), normalizedTestBeg);
         assertTrue(flip.beg() >= WAD && flip.beg() < 105 * WAD / 100);  // gt eq 0% and lt 5%
         assertEq(uint(flip.ttl()), values.collaterals[ilk].ttl);
