@@ -167,9 +167,9 @@ contract DssSpellTest is DSTest, DSMath {
         //
         afterSpell = SystemValues({
             dsr_rate: 0,                 // In basis points
-            vat_Line: 1216 * MILLION * RAD,
-            pause_delay: 60,
-            vow_wait: 3600,
+            vat_Line: 1216 * MILLION,    // In whole Dai units
+            pause_delay: 60,             // In seconds
+            vow_wait: 3600,              // In seconds
             vow_dump: 2 * WAD,
             vow_sump: 50 * RAD,
             vow_bump: 10 * RAD,
@@ -406,8 +406,9 @@ contract DssSpellTest is DSTest, DSMath {
         );
         assertTrue(diffCalc(expectedRate(values.dsr_rate * 10), yearlyYield(expectedDSRRate)) <= TOLERANCE);
 
-        // Line
-        assertEq(vat.Line(), values.vat_Line);
+        // Line values in RAD
+        uint normalizedLine = values.vat_Line * RAD;
+        assertEq(vat.Line(), normalizedLine);
         assertTrue(
             (vat.Line() >= RAD && vat.Line() < 100 * BILLION * RAD) ||
             vat.Line() == 0
