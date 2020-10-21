@@ -45,6 +45,7 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 vow_bump;
         uint256 vow_hump;
         uint256 cat_box;
+        uint256 ilk_count;
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
@@ -166,31 +167,32 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all system configuration changes
         //
         afterSpell = SystemValues({
-            dsr_rate: 0,                 // In basis points
-            vat_Line: 1216 * MILLION,    // In whole Dai units
-            pause_delay: 60,             // In seconds
-            vow_wait: 3600,              // In seconds
-            vow_dump: 2,                 // In whole Dai units
-            vow_sump: 50,                // In whole Dai units
-            vow_bump: 10 * RAD,
-            vow_hump: 500 * RAD,
-            cat_box: 10 * THOUSAND * RAD
+            dsr_rate:     0,               // In basis points
+            vat_Line:     1216 * MILLION,  // In whole Dai units
+            pause_delay:  60,              // In seconds
+            vow_wait:     3600,            // In seconds
+            vow_dump:     2,               // In whole Dai units
+            vow_sump:     50,              // In whole Dai units
+            vow_bump:     10,              // In whole Dai units
+            vow_hump:     500,             // In whole Dai units
+            cat_box:      10 * THOUSAND,   // In whole Dai units
+            ilk_count:    15               // Num expected in system
         });
 
         //
         // Test for all collateral based changes here
         //
         afterSpell.collaterals["ETH-A"] = CollateralValues({
-            line:         540 * MILLION,  // In whole Dai units
-            dust:         100,            // In whole Dai units
-            pct:          0,              // In basis points
-            chop:         1300,           // In basis points
-            dunk:         500,            // In whole Dai units
-            mat:          15000,          // In basis points
-            beg:          10300,          // In basis points
-            ttl:          1 hours,        // In seconds
-            tau:          1 hours,        // In seconds
-            liquidations: 1               // 1 if enabled
+            line:         540 * MILLION,   // In whole Dai units
+            dust:         100,             // In whole Dai units
+            pct:          0,               // In basis points
+            chop:         1300,            // In basis points
+            dunk:         500,             // In whole Dai units
+            mat:          15000,           // In basis points
+            beg:          10300,           // In basis points
+            ttl:          1 hours,         // In seconds
+            tau:          1 hours,         // In seconds
+            liquidations: 1                // 1 if enabled
         });
         afterSpell.collaterals["ETH-B"] = CollateralValues({
             line:         20 * MILLION,
@@ -439,19 +441,34 @@ contract DssSpellTest is DSTest, DSMath {
             vow.sump() == 0
         );
         }
-        // bump
-        assertEq(vow.bump(), values.vow_bump);
+        {
+        // bump values in RAD
+        uint normalizedBump = values.vow_bump * RAD;
+        assertEq(vow.bump(), normalizedBump);
         assertTrue(
             (vow.bump() >= RAD && vow.bump() < HUNDRED * THOUSAND * RAD) ||
             vow.bump() == 0
         );
-
-        // hump
-        assertEq(vow.hump(), values.vow_hump);
+        }
+        {
+        // hump values in RAD
+        uint normalizedHump = values.vow_hump * RAD;
+        assertEq(vow.hump(), normalizedHump);
         assertTrue(
             (vow.hump() >= RAD && vow.hump() < HUNDRED * MILLION * RAD) ||
             vow.hump() == 0
         );
+        }
+
+        // box values in RAD
+        {
+            uint normalizedBox = values.cat_box * RAD;
+            assertEq(cat.box(), normalizedBox);
+        }
+
+        // check number of ilks
+        assertEq(reg.count(), values.ilk_count);
+
     }
 
     function checkCollateralValues(bytes32 ilk, SystemValues storage values) internal {
