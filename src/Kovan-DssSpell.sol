@@ -26,11 +26,7 @@ import "lib/dss-interfaces/src/dss/OsmAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
-
-// DO NOT REMOVE THIS ABSTRACT
-interface FaucetAbstract {
-    function setAmt(address, uint256) external;
-}
+import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
 
 contract SpellAction {
     address constant MCD_VAT      = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
@@ -46,7 +42,7 @@ contract SpellAction {
     address constant FAUCET       = 0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3;
 
     address constant BAL            = 0x630D82Cbf82089B09F71f8d3aAaff2EBA6f47B15;
-    address constant MCD_JOIN_BAL_A = 0x17D3fd747FCc1BA15DC07f077ccd5Fc1902e0F08;
+    address constant MCD_JOIN_BAL_A = 0x8De5EA9251E0576e3726c8766C56E27fAb2B6597;
     address constant MCD_FLIP_BAL_A = 0xF6d19CC05482Ef7F73f09c1031BA01567EF6ac0f;
     address constant PIP_BAL        = 0x4fd34872F3AbC07ea6C45c7907f87041C0801DdE;
 
@@ -62,7 +58,7 @@ contract SpellAction {
     //
     // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
     //
-    uint256 constant public X_PERCENT_RATE = ;
+    uint256 constant FIVE_PERCENT_RATE = 1000000001547125957863212448;
 
     function execute() external {
         bytes32 ilk = "BAL-A";
@@ -127,7 +123,7 @@ contract SpellAction {
         // Set the BAL-A liquidation penalty (e.g. 13% => X = 113)
         CatAbstract(MCD_CAT).file(ilk, "chop", 113 * WAD / 100);
         // Set the BAL-A stability fee (e.g. 1% = 1000000000315522921573372069)
-        JugAbstract(MCD_JUG).file(ilk, "duty", 1000000001547125957863212448);
+        JugAbstract(MCD_JUG).file(ilk, "duty", FIVE_PERCENT_RATE);
         // Set the BAL-A percentage between bids (e.g. 3% => X = 103)
         FlipAbstract(MCD_FLIP_BAL_A).file("beg", 103 * WAD / 100);
         // Set the BAL-A time max time between bids
