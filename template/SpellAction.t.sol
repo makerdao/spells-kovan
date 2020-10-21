@@ -8,10 +8,14 @@
         // add to the end of the list of collateral tests
         // change the values as appropriate
         afterSpell.collaterals["TOKEN-LETTER"] = CollateralValues({
-            line:         4 * MILLION,                                                          dust:         100,
-            pct:          500,                                                                  chop:         1300,
-            dunk:         500,                                                                  mat:          17500,
-            beg:          10300,                                                                ttl:          1 hours,
+            line:         4 * MILLION,
+            dust:         100,
+            pct:          500,
+            chop:         1300,
+            dunk:         500,
+            mat:          17500,
+            beg:          10300,
+            ttl:          1 hours,
             tau:          1 hours,
             liquidations: 1
         });
