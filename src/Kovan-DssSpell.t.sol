@@ -183,11 +183,11 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all collateral based changes here
         //
         afterSpell.collaterals["ETH-A"] = CollateralValues({
-            line:         540 * MILLION,  // In whole Dai
-            dust:         100 * RAD,
+            line:         540 * MILLION,  // In whole Dai units
+            dust:         100,            // In whole Dai units
             pct:          0,              // In basis points
             chop:         1300,           // In basis points
-            dunk:         500,            // In whole Dai
+            dunk:         500,            // In whole Dai units
             mat:          15000,          // In basis points
             beg:          10300,          // In basis points
             ttl:          1 hours,        // In seconds
@@ -196,7 +196,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["ETH-B"] = CollateralValues({
             line:         20 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          600,
             chop:         1300,
             dunk:         500,
@@ -208,7 +208,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["BAT-A"] = CollateralValues({
             line:         5 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          400,
             chop:         1300,
             dunk:         500,
@@ -220,7 +220,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["USDC-A"] = CollateralValues({
             line:         400 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          400,
             chop:         1300,
             dunk:         500,
@@ -232,7 +232,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["USDC-B"] = CollateralValues({
             line:         30 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          5000,
             chop:         1300,
             dunk:         500,
@@ -244,7 +244,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["WBTC-A"] = CollateralValues({
             line:         120 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          400,
             chop:         1300,
             dunk:         500,
@@ -256,7 +256,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["TUSD-A"] = CollateralValues({
             line:         50 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          400,
             chop:         1300,
             dunk:         500,
@@ -268,7 +268,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["KNC-A"] = CollateralValues({
             line:         5 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          400,
             chop:         1300,
             dunk:         500,
@@ -280,7 +280,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["ZRX-A"] = CollateralValues({
             line:         5 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          400,
             chop:         1300,
             dunk:         500,
@@ -292,7 +292,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["MANA-A"] = CollateralValues({
             line:         1 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          1200,
             chop:         1300,
             dunk:         500,
@@ -304,7 +304,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             line:         10 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          800,
             chop:         1300,
             dunk:         500,
@@ -316,7 +316,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             line:         30 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          400,
             chop:         1300,
             dunk:         500,
@@ -328,7 +328,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["COMP-A"] = CollateralValues({
             line:         7 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          100,
             chop:         1300,
             dunk:         500,
@@ -340,7 +340,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["LRC-A"] = CollateralValues({
             line:         3 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          300,
             chop:         1300,
             dunk:         500,
@@ -352,7 +352,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["LINK-A"] = CollateralValues({
             line:         5 * MILLION,
-            dust:         100 * RAD,
+            dust:         100,
             pct:          200,
             chop:         1300,
             dunk:         500,
@@ -465,7 +465,8 @@ contract DssSpellTest is DSTest, DSMath {
         uint normalizedTestLine = values.collaterals[ilk].line * RAD;
         assertEq(line, normalizedTestLine);
         assertTrue((line >= RAD && line < BILLION * RAD) || line == 0);  // eq 0 or gt eq 1 RAD and lt 1B
-        assertEq(dust, values.collaterals[ilk].dust);
+        uint normalizedTestDust = values.collaterals[ilk].dust * RAD;
+        assertEq(dust, normalizedTestDust);
         assertTrue((dust >= RAD && dust < 10 * THOUSAND * RAD) || dust == 0); // eq 0 or gt eq 1 and lt 10k
         }
         {
