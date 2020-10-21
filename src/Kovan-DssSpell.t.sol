@@ -14,9 +14,11 @@ interface Hevm {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0);
+    address constant KOVAN_SPELL = address(
+      0x0DE068b775ED97f53981a733769146Aba3F4a1aC
+    );
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1602770824;
+    uint256 constant SPELL_CREATED = 1603315220;
 
     struct CollateralValues {
         uint256 line;
