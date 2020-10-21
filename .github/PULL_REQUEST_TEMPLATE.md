@@ -1,6 +1,6 @@
 # Description
 
-Collateral Type (e.g. `ETH-A`):
+Spell Description:
 
 COB Team Name or Author(s):
 
