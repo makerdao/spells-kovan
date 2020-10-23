@@ -47,10 +47,10 @@ contract SpellAction {
 
     address constant FAUCET       = 0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3;
 
-    address constant BAL            = 0x630D82Cbf82089B09F71f8d3aAaff2EBA6f47B15;
-    address constant MCD_JOIN_BAL_A = 0x8De5EA9251E0576e3726c8766C56E27fAb2B6597;
-    address constant MCD_FLIP_BAL_A = 0xF6d19CC05482Ef7F73f09c1031BA01567EF6ac0f;
-    address constant PIP_BAL        = 0x4fd34872F3AbC07ea6C45c7907f87041C0801DdE;
+    address constant YFI            = 0x251F1c3077FEd1770cB248fB897100aaE1269FFC;
+    address constant MCD_JOIN_YFI_A = 0x5b683137481F2FE683E2f2385792B1DeB018050F;
+    address constant MCD_FLIP_YFI_A = 0x5eB5D3B028CD255d79019f7C44a502b31bFFde9d;
+    address constant PIP_YFI        = 0x9D8255dc4e25bB85e49c65B21D8e749F2293862a;
 
     uint256 constant THOUSAND = 10**3;
     uint256 constant MILLION = 10**6;
@@ -64,89 +64,89 @@ contract SpellAction {
     //
     // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
     //
-    uint256 constant FIVE_PERCENT_RATE = 1000000001547125957863212448;
+    uint256 constant FOUR_PERCENT_RATE = 1000000001243680656318820312;
 
     function execute() external {
-        bytes32 ilk = "BAL-A";
+        bytes32 ilk = "YFI-A";
 
         // Sanity checks
-        require(GemJoinAbstract(MCD_JOIN_BAL_A).vat() == MCD_VAT, "join-vat-not-match");
-        require(GemJoinAbstract(MCD_JOIN_BAL_A).ilk() == ilk, "join-ilk-not-match");
-        require(GemJoinAbstract(MCD_JOIN_BAL_A).gem() == BAL, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_BAL_A).dec() == 18, "join-dec-not-match");
-        require(FlipAbstract(MCD_FLIP_BAL_A).vat() == MCD_VAT, "flip-vat-not-match");
-        require(FlipAbstract(MCD_FLIP_BAL_A).cat() == MCD_CAT, "flip-cat-not-match");
-        require(FlipAbstract(MCD_FLIP_BAL_A).ilk() == ilk, "flip-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_YFI_A).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_YFI_A).ilk() == ilk, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_YFI_A).gem() == YFI, "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_YFI_A).dec() == 18, "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_YFI_A).vat() == MCD_VAT, "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_YFI_A).cat() == MCD_CAT, "flip-cat-not-match");
+        require(FlipAbstract(MCD_FLIP_YFI_A).ilk() == ilk, "flip-ilk-not-match");
 
-        // Set the BAL PIP in the Spotter
-        SpotAbstract(MCD_SPOT).file(ilk, "pip", PIP_BAL);
+        // Set the YFI PIP in the Spotter
+        SpotAbstract(MCD_SPOT).file(ilk, "pip", PIP_YFI);
 
-        // Set the BAL-A Flipper in the Cat
-        CatAbstract(MCD_CAT).file(ilk, "flip", MCD_FLIP_BAL_A);
+        // Set the YFI-A Flipper in the Cat
+        CatAbstract(MCD_CAT).file(ilk, "flip", MCD_FLIP_YFI_A);
 
-        // Init BAL-A ilk in Vat & Jug
+        // Init YFI-A ilk in Vat & Jug
         VatAbstract(MCD_VAT).init(ilk);
         JugAbstract(MCD_JUG).init(ilk);
 
-        // Allow BAL-A Join to modify Vat registry
-        VatAbstract(MCD_VAT).rely(MCD_JOIN_BAL_A);
-        // Allow the BAL-A Flipper to reduce the Cat litterbox on deal()
-        CatAbstract(MCD_CAT).rely(MCD_FLIP_BAL_A);
-        // Allow Cat to kick auctions in BAL-A Flipper
-        FlipAbstract(MCD_FLIP_BAL_A).rely(MCD_CAT);
-        // Allow End to yank auctions in BAL-A Flipper
-        FlipAbstract(MCD_FLIP_BAL_A).rely(MCD_END);
-        // Allow FlipperMom to access to the BAL-A Flipper
-        FlipAbstract(MCD_FLIP_BAL_A).rely(FLIPPER_MOM);
-        // Disallow Cat to kick auctions in BAL-A Flipper
+        // Allow YFI-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_YFI_A);
+        // Allow the YFI-A Flipper to reduce the Cat litterbox on deal()
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_YFI_A);
+        // Allow Cat to kick auctions in YFI-A Flipper
+        FlipAbstract(MCD_FLIP_YFI_A).rely(MCD_CAT);
+        // Allow End to yank auctions in YFI-A Flipper
+        FlipAbstract(MCD_FLIP_YFI_A).rely(MCD_END);
+        // Allow FlipperMom to access to the YFI-A Flipper
+        FlipAbstract(MCD_FLIP_YFI_A).rely(FLIPPER_MOM);
+        // Disallow Cat to kick auctions in YFI-A Flipper
         // !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
-        // FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_BAL_A);
+        // FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_YFI_A);
 
-        // Allow OsmMom to access to the BAL Osm
-        // !!!!!!!! Only if PIP_BAL = Osm and hasn't been already relied due a previous deployed ilk
-        OsmAbstract(PIP_BAL).rely(OSM_MOM);
+        // Allow OsmMom to access to the YFI Osm
+        // !!!!!!!! Only if PIP_YFI = Osm and hasn't been already relied due a previous deployed ilk
+        OsmAbstract(PIP_YFI).rely(OSM_MOM);
         // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
-        // !!!!!!!! Only if PIP_BAL = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk
-        MedianAbstract(OsmAbstract(PIP_BAL).src()).kiss(PIP_BAL);
+        // !!!!!!!! Only if PIP_YFI = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk
+        MedianAbstract(OsmAbstract(PIP_YFI).src()).kiss(PIP_YFI);
         // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
-        // !!!!!!!! Only if PIP_BAL = Osm or PIP_BAL = Median and hasn't been already whitelisted due a previous deployed ilk
-        OsmAbstract(PIP_BAL).kiss(MCD_SPOT);
+        // !!!!!!!! Only if PIP_YFI = Osm or PIP_YFI = Median and hasn't been already whitelisted due a previous deployed ilk
+        OsmAbstract(PIP_YFI).kiss(MCD_SPOT);
         // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
-        // !!!!!!!! Only if PIP_BAL = Osm or PIP_BAL = Median and hasn't been already whitelisted due a previous deployed ilk
-        OsmAbstract(PIP_BAL).kiss(MCD_END);
-        // Set BAL Osm in the OsmMom for new ilk
-        // !!!!!!!! Only if PIP_BAL = Osm
-        OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_BAL);
+        // !!!!!!!! Only if PIP_YFI = Osm or PIP_YFI = Median and hasn't been already whitelisted due a previous deployed ilk
+        OsmAbstract(PIP_YFI).kiss(MCD_END);
+        // Set YFI Osm in the OsmMom for new ilk
+        // !!!!!!!! Only if PIP_YFI = Osm
+        OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_YFI);
 
         // Set the global debt ceiling
-        VatAbstract(MCD_VAT).file("Line", 1220 * MILLION * RAD);
-        // Set the BAL-A debt ceiling
-        VatAbstract(MCD_VAT).file(ilk, "line", 4 * MILLION * RAD);
-        // Set the BAL-A dust
+        VatAbstract(MCD_VAT).file("Line", 1227 * MILLION * RAD);
+        // Set the YFI-A debt ceiling
+        VatAbstract(MCD_VAT).file(ilk, "line", 7 * MILLION * RAD);
+        // Set the YFI-A dust
         VatAbstract(MCD_VAT).file(ilk, "dust", 100 * RAD);
         // Set the Lot size
         CatAbstract(MCD_CAT).file(ilk, "dunk", 500 * RAD);
-        // Set the BAL-A liquidation penalty (e.g. 13% => X = 113)
+        // Set the YFI-A liquidation penalty (e.g. 13% => X = 113)
         CatAbstract(MCD_CAT).file(ilk, "chop", 113 * WAD / 100);
-        // Set the BAL-A stability fee (e.g. 1% = 1000000000315522921573372069)
-        JugAbstract(MCD_JUG).file(ilk, "duty", FIVE_PERCENT_RATE);
-        // Set the BAL-A percentage between bids (e.g. 3% => X = 103)
-        FlipAbstract(MCD_FLIP_BAL_A).file("beg", 103 * WAD / 100);
-        // Set the BAL-A time max time between bids
-        FlipAbstract(MCD_FLIP_BAL_A).file("ttl", 1 hours);
-        // Set the BAL-A max auction duration to
-        FlipAbstract(MCD_FLIP_BAL_A).file("tau", 1 hours);
-        // Set the BAL-A min collateralization ratio (e.g. 150% => X = 150)
+        // Set the YFI-A stability fee (e.g. 1% = 1000000000315522921573372069)
+        JugAbstract(MCD_JUG).file(ilk, "duty", FOUR_PERCENT_RATE);
+        // Set the YFI-A percentage between bids (e.g. 3% => X = 103)
+        FlipAbstract(MCD_FLIP_YFI_A).file("beg", 103 * WAD / 100);
+        // Set the YFI-A time max time between bids
+        FlipAbstract(MCD_FLIP_YFI_A).file("ttl", 1 hours);
+        // Set the YFI-A max auction duration to
+        FlipAbstract(MCD_FLIP_YFI_A).file("tau", 1 hours);
+        // Set the YFI-A min collateralization ratio (e.g. 150% => X = 150)
         SpotAbstract(MCD_SPOT).file(ilk, "mat", 175 * RAY / 100);
 
-        // Update BAL-A spot value in Vat
+        // Update YFI-A spot value in Vat
         SpotAbstract(MCD_SPOT).poke(ilk);
 
         // Add new ilk to the IlkRegistry
-        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_BAL_A);
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_YFI_A);
 
         // Set gulp amount in faucet on kovan
-        FaucetAbstract(FAUCET).setAmt(BAL, 200 * WAD);
+        FaucetAbstract(FAUCET).setAmt(YFI, 1 * WAD);
     }
 }
 
