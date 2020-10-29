@@ -15,10 +15,10 @@ interface Hevm {
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
     address constant KOVAN_SPELL = address(
-      0x73C9a0068C9D27Ca6812703c7c93A10adF56cF91
+      0xC66300fB8a87c4C4abC7030F4359082394FeADd6
     );
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1603477612;
+    uint256 constant SPELL_CREATED = 1604000008;
 
     struct CollateralValues {
         uint256 line;
@@ -94,7 +94,6 @@ contract DssSpellTest is DSTest, DSMath {
     // BAL-A specific
     DSTokenAbstract       bal = DSTokenAbstract(     0x630D82Cbf82089B09F71f8d3aAaff2EBA6f47B15);
     GemJoinAbstract  joinBALA = GemJoinAbstract(     0x8De5EA9251E0576e3726c8766C56E27fAb2B6597);
-    OsmAbstract        pipBAL = OsmAbstract(         0x4fd34872F3AbC07ea6C45c7907f87041C0801DdE);
     FlipAbstract     flipBALA = FlipAbstract(        0xF6d19CC05482Ef7F73f09c1031BA01567EF6ac0f);
     MedianAbstract    medBALA = MedianAbstract(      0x0C472661dde5B08BEee6a7F8266720ea445830a3);
 
@@ -104,6 +103,12 @@ contract DssSpellTest is DSTest, DSMath {
     OsmAbstract        pipYFI = OsmAbstract(         0x9D8255dc4e25bB85e49c65B21D8e749F2293862a);
     FlipAbstract     flipYFIA = FlipAbstract(        0x5eB5D3B028CD255d79019f7C44a502b31bFFde9d);
     MedianAbstract    medYFIA = MedianAbstract(      0x67E681d202cf86287Bb088902B89CC66F1A075D4);
+
+    // GUSD-A specific
+    DSTokenAbstract       gusd = DSTokenAbstract(     0x31D8EdbF6F33ef858c80d68D06Ec83f33c2aA150);
+    GemJoinAbstract  joinGUSDA = GemJoinAbstract(     0xE48679421Ac2e5148346c9b1385246aACC6Ffb5f);
+    OsmAbstract        pipGUSD = OsmAbstract(         0xb6630DE6Eda0f3f3d96Db4639914565d6b82CfEF);
+    FlipAbstract     flipGUSDA = FlipAbstract(        0xf6c0e36a76F2B9F7Bd568155F3fDc53ff1be1Aeb);
 
     // Faucet
     FaucetAbstract      faucet = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
@@ -180,7 +185,7 @@ contract DssSpellTest is DSTest, DSMath {
         //
         afterSpell = SystemValues({
             dsr_rate:     0,               // In basis points
-            vat_Line:     1227 * MILLION,  // In whole Dai units
+            vat_Line:     1232 * MILLION,  // In whole Dai units
             pause_delay:  60,              // In seconds
             vow_wait:     3600,            // In seconds
             vow_dump:     2,               // In whole Dai units
@@ -188,7 +193,7 @@ contract DssSpellTest is DSTest, DSMath {
             vow_bump:     10,              // In whole Dai units
             vow_hump:     500,             // In whole Dai units
             cat_box:      10 * THOUSAND,   // In whole Dai units
-            ilk_count:    17               // Num expected in system
+            ilk_count:    18               // Num expected in system
         });
 
         //
@@ -398,6 +403,18 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          1 hours,
             liquidations: 1
         });
+        afterSpell.collaterals["GUSD-A"] = CollateralValues({
+            line:         5 * MILLION,
+            dust:         100,
+            pct:          400,
+            chop:         1300,
+            dunk:         500,
+            mat:          10100,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 0
+        });
     }
 
     function vote() private {
@@ -586,69 +603,69 @@ contract DssSpellTest is DSTest, DSMath {
         }
     }
 
-    function testSpellIsCast_YFI_INTEGRATION() public {
+    function testSpellIsCast_GUSD_INTEGRATION() public {
         vote();
         scheduleWaitAndCast();
         assertTrue(spell.done());
 
-        pipBAL.poke();
-        hevm.warp(now + 3601);
-        pipYFI.poke();
-        spot.poke("YFI-A");
+        //pipGUSD.poke();
+        //hevm.warp(now + 3601);
+        //pipGUSD.poke();
+        spot.poke("GUSD-A");
 
         // Check faucet amount
-        uint256 faucetAmount = faucet.amt(address(yfi));
+        uint256 faucetAmount = faucet.amt(address(gusd));
         assertTrue(faucetAmount > 0);
-        faucet.gulp(address(yfi));
-        assertEq(yfi.balanceOf(address(this)), faucetAmount);
+        faucet.gulp(address(gusd));
+        assertEq(gusd.balanceOf(address(this)), faucetAmount);
 
         // Check median matches pip.src()
-        assertEq(pipYFI.src(), address(medYFIA));
+        //assertEq(pipGUSD.src(), address(medGUSDA));
 
         // Authorization
-        assertEq(joinYFIA.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(joinYFIA)), 1);
-        assertEq(flipYFIA.wards(address(end)), 1);
-        assertEq(flipYFIA.wards(address(flipMom)), 1);
-        assertEq(pipYFI.wards(address(osmMom)), 1);
-        assertEq(pipYFI.bud(address(spot)), 1);
-        assertEq(pipYFI.bud(address(end)), 1);
-        assertEq(MedianAbstract(pipYFI.src()).bud(address(pipYFI)), 1);
+        assertEq(joinGUSDA.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinGUSDA)), 1);
+        assertEq(flipGUSDA.wards(address(end)), 1);
+        assertEq(flipGUSDA.wards(address(flipMom)), 1);
+        //assertEq(pipGUSD.wards(address(osmMom)), 1);
+        assertEq(pipGUSD.bud(address(spot)), 1);
+        assertEq(pipGUSD.bud(address(end)), 1);
+        //assertEq(MedianAbstract(pipGUSD.src()).bud(address(pipGUSD)), 1);
 
         // Join to adapter
-        assertEq(vat.gem("YFI-A", address(this)), 0);
-        yfi.approve(address(joinYFIA), faucetAmount);
-        joinYFIA.join(address(this), faucetAmount);
-        assertEq(yfi.balanceOf(address(this)), 0);
-        assertEq(vat.gem("YFI-A", address(this)), faucetAmount);
+        assertEq(vat.gem("GUSD-A", address(this)), 0);
+        gusd.approve(address(joinGUSDA), faucetAmount);
+        joinGUSDA.join(address(this), faucetAmount);
+        assertEq(gusd.balanceOf(address(this)), 0);
+        assertEq(vat.gem("GUSD-A", address(this)), faucetAmount);
 
         // Deposit collateral, generate DAI
         assertEq(vat.dai(address(this)), 0);
-        vat.frob("YFI-A", address(this), address(this), address(this), int(faucetAmount), int(100 * WAD));
-        assertEq(vat.gem("YFI-A", address(this)), 0);
+        vat.frob("GUSD-A", address(this), address(this), address(this), int(faucetAmount), int(100 * WAD));
+        assertEq(vat.gem("GUSD-A", address(this)), 0);
         assertEq(vat.dai(address(this)), 100 * RAD);
 
         // Payback DAI, withdraw collateral
-        vat.frob("YFI-A", address(this), address(this), address(this), -int(faucetAmount), -int(100 * WAD));
-        assertEq(vat.gem("YFI-A", address(this)), faucetAmount);
+        vat.frob("GUSD-A", address(this), address(this), address(this), -int(faucetAmount), -int(100 * WAD));
+        assertEq(vat.gem("GUSD-A", address(this)), faucetAmount);
         assertEq(vat.dai(address(this)), 0);
 
         // Withdraw from adapter
-        joinYFIA.exit(address(this), faucetAmount);
-        assertEq(yfi.balanceOf(address(this)), faucetAmount);
-        assertEq(vat.gem("YFI-A", address(this)), 0);
+        joinGUSDA.exit(address(this), faucetAmount);
+        assertEq(gusd.balanceOf(address(this)), faucetAmount);
+        assertEq(vat.gem("GUSD-A", address(this)), 0);
 
         // Generate new DAI to force a liquidation
-        yfi.approve(address(joinYFIA), faucetAmount);
-        joinYFIA.join(address(this), faucetAmount);
-        (,,uint256 spotV,,) = vat.ilks("YFI-A");
+        gusd.approve(address(joinGUSDA), faucetAmount);
+        joinGUSDA.join(address(this), faucetAmount);
+        (,,uint256 spotV,,) = vat.ilks("GUSD-A");
         // dart max amount of DAI
-        vat.frob("YFI-A", address(this), address(this), address(this), int(faucetAmount), int(mul(faucetAmount, spotV) / RAY));
+        vat.frob("GUSD-A", address(this), address(this), address(this), int(faucetAmount), int(mul(faucetAmount, spotV) / RAY));
         hevm.warp(now + 1);
-        jug.drip("YFI-A");
-        assertEq(flipYFIA.kicks(), 0);
-        cat.bite("YFI-A", address(this));
-        assertEq(flipYFIA.kicks(), 1);
+        jug.drip("GUSD-A");
+        assertEq(flipGUSDA.kicks(), 0);
+        cat.bite("GUSD-A", address(this));
+        assertEq(flipGUSDA.kicks(), 1);
     }
 
 }
