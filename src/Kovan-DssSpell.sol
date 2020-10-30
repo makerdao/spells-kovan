@@ -49,7 +49,7 @@ contract SpellAction {
     address constant FAUCET       = 0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3;
 
     address constant GUSD            = 0x31D8EdbF6F33ef858c80d68D06Ec83f33c2aA150;
-    address constant MCD_JOIN_GUSD_A = 0xE48679421Ac2e5148346c9b1385246aACC6Ffb5f;
+    address constant MCD_JOIN_GUSD_A = 0xC32fb81a573C1DAC509443e86759330f893dA8bD;
     address constant MCD_FLIP_GUSD_A = 0xf6c0e36a76F2B9F7Bd568155F3fDc53ff1be1Aeb;
     address constant PIP_GUSD        = 0xb6630DE6Eda0f3f3d96Db4639914565d6b82CfEF;
 
@@ -147,7 +147,7 @@ contract SpellAction {
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_GUSD_A);
 
         // Set gulp amount in faucet on kovan
-        FaucetAbstract(FAUCET).setAmt(GUSD, 1 * WAD);
+        FaucetAbstract(FAUCET).setAmt(GUSD, 100000);
     }
 }
 
