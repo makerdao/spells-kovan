@@ -27,7 +27,6 @@ contract SpellAction {
     //     https://changelog.makerdao.com/releases/kovan/1.1.3/contracts.json
 
     address constant FLIPPER_MOM = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
-    address constant MCD_PAUSE   = 0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189;
     address constant OSM_MOM     = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
 
     uint256 constant THOUSAND = 10**3;
@@ -44,9 +43,6 @@ contract SpellAction {
     //
 
     function execute() external {
-        // increase governance delay to 72 hours
-        DSPauseAbstract(MCD_PAUSE).setDelay(72 hours);
-
         // remove authority from the FlipperMom
         FlipperMomAbstract(FLIPPER_MOM).setAuthority(address(0));
 
