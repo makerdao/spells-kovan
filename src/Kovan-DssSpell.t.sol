@@ -561,6 +561,4 @@ contract DssSpellTest is DSTest, DSMath {
             checkCollateralValues(ilks[i],  afterSpell);
         }
     }
-
-
 }
