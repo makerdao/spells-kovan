@@ -14,9 +14,6 @@ interface Hevm {
 
 interface MedianizerV1Abstract {
     function authority() external view returns (address);
-    function owner() external view returns (address);
-    function peek() external view returns (uint256, bool);
-    function poke() external;
 }
 
 contract DssSpellTest is DSTest, DSMath {
@@ -163,7 +160,6 @@ contract DssSpellTest is DSTest, DSMath {
             ilk_count:             17,              // Num expected in system
             osm_mom_authority:     address(0),      // OsmMom authority
             flipper_mom_authority: address(0)       // FlipperMom authority
-
         });
 
         //
@@ -485,7 +481,6 @@ contract DssSpellTest is DSTest, DSMath {
 
         // check FlipperMom authority
         assertEq(flipMom.authority(), values.flipper_mom_authority);
-
     }
 
     function checkCollateralValues(bytes32 ilk, SystemValues storage values) internal {
