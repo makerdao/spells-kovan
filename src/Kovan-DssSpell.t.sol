@@ -18,9 +18,9 @@ interface MedianizerV1Abstract {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0);
+    address constant KOVAN_SPELL = address(0xe53F126054cd33941E272aa67561434C9BFac93C);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 0;
+    uint256 constant SPELL_CREATED = 1604499500;
 
     struct CollateralValues {
         uint256 line;
