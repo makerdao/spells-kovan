@@ -137,7 +137,7 @@ contract SpellAction {
     }
 }
 
-contract DssSpell {
+contract DssSpellTestchain {
     DSPauseAbstract public pause =
         DSPauseAbstract(0xd34835EaE60dA418abfc538B7b55332fC5F10340);
     address         public action;
