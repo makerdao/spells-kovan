@@ -163,8 +163,8 @@ contract DssSpellTest is DSTest, DSMath {
             vow_hump:              500,            // In whole Dai units
             cat_box:               10 * THOUSAND,  // In whole Dai units
             ilk_count:             18,             // Num expected in system
-            osm_mom_authority:     address(0),     // OsmMom authority
-            flipper_mom_authority: address(0)      // FlipperMom authority
+            osm_mom_authority:     0xbBFFC76e94B34F72D96D054b31f6424249c1337d,     // OsmMom authority
+            flipper_mom_authority: 0xbBFFC76e94B34F72D96D054b31f6424249c1337d      // FlipperMom authority
         });
 
         //
