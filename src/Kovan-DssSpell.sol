@@ -34,7 +34,7 @@ contract SpellAction {
     //
     // The contracts in this list should correspond to MCD core contracts, verify
     //  against the current release list at:
-    //     https://changelog.makerdao.com/releases/kovan/1.1.3/contracts.json
+    //     https://changelog.makerdao.com/releases/kovan/1.1.4/contracts.json
 
     address constant MCD_VAT      = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
     address constant MCD_CAT      = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
