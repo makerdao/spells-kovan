@@ -40,17 +40,21 @@ contract SpellAction {
 
     ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    address immutable MCD_VAT;
-    address immutable MCD_CAT;
-    address immutable MCD_JUG;
-    address immutable MCD_SPOT;
-    address immutable MCD_POT;
-    address immutable MCD_END;
-    address immutable FLIPPER_MOM;
-    address immutable OSM_MOM;
-    address immutable ILK_REGISTRY;
+    /*
+    address MCD_VAT;
+    address MCD_CAT;
+    address MCD_JUG;
+    address MCD_SPOT;
+    address MCD_POT;
+    address MCD_END;
+    address FLIPPER_MOM;
+    address OSM_MOM;
+    address ILK_REGISTRY;
 
-    address immutable FAUCET;
+    address FAUCET;
+    */
+
+    address constant FLIP_FAB        = 0x7c890e1e492FDDA9096353D155eE1B26C1656a62;
 
     address constant GUSD            = 0x31D8EdbF6F33ef858c80d68D06Ec83f33c2aA150;
     address constant MCD_JOIN_GUSD_A = 0x0c6B26e6AB583D2e4528034037F74842ea988909;
@@ -63,19 +67,6 @@ contract SpellAction {
     uint256 constant RAY = 10**27;
     uint256 constant RAD = 10**45;
 
-    constructor() public {
-        MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
-        MCD_CAT      = CHANGELOG.getAddress("MCD_CAT");
-        MCD_JUG      = CHANGELOG.getAddress("MCD_JUG");
-        MCD_POT      = CHANGELOG.getAddress("MCD_POT");
-        MCD_SPOT     = CHANGELOG.getAddress("MCD_SPOT");
-        MCD_END      = CHANGELOG.getAddress("MCD_END");
-        FLIPPER_MOM  = CHANGELOG.getAddress("FLIPPER_MOM");
-        OSM_MOM      = CHANGELOG.getAddress("OSM_MOM");
-        ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
-        FAUCET       = CHANGELOG.getAddress("FAUCET");
-    }
-
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
     // To check this yourself, use the following rate calculation (example 8%):
@@ -85,6 +76,26 @@ contract SpellAction {
     uint256 constant FOUR_PERCENT_RATE = 1000000001243680656318820312;
 
     function execute() external {
+        address MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
+        address MCD_CAT      = CHANGELOG.getAddress("MCD_CAT");
+        address MCD_JUG      = CHANGELOG.getAddress("MCD_JUG");
+        address MCD_POT      = CHANGELOG.getAddress("MCD_POT");
+        address MCD_SPOT     = CHANGELOG.getAddress("MCD_SPOT");
+        address MCD_END      = CHANGELOG.getAddress("MCD_END");
+        address FLIPPER_MOM  = CHANGELOG.getAddress("FLIPPER_MOM");
+        //address OSM_MOM      = CHANGELOG.getAddress("OSM_MOM");
+        address ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
+        address FAUCET       = CHANGELOG.getAddress("FAUCET");
+
+        // Add the flipper factory to the changelog
+        CHANGELOG.setAddress("FLIP_FAB", FLIP_FAB);
+
+        // Add GUSD contracts to the changelog
+        CHANGELOG.setAddress("GUSD", GUSD);
+        CHANGELOG.setAddress("MCD_JOIN_GUSD_A", MCD_JOIN_GUSD_A);
+        CHANGELOG.setAddress("MCD_FLIP_GUSD_A", MCD_FLIP_GUSD_A);
+        CHANGELOG.setAddress("PIP_GUSD", PIP_GUSD);
+
         bytes32 ilk = "GUSD-A";
 
         // Sanity checks
