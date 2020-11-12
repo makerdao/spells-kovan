@@ -40,20 +40,6 @@ contract SpellAction {
 
     ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    /*
-    address MCD_VAT;
-    address MCD_CAT;
-    address MCD_JUG;
-    address MCD_SPOT;
-    address MCD_POT;
-    address MCD_END;
-    address FLIPPER_MOM;
-    address OSM_MOM;
-    address ILK_REGISTRY;
-
-    address FAUCET;
-    */
-
     address constant FLIP_FAB        = 0x7c890e1e492FDDA9096353D155eE1B26C1656a62;
 
     address constant GUSD            = 0x31D8EdbF6F33ef858c80d68D06Ec83f33c2aA150;
