@@ -79,7 +79,6 @@ contract SpellAction {
         address MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
         address MCD_CAT      = CHANGELOG.getAddress("MCD_CAT");
         address MCD_JUG      = CHANGELOG.getAddress("MCD_JUG");
-        address MCD_POT      = CHANGELOG.getAddress("MCD_POT");
         address MCD_SPOT     = CHANGELOG.getAddress("MCD_SPOT");
         address MCD_END      = CHANGELOG.getAddress("MCD_END");
         address FLIPPER_MOM  = CHANGELOG.getAddress("FLIPPER_MOM");
@@ -180,8 +179,9 @@ contract SpellAction {
 }
 
 contract DssSpell {
+    ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     DSPauseAbstract public pause =
-        DSPauseAbstract(0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
+        DSPauseAbstract(CHANGELOG.getAddress("MCD_PAUSE"));
     address         public action;
     bytes32         public tag;
     uint256         public eta;
