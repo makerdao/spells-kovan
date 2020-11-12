@@ -28,6 +28,8 @@ import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
+
 
 contract SpellAction {
     // KOVAN ADDRESSES
@@ -36,17 +38,19 @@ contract SpellAction {
     //  against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/1.1.3/contracts.json
 
-    address constant MCD_VAT      = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
-    address constant MCD_CAT      = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
-    address constant MCD_JUG      = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
-    address constant MCD_SPOT     = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
-    address constant MCD_POT      = 0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb;
-    address constant MCD_END      = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
-    address constant FLIPPER_MOM  = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
-    address constant OSM_MOM      = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
-    address constant ILK_REGISTRY = 0xedE45A0522CA19e979e217064629778d6Cc2d9Ea;
+    ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    address constant FAUCET       = 0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3;
+    address immutable MCD_VAT;
+    address immutable MCD_CAT;
+    address immutable MCD_JUG;
+    address immutable MCD_SPOT;
+    address immutable MCD_POT;
+    address immutable MCD_END;
+    address immutable FLIPPER_MOM;
+    address immutable OSM_MOM;
+    address immutable ILK_REGISTRY;
+
+    address immutable FAUCET;
 
     address constant GUSD            = 0x31D8EdbF6F33ef858c80d68D06Ec83f33c2aA150;
     address constant MCD_JOIN_GUSD_A = 0x0c6B26e6AB583D2e4528034037F74842ea988909;
@@ -58,6 +62,19 @@ contract SpellAction {
     uint256 constant WAD = 10**18;
     uint256 constant RAY = 10**27;
     uint256 constant RAD = 10**45;
+
+    constructor() public {
+        MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
+        MCD_CAT      = CHANGELOG.getAddress("MCD_CAT");
+        MCD_JUG      = CHANGELOG.getAddress("MCD_JUG");
+        MCD_POT      = CHANGELOG.getAddress("MCD_POT");
+        MCD_SPOT     = CHANGELOG.getAddress("MCD_SPOT");
+        MCD_END      = CHANGELOG.getAddress("MCD_END");
+        FLIPPER_MOM  = CHANGELOG.getAddress("FLIPPER_MOM");
+        OSM_MOM      = CHANGELOG.getAddress("OSM_MOM");
+        ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
+        FAUCET       = CHANGELOG.getAddress("FAUCET");
+    }
 
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
