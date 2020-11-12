@@ -50,7 +50,7 @@ contract DssSpellTestTestchain is DSTest, DSMath {
     SystemValues afterSpell;
     Hevm hevm;
 
-    // KOVAN ADDRESSES
+    // Testchain ADDRESSES
     DSPauseAbstract      pause = DSPauseAbstract(    0xbacD4966540aAF7223CC9DC39a3ea1E4322Aba78);
     address         pauseProxy =                     0xBAfAfffeD9132270493DcfcA9B54915C0E9BDA24;
     DSChiefAbstract      chief = DSChiefAbstract(    0x32fF9398E20e95eE7E5AeA732159C4315553cE00);
@@ -148,7 +148,7 @@ contract DssSpellTestTestchain is DSTest, DSMath {
 
         chief.vote(yays);
         chief.lift(address(spell));
-        
+
         assertEq(chief.hat(), address(spell));
     }
 
