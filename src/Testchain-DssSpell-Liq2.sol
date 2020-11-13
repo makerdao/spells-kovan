@@ -84,23 +84,23 @@ contract SpellAction {
         // *** Initial parameters used from https://github.com/makerdao/dss/blob/liq-2.0/src/test/clip.t.sol ***
         // ************************
 
-        require(DogAbstract(dog).vat() == MCD_VAT,              "non-matching-vat");
-        require(DogAbstract(dog).live() == 1,                   "dog-not-live");
+        require(dog.vat() == MCD_VAT,              "non-matching-vat");
+        require(dog.live() == 1,                   "dog-not-live");
 
         /// DOG
-        DogAbstract(dog).file("vow", MCD_VOW);
-        VatAbstract(MCD_VAT).rely(dog);
-        VowAbstract(MCD_VOW).rely(dog);
+        dog.file("vow", MCD_VOW);
+        VatAbstract(MCD_VAT).rely(address(dog));
+        VowAbstract(MCD_VOW).rely(address(dog));
 
-        DogAbstract(dog).file("Hole", 1000 * RAD);
+        dog.file("Hole", 1000 * RAD);
 
         /// ABACUS
-        AbacusAbstract(abacus).file("cut",  1 * RAY / 100);   // 1% decrease
-        AbacusAbstract(abacus).file("step", 1);            // Decrease every 1 second
+        abacus.file("cut",  1 * RAY / 100);   // 1% decrease
+        abacus.file("step", 1);            // Decrease every 1 second
 
         // CLIP
-        VatAbstract(MCD_VAT).rely(clipper);                // Is this needed?
-        _flipToClip(ClipAbstract(clipper), FlipAbstract(MCD_FLIP_ETH_A), dog, abacus);
+        VatAbstract(MCD_VAT).rely(address(clipper));                // Is this needed?
+        _flipToClip(clipper, FlipAbstract(MCD_FLIP_ETH_A), dog, abacus);
 
 
     }
@@ -112,20 +112,20 @@ contract SpellAction {
         require(newClip.dog() == dog, "non-matching-cat");
         require(newClip.vat() == MCD_VAT, "non-matching-vat");
 
-        DogAbstract(dog).file(ilk, "clip", address(newClip));
-        DogAbstract(dog).file(ilk, "chop", 1.1 ether); // 10% chop
-        DogAbstract(dog).file(ilk, "hole", 1000 * RAD); // 30 MM DAI
-        DogAbstract(dog).file(ilk, "chip", 2 * WAD / 100); // linear increase of 2% of tab
-        DogAbstract(dog).file(ilk, "tip", 2 * RAD); // flat fee of two DAI
+        dog.file(ilk, "clip", address(newClip));
+        dog.file(ilk, "chop", 1.1 ether); // 10% chop
+        dog.file(ilk, "hole", 1000 * RAD); // 30 MM DAI
+        dog.file(ilk, "chip", 2 * WAD / 100); // linear increase of 2% of tab
+        dog.file(ilk, "tip", 2 * RAD); // flat fee of two DAI
 
-        DogAbstract(dog).rely(address(newClip));
+        dog.rely(address(newClip));
 
-        newClip.rely(dog);
+        newClip.rely(address(dog));
 
-        newClip.file("buf",  5 * RAY / 4);   // 25% Initial price buffer
+        newClip.file("buf",  5 * RAY / 4);      // 25% Initial price buffer
         newClip.file("calc", address(abacus));  // File price contract
-        newClip.file("cusp", 1 * RAY / 3);                  // 67.77% drop before reset
-        newClip.file("tail", 3600);         // 1 hour before reset
+        newClip.file("cusp", 1 * RAY / 3);      // 67.77% drop before reset
+        newClip.file("tail", 3600);             // 1 hour before reset
     }
 }
 
