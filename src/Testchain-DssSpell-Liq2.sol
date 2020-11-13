@@ -77,7 +77,7 @@ contract SpellAction {
     uint256 constant RAD      = 10 ** 45;
 
 
-    function execute(address dog, address clipper, address abacus) external {
+    function execute(DogAbstract dog, ClipAbstract clipper, AbacusAbstract abacus) external {
 
         // ************************
         // *** Liquidations 2.0 ***
@@ -105,7 +105,7 @@ contract SpellAction {
 
     }
 
-    function _flipToClip(ClipAbstract newClip, FlipAbstract oldFlip, dog, abacus) internal {
+    function _flipToClip(ClipAbstract newClip, FlipAbstract oldFlip, DogAbstract dog, AbacusAbstract abacus) internal {
         bytes32 ilk = newClip.ilk();
         require(ilk == oldFlip.ilk(), "non-matching-ilk");
         require(newClip.vat() == oldFlip.vat(), "non-matching-vat");
