@@ -100,12 +100,12 @@ contract SpellAction {
 
         // CLIP
         VatAbstract(MCD_VAT).rely(clipper);                // Is this needed?
-        _flipToClip(ClipAbstract(clipper), FlipAbstract(MCD_FLIP_ETH_A));
+        _flipToClip(ClipAbstract(clipper), FlipAbstract(MCD_FLIP_ETH_A), dog, abacus);
 
 
     }
 
-    function _flipToClip(ClipAbstract newClip, FlipAbstract oldFlip) internal {
+    function _flipToClip(ClipAbstract newClip, FlipAbstract oldFlip, dog, abacus) internal {
         bytes32 ilk = newClip.ilk();
         require(ilk == oldFlip.ilk(), "non-matching-ilk");
         require(newClip.vat() == oldFlip.vat(), "non-matching-vat");
