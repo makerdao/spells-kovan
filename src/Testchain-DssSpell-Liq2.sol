@@ -68,9 +68,6 @@ contract SpellAction {
     address constant MCD_VAT             = 0xb002A319887185e56d787A5c90900e13834a85E3;
     address constant MCD_VOW             = 0x32fE44E2061A19419C0F112596B6f6ea77EC6511;
     address constant MCD_FLIP_ETH_A      = 0xc1F5856c066cfdD59D405DfCf1e77F667537bc99;
-    address public MCD_DOG;
-    address public MCD_CLIP_ETH_A;
-    address public MCD_ABACUS_ETH_A;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -79,36 +76,31 @@ contract SpellAction {
     uint256 constant RAY      = 10 ** 27;
     uint256 constant RAD      = 10 ** 45;
 
-    constructor(address dog, address clipper, address abacus) public {
-        MCD_DOG = dog;
-        MCD_CLIP_ETH_A = clipper;
-        MCD_ABACUS_ETH_A = abacus;
-    }
 
-    function execute() external {
+    function execute(address dog, address clipper, address abacus) external {
 
         // ************************
         // *** Liquidations 2.0 ***
         // *** Initial parameters used from https://github.com/makerdao/dss/blob/liq-2.0/src/test/clip.t.sol ***
         // ************************
 
-        require(CatAbstract(MCD_DOG).vat() == MCD_VAT,              "non-matching-vat");
-        require(CatAbstract(MCD_DOG).live() == 1,                   "dog-not-live");
+        require(CatAbstract(dog).vat() == MCD_VAT,              "non-matching-vat");
+        require(CatAbstract(dog).live() == 1,                   "dog-not-live");
 
         /// DOG
-        DogAbstract(MCD_DOG).file("vow", MCD_VOW);
-        VatAbstract(MCD_VAT).rely(MCD_DOG);
-        VowAbstract(MCD_VOW).rely(MCD_DOG);
+        DogAbstract(dog).file("vow", MCD_VOW);
+        VatAbstract(MCD_VAT).rely(dog);
+        VowAbstract(MCD_VOW).rely(dog);
 
-        DogAbstract(MCD_DOG).file("Hole", 1000 * RAD);
+        DogAbstract(dog).file("Hole", 1000 * RAD);
 
         /// ABACUS
-        AbacusAbstract(MCD_ABACUS_ETH_A).file("cut",  1 * RAY / 100);   // 1% decrease
-        AbacusAbstract(MCD_ABACUS_ETH_A).file("step", 1);            // Decrease every 1 second
+        AbacusAbstract(abacus).file("cut",  1 * RAY / 100);   // 1% decrease
+        AbacusAbstract(abacus).file("step", 1);            // Decrease every 1 second
 
         // CLIP
-        VatAbstract(MCD_VAT).rely(MCD_CLIP_ETH_A);                // Is this needed?
-        _flipToClip(ClipAbstract(MCD_CLIP_ETH_A), FlipAbstract(MCD_FLIP_ETH_A));
+        VatAbstract(MCD_VAT).rely(clipper);                // Is this needed?
+        _flipToClip(ClipAbstract(clipper), FlipAbstract(MCD_FLIP_ETH_A));
 
 
     }
@@ -117,21 +109,21 @@ contract SpellAction {
         bytes32 ilk = newClip.ilk();
         require(ilk == oldFlip.ilk(), "non-matching-ilk");
         require(newClip.vat() == oldFlip.vat(), "non-matching-vat");
-        require(newClip.dog() == MCD_DOG, "non-matching-cat");
+        require(newClip.dog() == dog, "non-matching-cat");
         require(newClip.vat() == MCD_VAT, "non-matching-vat");
 
-        DogAbstract(MCD_DOG).file(ilk, "clip", address(newClip));
-        DogAbstract(MCD_DOG).file(ilk, "chop", 1.1 ether); // 10% chop
-        DogAbstract(MCD_DOG).file(ilk, "hole", 1000 * RAD); // 30 MM DAI
-        DogAbstract(MCD_DOG).file(ilk, "chip", 2 * WAD / 100); // linear increase of 2% of tab
-        DogAbstract(MCD_DOG).file(ilk, "tip", 2 * RAD); // flat fee of two DAI
+        DogAbstract(dog).file(ilk, "clip", address(newClip));
+        DogAbstract(dog).file(ilk, "chop", 1.1 ether); // 10% chop
+        DogAbstract(dog).file(ilk, "hole", 1000 * RAD); // 30 MM DAI
+        DogAbstract(dog).file(ilk, "chip", 2 * WAD / 100); // linear increase of 2% of tab
+        DogAbstract(dog).file(ilk, "tip", 2 * RAD); // flat fee of two DAI
 
-        DogAbstract(MCD_DOG).rely(address(newClip));
+        DogAbstract(dog).rely(address(newClip));
 
-        newClip.rely(MCD_DOG);
+        newClip.rely(dog);
 
         newClip.file("buf",  5 * RAY / 4);   // 25% Initial price buffer
-        newClip.file("calc", address(MCD_ABACUS_ETH_A));  // File price contract
+        newClip.file("calc", address(abacus));  // File price contract
         newClip.file("cusp", 1 * RAY / 3);                  // 67.77% drop before reset
         newClip.file("tail", 3600);         // 1 hour before reset
     }
@@ -152,8 +144,8 @@ contract DssSpellTestchain {
         "Auction-Demo-Keeper LIQ2.0 Support";
 
     constructor(address dog, address clipper, address abacus) public {
-        sig = abi.encodeWithSignature("execute()");
-        action = address(new SpellAction(dog, clipper, abacus));
+        sig = abi.encodeWithSignature("execute(address,address,address)", dog, clipper, abacus);
+        action = address(new SpellAction());
         bytes32 _tag;
         address _action = action;
         assembly { _tag := extcodehash(_action) }
