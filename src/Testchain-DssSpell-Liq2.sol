@@ -109,7 +109,7 @@ contract SpellAction {
         bytes32 ilk = newClip.ilk();
         require(ilk == oldFlip.ilk(), "non-matching-ilk");
         require(newClip.vat() == oldFlip.vat(), "non-matching-vat");
-        require(newClip.dog() == dog, "non-matching-cat");
+        require(newClip.dog() == address(dog), "non-matching-dog");
         require(newClip.vat() == MCD_VAT, "non-matching-vat");
 
         dog.file(ilk, "clip", address(newClip));
