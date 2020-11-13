@@ -84,8 +84,8 @@ contract SpellAction {
         // *** Initial parameters used from https://github.com/makerdao/dss/blob/liq-2.0/src/test/clip.t.sol ***
         // ************************
 
-        require(CatAbstract(dog).vat() == MCD_VAT,              "non-matching-vat");
-        require(CatAbstract(dog).live() == 1,                   "dog-not-live");
+        require(DogAbstract(dog).vat() == MCD_VAT,              "non-matching-vat");
+        require(DogAbstract(dog).live() == 1,                   "dog-not-live");
 
         /// DOG
         DogAbstract(dog).file("vow", MCD_VOW);
