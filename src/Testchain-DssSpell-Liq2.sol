@@ -21,6 +21,7 @@ import "lib/dss-interfaces/src/dss/EndAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 import "lib/dss-interfaces/src/dss/VowAbstract.sol";
+import "lib/dss-interfaces/src/dss/JugAbstract.sol";
 
 interface DogAbstract {
     function wards(address) external view returns (uint256);
@@ -68,6 +69,7 @@ contract SpellAction {
     address constant MCD_VAT             = 0xb002A319887185e56d787A5c90900e13834a85E3;
     address constant MCD_VOW             = 0x32fE44E2061A19419C0F112596B6f6ea77EC6511;
     address constant MCD_FLIP_ETH_A      = 0xc1F5856c066cfdD59D405DfCf1e77F667537bc99;
+    address constant MCD_JUG             = 0x2125C30dA5DcA0819aEC5e4cdbF58Bfe91918e43;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -102,6 +104,11 @@ contract SpellAction {
         VatAbstract(MCD_VAT).rely(address(clipper));                // Is this needed?
         _flipToClip(clipper, FlipAbstract(MCD_FLIP_ETH_A), dog, abacus);
 
+        // Super high stability fees to liquidate Vaults
+        JugAbstract(MCD_JUG).drip("ETH-A");
+        uint256 ETH_FEE = 1020000021979553151239153027;
+        JugAbstract(MCD_JUG).file("ETH-A", "duty", ETH_FEE);
+
 
     }
 
@@ -114,7 +121,7 @@ contract SpellAction {
 
         dog.file(ilk, "clip", address(newClip));
         dog.file(ilk, "chop", 1.1 ether); // 10% chop
-        dog.file(ilk, "hole", 1000 * RAD); // 30 MM DAI
+        dog.file(ilk, "hole", 1000 * RAD); // 1000 DAI
         dog.file(ilk, "chip", 2 * WAD / 100); // linear increase of 2% of tab
         dog.file(ilk, "tip", 2 * RAD); // flat fee of two DAI
 
