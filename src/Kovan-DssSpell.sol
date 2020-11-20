@@ -44,6 +44,9 @@ contract SpellAction {
         // Add MCD_VOTE_PROXY to the changelog (previous one was missing)
         CHANGELOG.setAddress("VOTE_PROXY_FACTORY", 0xEec40383cbeE179Be76D4D930c0ABD0D4beA672f);
 
+        // Bump version
+        CHANGELOG.setVersion("1.1.6");
+
         // Set new Chief in the Pause
         DSPauseAbstract(MCD_PAUSE).setAuthority(MCD_ADM);
 
