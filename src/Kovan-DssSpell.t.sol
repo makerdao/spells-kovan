@@ -12,10 +12,6 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
-interface MedianizerV1Abstract {
-    function authority() external view returns (address);
-}
-
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
     address constant KOVAN_SPELL = address(0x0);
@@ -46,6 +42,7 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 vow_hump;
         uint256 cat_box;
         uint256 ilk_count;
+        address pause_authority;
         address osm_mom_authority;
         address flipper_mom_authority;
         mapping (bytes32 => CollateralValues) collaterals;
@@ -59,7 +56,8 @@ contract DssSpellTest is DSTest, DSMath {
     // KOVAN ADDRESSES
     DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
-    DSChiefAbstract      chief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
+    DSChiefAbstract   oldChief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
+    DSChiefAbstract   newChief = DSChiefAbstract(    0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6);
     VatAbstract            vat = VatAbstract(        0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
     CatAbstract            cat = CatAbstract(        0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
     VowAbstract            vow = VowAbstract(        0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b);
@@ -73,11 +71,6 @@ contract DssSpellTest is DSTest, DSMath {
 
     OsmMomAbstract      osmMom = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
     FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
-
-    // GUSD-A specific
-    DSTokenAbstract       gusd = DSTokenAbstract(     0x31D8EdbF6F33ef858c80d68D06Ec83f33c2aA150);
-    GemJoinAbstract  joinGUSDA = GemJoinAbstract(     0x0c6B26e6AB583D2e4528034037F74842ea988909);
-    FlipAbstract     flipGUSDA = FlipAbstract(        0xf6c0e36a76F2B9F7Bd568155F3fDc53ff1be1Aeb);
 
     // Faucet
     FaucetAbstract      faucet = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
@@ -153,18 +146,19 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all system configuration changes
         //
         afterSpell = SystemValues({
-            dsr_rate:              0,              // In basis points
-            vat_Line:              1232 * MILLION, // In whole Dai units
-            pause_delay:           60,             // In seconds
-            vow_wait:              3600,           // In seconds
-            vow_dump:              2,              // In whole Dai units
-            vow_sump:              50,             // In whole Dai units
-            vow_bump:              10,             // In whole Dai units
-            vow_hump:              500,            // In whole Dai units
-            cat_box:               10 * THOUSAND,  // In whole Dai units
-            ilk_count:             18,             // Num expected in system
-            osm_mom_authority:     address(0),     // OsmMom authority
-            flipper_mom_authority: address(0)      // FlipperMom authority
+            dsr_rate:              0,                   // In basis points
+            vat_Line:              1232 * MILLION,      // In whole Dai units
+            pause_delay:           60,                  // In seconds
+            vow_wait:              3600,                // In seconds
+            vow_dump:              2,                   // In whole Dai units
+            vow_sump:              50,                  // In whole Dai units
+            vow_bump:              10,                  // In whole Dai units
+            vow_hump:              500,                 // In whole Dai units
+            cat_box:               10 * THOUSAND,       // In whole Dai units
+            ilk_count:             18,                  // Num expected in system
+            pause_authority:       address(newChief),   // Pause authority
+            osm_mom_authority:     address(newChief),   // OsmMom authority
+            flipper_mom_authority: address(newChief)    // FlipperMom authority
         });
 
         //
@@ -389,24 +383,24 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function vote() private {
-        if (chief.hat() != address(spell)) {
+        if (oldChief.hat() != address(spell)) {
             hevm.store(
                 address(gov),
                 keccak256(abi.encode(address(this), uint256(1))),
                 bytes32(uint256(999999999999 ether))
             );
-            gov.approve(address(chief), uint256(-1));
-            chief.lock(sub(gov.balanceOf(address(this)), 1 ether));
+            gov.approve(address(oldChief), uint256(-1));
+            oldChief.lock(sub(gov.balanceOf(address(this)), 1 ether));
 
             assertTrue(!spell.done());
 
             address[] memory yays = new address[](1);
             yays[0] = address(spell);
 
-            chief.vote(yays);
-            chief.lift(address(spell));
+            oldChief.vote(yays);
+            oldChief.lift(address(spell));
         }
-        assertEq(chief.hat(), address(spell));
+        assertEq(oldChief.hat(), address(spell));
     }
 
     function scheduleWaitAndCast() public {
@@ -508,6 +502,9 @@ contract DssSpellTest is DSTest, DSMath {
         // check number of ilks
         assertEq(reg.count(), values.ilk_count);
 
+        // check Pause authority
+        assertEq(pause.authority(), values.pause_authority);
+
         // check OsmMom authority
         assertEq(osmMom.authority(), values.osm_mom_authority);
 
@@ -592,72 +589,6 @@ contract DssSpellTest is DSTest, DSMath {
         for(uint i = 0; i < ilks.length; i++) {
             checkCollateralValues(ilks[i],  afterSpell);
         }
-    }
-
-    function testSpellIsCast_GUSD_INTEGRATION() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        //pipGUSD.poke();
-        //hevm.warp(now + 3601);
-        //pipGUSD.poke();
-        spot.poke("GUSD-A");
-
-        // Check faucet amount
-        uint256 faucetAmount = faucet.amt(address(gusd));
-        uint256 faucetAmountWad = faucetAmount * (10 ** (18 - gusd.decimals()));
-        assertTrue(faucetAmount > 0);
-        faucet.gulp(address(gusd));
-        assertEq(gusd.balanceOf(address(this)), faucetAmount);
-
-        // Check median matches pip.src()
-        //assertEq(pipGUSD.src(), address(medGUSDA));
-
-        // Authorization
-        assertEq(joinGUSDA.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(joinGUSDA)), 1);
-        assertEq(flipGUSDA.wards(address(end)), 1);
-        assertEq(flipGUSDA.wards(address(flipMom)), 1);
-        //assertEq(pipGUSD.wards(address(osmMom)), 1);
-        //assertEq(pipGUSD.bud(address(spot)), 1);
-        //assertEq(pipGUSD.bud(address(end)), 1);
-        //assertEq(MedianAbstract(pipGUSD.src()).bud(address(pipGUSD)), 1);
-
-        // Join to adapter
-        assertEq(vat.gem("GUSD-A", address(this)), 0);
-        gusd.approve(address(joinGUSDA), faucetAmount);
-        joinGUSDA.join(address(this), faucetAmount);
-        assertEq(gusd.balanceOf(address(this)), 0);
-        assertEq(vat.gem("GUSD-A", address(this)), faucetAmountWad);
-
-        // Deposit collateral, generate DAI
-        assertEq(vat.dai(address(this)), 0);
-        vat.frob("GUSD-A", address(this), address(this), address(this), int(faucetAmountWad), int(100 * WAD));
-        assertEq(vat.gem("GUSD-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), 100 * RAD);
-
-        // Payback DAI, withdraw collateral
-        vat.frob("GUSD-A", address(this), address(this), address(this), -int(faucetAmountWad), -int(100 * WAD));
-        assertEq(vat.gem("GUSD-A", address(this)), faucetAmountWad);
-        assertEq(vat.dai(address(this)), 0);
-
-        // Withdraw from adapter
-        joinGUSDA.exit(address(this), faucetAmount);
-        assertEq(gusd.balanceOf(address(this)), faucetAmount);
-        assertEq(vat.gem("GUSD-A", address(this)), 0);
-
-        // Generate new DAI to force a liquidation
-        gusd.approve(address(joinGUSDA), faucetAmount);
-        joinGUSDA.join(address(this), faucetAmount);
-        (,,uint256 spotV,,) = vat.ilks("GUSD-A");
-        // dart max amount of DAI
-        vat.frob("GUSD-A", address(this), address(this), address(this), int(faucetAmountWad), int(mul(faucetAmountWad, spotV) / RAY));
-        hevm.warp(now + 1);
-        jug.drip("GUSD-A");
-        // assertEq(flipGUSDA.kicks(), 0);
-        // cat.bite("GUSD-A", address(this));
-        // assertEq(flipGUSDA.kicks(), 1);
     }
 
 }
