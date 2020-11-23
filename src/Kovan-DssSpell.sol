@@ -46,7 +46,7 @@ contract SpellAction {
         CHANGELOG.setAddress("VOTE_PROXY_FACTORY", VOTE_PROXY_FACTORY);
 
         // Bump version
-        CHANGELOG.setVersion("1.1.6");
+        CHANGELOG.setVersion("1.2.0");
 
         // Set new Chief in the Pause
         DSPauseAbstract(MCD_PAUSE).setAuthority(MCD_ADM);
