@@ -59,6 +59,7 @@ contract DssSpellTest is DSTest, DSMath {
     Rates rates;
 
     // KOVAN ADDRESSES
+    ChainlogAbstract changelog = ChainlogAbstract(   0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
     DSChiefAbstract   oldChief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
@@ -654,7 +655,6 @@ contract DssSpellTest is DSTest, DSMath {
         slate[0] = address(spellTest);
         newChief.vote(slate);
         newChief.lift(address(spellTest));
-        assertTrue(!newChief.isUserRoot(address(spellTest)));
         spellTest.schedule();
     }
 
@@ -681,6 +681,47 @@ contract DssSpellTest is DSTest, DSMath {
 
         _runOldChief();
     }
+
+    function testMoms() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
+        oldChief.free(999999999999 ether);
+        gov.approve(address(newChief), uint256(-1));
+
+        newChief.lock(80_000 ether);
+        address[] memory slate = new address[](1);
+
+        // Create spell for testing
+        SpellTestMoms spellTestMoms = new SpellTestMoms();
+
+        // System not launched, lifted address doesn't get root access
+        slate[0] = address(spellTestMoms);
+        newChief.vote(slate);
+        newChief.lift(address(spellTestMoms));
+
+        // Launch system
+        slate[0] = address(0);
+        newChief.vote(slate);
+        newChief.lift(address(0));
+        NewChiefAbstract(address(newChief)).launch();
+
+        // System launched, lifted address gets root access
+        slate[0] = address(spellTestMoms);
+        newChief.vote(slate);
+        newChief.lift(address(spellTestMoms));
+
+        FlipAbstract flip = FlipAbstract(changelog.getAddress("MCD_FLIP_ETH_A"));
+        OsmAbstract osm   = OsmAbstract(changelog.getAddress("PIP_ETH"));
+
+        assertEq(flip.wards(address(cat)), 1);
+        assertEq(osm.stopped(), 0);
+        spellTestMoms.cast();
+        assertEq(flip.wards(address(cat)), 0);
+        assertEq(osm.stopped(), 1);
+    }
 }
 
 contract SpellActionTest {
@@ -697,8 +738,6 @@ contract SpellTest {
     bytes32         public tag;
     uint256         public eta;
     bytes           public sig;
-    uint256         public expiration;
-    bool            public done;
 
     constructor() public {
         sig = abi.encodeWithSignature("execute()");
@@ -707,19 +746,25 @@ contract SpellTest {
         address _action = action;
         assembly { _tag := extcodehash(_action) }
         tag = _tag;
-        expiration = now + 30 days;
     }
 
     function schedule() public {
-        require(now <= expiration, "This contract has expired");
-        require(eta == 0, "This spell has already been scheduled");
         eta = now + DSPauseAbstract(pause).delay();
         pause.plot(action, tag, sig, eta);
     }
+}
+
+contract SpellTestMoms {
+    ChainlogAbstract changelog = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
+
+    FlipperMomAbstract public fMom =
+        FlipperMomAbstract(changelog.getAddress("FLIPPER_MOM"));
+
+    OsmMomAbstract public oMom =
+        OsmMomAbstract(changelog.getAddress("OSM_MOM"));
 
     function cast() public {
-        require(!done, "spell-already-cast");
-        done = true;
-        pause.exec(action, tag, sig, eta);
+        fMom.deny(changelog.getAddress("MCD_FLIP_ETH_A"));
+        oMom.stop("ETH-A");
     }
 }
