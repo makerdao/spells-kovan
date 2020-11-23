@@ -26,7 +26,7 @@ contract SpellAction {
     //
     // The contracts in this list should correspond to MCD core contracts, verify
     //  against the current release list at:
-    //     https://changelog.makerdao.com/releases/kovan/1.1.4/contracts.json
+    //     https://changelog.makerdao.com/releases/kovan/active/contracts.json
 
     ChainlogAbstract constant CHANGELOG     = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
@@ -42,7 +42,7 @@ contract SpellAction {
         CHANGELOG.setAddress("MCD_ADM", MCD_ADM);
 
         // Add VOTE_PROXY_FACTORY to the changelog (previous one was missing)
-        CHANGELOG.setAddress("VOTE_PROXY_FACTORY", 0xEec40383cbeE179Be76D4D930c0ABD0D4beA672f);
+        CHANGELOG.setAddress("VOTE_PROXY_FACTORY", VOTE_PROXY_FACTORY);
 
         // Bump version
         CHANGELOG.setVersion("1.1.6");

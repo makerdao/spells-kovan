@@ -701,6 +701,7 @@ contract DssSpellTest is DSTest, DSMath {
         slate[0] = address(spellTestMoms);
         newChief.vote(slate);
         newChief.lift(address(spellTestMoms));
+        assertTrue(!newChief.isUserRoot(address(spellTestMoms)));
 
         // Launch system
         slate[0] = address(0);
@@ -712,6 +713,7 @@ contract DssSpellTest is DSTest, DSMath {
         slate[0] = address(spellTestMoms);
         newChief.vote(slate);
         newChief.lift(address(spellTestMoms));
+        assertTrue(newChief.isUserRoot(address(spellTestMoms)));
 
         FlipAbstract flip = FlipAbstract(changelog.getAddress("MCD_FLIP_ETH_A"));
         OsmAbstract osm   = OsmAbstract(changelog.getAddress("PIP_ETH"));
