@@ -41,7 +41,7 @@ contract SpellAction {
         // Change MCD_ADM address in the changelog (Chief)
         CHANGELOG.setAddress("MCD_ADM", MCD_ADM);
 
-        // Add MCD_VOTE_PROXY to the changelog (previous one was missing)
+        // Add VOTE_PROXY_FACTORY to the changelog (previous one was missing)
         CHANGELOG.setAddress("VOTE_PROXY_FACTORY", 0xEec40383cbeE179Be76D4D930c0ABD0D4beA672f);
 
         // Bump version

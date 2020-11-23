@@ -12,6 +12,11 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
+interface NewChiefAbstract {
+    function live() external view returns (uint256);
+    function launch() external;
+}
+
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
     address constant KOVAN_SPELL = address(0x0);
@@ -390,7 +395,7 @@ contract DssSpellTest is DSTest, DSMath {
                 bytes32(uint256(999999999999 ether))
             );
             gov.approve(address(oldChief), uint256(-1));
-            oldChief.lock(sub(gov.balanceOf(address(this)), 1 ether));
+            oldChief.lock(999999999999 ether);
 
             assertTrue(!spell.done());
 
@@ -591,4 +596,130 @@ contract DssSpellTest is DSTest, DSMath {
         }
     }
 
+    function testRootExecuteSpell() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
+        oldChief.free(999999999999 ether);
+        gov.approve(address(newChief), uint256(-1));
+
+        newChief.lock(80_000 ether);
+        address[] memory slate = new address[](1);
+
+        // Create spell for testing
+        SpellTest spellTest = new SpellTest();
+
+        // System not launched, lifted address doesn't get root access
+        slate[0] = address(spellTest);
+        newChief.vote(slate);
+        newChief.lift(address(spellTest));
+        assertTrue(!newChief.isUserRoot(address(spellTest)));
+
+        // Launch system
+        slate[0] = address(0);
+        newChief.vote(slate);
+        newChief.lift(address(0));
+        assertEq(NewChiefAbstract(address(newChief)).live(), 0);
+        assertTrue(!newChief.isUserRoot(address(0)));
+        NewChiefAbstract(address(newChief)).launch();
+        assertEq(NewChiefAbstract(address(newChief)).live(), 1);
+        assertTrue(newChief.isUserRoot(address(0)));
+
+        // System launched, lifted address gets root access
+        slate[0] = address(spellTest);
+        newChief.vote(slate);
+        newChief.lift(address(spellTest));
+        assertTrue(newChief.isUserRoot(address(spellTest)));
+        spellTest.schedule();
+    }
+
+    function testFailExecuteSpellNotLaunched() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
+        oldChief.free(999999999999 ether);
+        gov.approve(address(newChief), uint256(-1));
+
+        newChief.lock(80_000 ether);
+        address[] memory slate = new address[](1);
+
+        // Create spell for testing
+        SpellTest spellTest = new SpellTest();
+
+        // System not launched, lifted address doesn't get root access
+        slate[0] = address(spellTest);
+        newChief.vote(slate);
+        newChief.lift(address(spellTest));
+        assertTrue(!newChief.isUserRoot(address(spellTest)));
+        spellTest.schedule();
+    }
+
+    function _runOldChief() internal {
+        SpellTest spellTest = new SpellTest();
+
+        address[] memory slate = new address[](1);
+        slate[0] = address(spellTest);
+        oldChief.vote(slate);
+        oldChief.lift(address(spellTest));
+        spellTest.schedule();
+    }
+
+    function testExecuteSpellOldChief() public {
+        vote();
+
+        _runOldChief();
+    }
+
+    function testFailExecuteSpellOldChief() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        _runOldChief();
+    }
+}
+
+contract SpellActionTest {
+    function execute() external {
+        // Random action to test authority
+        VatAbstract(ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F).getAddress("MCD_VAT")).rely(address(123));
+    }
+}
+
+contract SpellTest {
+    DSPauseAbstract public pause =
+        DSPauseAbstract(ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F).getAddress("MCD_PAUSE"));
+    address         public action;
+    bytes32         public tag;
+    uint256         public eta;
+    bytes           public sig;
+    uint256         public expiration;
+    bool            public done;
+
+    constructor() public {
+        sig = abi.encodeWithSignature("execute()");
+        action = address(new SpellActionTest());
+        bytes32 _tag;
+        address _action = action;
+        assembly { _tag := extcodehash(_action) }
+        tag = _tag;
+        expiration = now + 30 days;
+    }
+
+    function schedule() public {
+        require(now <= expiration, "This contract has expired");
+        require(eta == 0, "This spell has already been scheduled");
+        eta = now + DSPauseAbstract(pause).delay();
+        pause.plot(action, tag, sig, eta);
+    }
+
+    function cast() public {
+        require(!done, "spell-already-cast");
+        done = true;
+        pause.exec(action, tag, sig, eta);
+    }
 }
