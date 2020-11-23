@@ -16,6 +16,7 @@
 pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
+import "lib/dss-interfaces/src/dapp/DSAuthorityAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
@@ -62,6 +63,11 @@ contract DssSpell {
     ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     DSPauseAbstract public pause =
         DSPauseAbstract(CHANGELOG.getAddress("MCD_PAUSE"));
+
+    address constant MCD_ADM = 0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6;
+    address constant SAI_MOM = 0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b;
+    address constant SAI_TOP = 0x5f00393547561DA3030ebF30e52F5DC0D5D3362c;
+
     address         public action;
     bytes32         public tag;
     uint256         public eta;
@@ -86,6 +92,9 @@ contract DssSpell {
         require(eta == 0, "This spell has already been scheduled");
         eta = now + DSPauseAbstract(pause).delay();
         pause.plot(action, tag, sig, eta);
+
+        DSAuthAbstract(SAI_MOM).setAuthority(MCD_ADM);
+        DSAuthAbstract(SAI_TOP).setAuthority(MCD_ADM);
     }
 
     function cast() public {

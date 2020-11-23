@@ -81,6 +81,10 @@ contract DssSpellTest is DSTest, DSMath {
     // Faucet
     FaucetAbstract      faucet = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
 
+    // Specific for this spell
+    DSAuthAbstract saiMom      = DSAuthAbstract(     0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b);
+    DSAuthAbstract saiTop      = DSAuthAbstract(     0x5f00393547561DA3030ebF30e52F5DC0D5D3362c);
+
     DssSpell spell;
 
     // CHEAT_CODE = 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D
@@ -723,6 +727,15 @@ contract DssSpellTest is DSTest, DSMath {
         spellTestMoms.cast();
         assertEq(flip.wards(address(cat)), 0);
         assertEq(osm.stopped(), 1);
+    }
+
+    function testSAIcontractsAuthorityChange() public {
+        assertEq(saiMom.authority(), address(oldChief));
+        assertEq(saiTop.authority(), address(oldChief));
+        vote();
+        spell.schedule();
+        assertEq(saiMom.authority(), address(newChief));
+        assertEq(saiTop.authority(), address(newChief));
     }
 }
 
