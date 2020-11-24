@@ -12,11 +12,6 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
-interface NewChiefAbstract {
-    function live() external view returns (uint256);
-    function launch() external;
-}
-
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
     address constant KOVAN_SPELL = address(0x0);
@@ -37,7 +32,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     struct SystemValues {
-        uint256 dsr_rate;
+        uint256 pot_dsr;
         uint256 vat_Line;
         uint256 pause_delay;
         uint256 vow_wait;
@@ -156,7 +151,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all system configuration changes
         //
         afterSpell = SystemValues({
-            dsr_rate:              0,                   // In basis points
+            pot_dsr:               0,                   // In basis points
             vat_Line:              1232 * MILLION,      // In whole Dai units
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
@@ -442,14 +437,14 @@ contract DssSpellTest is DSTest, DSMath {
 
     function checkSystemValues(SystemValues storage values) internal {
         // dsr
-        uint expectedDSRRate = rates.rates(values.dsr_rate);
+        uint expectedDSRRate = rates.rates(values.pot_dsr);
         // make sure dsr is less than 100% APR
         // bc -l <<< 'scale=27; e( l(2.00)/(60 * 60 * 24 * 365) )'
         // 1000000021979553151239153027
         assertTrue(
             pot.dsr() >= RAY && pot.dsr() < 1000000021979553151239153027
         );
-        assertTrue(diffCalc(expectedRate(values.dsr_rate), yearlyYield(expectedDSRRate)) <= TOLERANCE);
+        assertTrue(diffCalc(expectedRate(values.pot_dsr), yearlyYield(expectedDSRRate)) <= TOLERANCE);
 
         {
         // Line values in RAD
@@ -626,10 +621,10 @@ contract DssSpellTest is DSTest, DSMath {
         slate[0] = address(0);
         newChief.vote(slate);
         newChief.lift(address(0));
-        assertEq(NewChiefAbstract(address(newChief)).live(), 0);
+        assertEq(newChief.live(), 0);
         assertTrue(!newChief.isUserRoot(address(0)));
-        NewChiefAbstract(address(newChief)).launch();
-        assertEq(NewChiefAbstract(address(newChief)).live(), 1);
+        newChief.launch();
+        assertEq(newChief.live(), 1);
         assertTrue(newChief.isUserRoot(address(0)));
 
         // System launched, lifted address gets root access
@@ -711,7 +706,7 @@ contract DssSpellTest is DSTest, DSMath {
         slate[0] = address(0);
         newChief.vote(slate);
         newChief.lift(address(0));
-        NewChiefAbstract(address(newChief)).launch();
+        newChief.launch();
 
         // System launched, lifted address gets root access
         slate[0] = address(spellTestMoms);
