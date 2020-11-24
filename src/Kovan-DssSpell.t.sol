@@ -729,8 +729,8 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(saiTop.authority(), address(oldChief));
         vote();
         spell.schedule();
-        assertEq(saiMom.authority(), address(newChief));
-        assertEq(saiTop.authority(), address(newChief));
+        assertEq(saiMom.authority(), address(0));
+        assertEq(saiTop.authority(), address(0));
     }
 }
 
