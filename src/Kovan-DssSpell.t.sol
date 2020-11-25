@@ -609,13 +609,13 @@ contract DssSpellTest is DSTest, DSMath {
         address[] memory slate = new address[](1);
 
         // Create spell for testing
-        SpellTest spellTest = new SpellTest();
+        TestSpell testSpell = new TestSpell();
 
         // System not launched, lifted address doesn't get root access
-        slate[0] = address(spellTest);
+        slate[0] = address(testSpell);
         newChief.vote(slate);
-        newChief.lift(address(spellTest));
-        assertTrue(!newChief.isUserRoot(address(spellTest)));
+        newChief.lift(address(testSpell));
+        assertTrue(!newChief.isUserRoot(address(testSpell)));
 
         // Launch system
         slate[0] = address(0);
@@ -628,11 +628,11 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(newChief.isUserRoot(address(0)));
 
         // System launched, lifted address gets root access
-        slate[0] = address(spellTest);
+        slate[0] = address(testSpell);
         newChief.vote(slate);
-        newChief.lift(address(spellTest));
-        assertTrue(newChief.isUserRoot(address(spellTest)));
-        spellTest.schedule();
+        newChief.lift(address(testSpell));
+        assertTrue(newChief.isUserRoot(address(testSpell)));
+        testSpell.schedule();
     }
 
     function testFailExecuteSpellNotLaunched() public {
@@ -648,23 +648,23 @@ contract DssSpellTest is DSTest, DSMath {
         address[] memory slate = new address[](1);
 
         // Create spell for testing
-        SpellTest spellTest = new SpellTest();
+        TestSpell testSpell = new TestSpell();
 
         // System not launched, lifted address doesn't get root access
-        slate[0] = address(spellTest);
+        slate[0] = address(testSpell);
         newChief.vote(slate);
-        newChief.lift(address(spellTest));
-        spellTest.schedule();
+        newChief.lift(address(testSpell));
+        testSpell.schedule();
     }
 
     function _runOldChief() internal {
-        SpellTest spellTest = new SpellTest();
+        TestSpell testSpell = new TestSpell();
 
         address[] memory slate = new address[](1);
-        slate[0] = address(spellTest);
+        slate[0] = address(testSpell);
         oldChief.vote(slate);
-        oldChief.lift(address(spellTest));
-        spellTest.schedule();
+        oldChief.lift(address(testSpell));
+        testSpell.schedule();
     }
 
     function testExecuteSpellOldChief() public {
@@ -694,13 +694,13 @@ contract DssSpellTest is DSTest, DSMath {
         address[] memory slate = new address[](1);
 
         // Create spell for testing
-        SpellTestMoms spellTestMoms = new SpellTestMoms();
+        TestMomsSpell testMomsSpell = new TestMomsSpell();
 
         // System not launched, lifted address doesn't get root access
-        slate[0] = address(spellTestMoms);
+        slate[0] = address(testMomsSpell);
         newChief.vote(slate);
-        newChief.lift(address(spellTestMoms));
-        assertTrue(!newChief.isUserRoot(address(spellTestMoms)));
+        newChief.lift(address(testMomsSpell));
+        assertTrue(!newChief.isUserRoot(address(testMomsSpell)));
 
         // Launch system
         slate[0] = address(0);
@@ -709,17 +709,17 @@ contract DssSpellTest is DSTest, DSMath {
         newChief.launch();
 
         // System launched, lifted address gets root access
-        slate[0] = address(spellTestMoms);
+        slate[0] = address(testMomsSpell);
         newChief.vote(slate);
-        newChief.lift(address(spellTestMoms));
-        assertTrue(newChief.isUserRoot(address(spellTestMoms)));
+        newChief.lift(address(testMomsSpell));
+        assertTrue(newChief.isUserRoot(address(testMomsSpell)));
 
         FlipAbstract flip = FlipAbstract(changelog.getAddress("MCD_FLIP_ETH_A"));
         OsmAbstract osm   = OsmAbstract(changelog.getAddress("PIP_ETH"));
 
         assertEq(flip.wards(address(cat)), 1);
         assertEq(osm.stopped(), 0);
-        spellTestMoms.cast();
+        testMomsSpell.cast();
         assertEq(flip.wards(address(cat)), 0);
         assertEq(osm.stopped(), 1);
     }
@@ -741,7 +741,7 @@ contract SpellActionTest {
     }
 }
 
-contract SpellTest {
+contract TestSpell {
     DSPauseAbstract public pause =
         DSPauseAbstract(ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F).getAddress("MCD_PAUSE"));
     address         public action;
@@ -764,7 +764,7 @@ contract SpellTest {
     }
 }
 
-contract SpellTestMoms {
+contract TestMomsSpell {
     ChainlogAbstract changelog = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
     FlipperMomAbstract public fMom =
