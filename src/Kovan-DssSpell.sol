@@ -29,7 +29,7 @@ contract SpellAction {
     //  against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/active/contracts.json
 
-    ChainlogAbstract constant CHANGELOG     = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
+    ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
     address constant MCD_ADM                = 0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6;
     address constant VOTE_PROXY_FACTORY     = 0xEec40383cbeE179Be76D4D930c0ABD0D4beA672f;
