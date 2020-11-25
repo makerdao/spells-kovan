@@ -103,7 +103,7 @@ contract DssSpellTest is DSTest, DSMath {
     VoteProxyFactoryAbstract
               voteProxyFactory
                                = VoteProxyFactoryAbstract(
-                                                     0xEec40383cbeE179Be76D4D930c0ABD0D4beA672f);
+                                                     0x1400798AA746457E467A1eb9b3F3f72C25314429);
 
     DssSpell spell;
 
