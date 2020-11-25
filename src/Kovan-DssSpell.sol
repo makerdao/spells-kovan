@@ -35,9 +35,9 @@ contract SpellAction {
     address constant VOTE_PROXY_FACTORY     = 0xEec40383cbeE179Be76D4D930c0ABD0D4beA672f;
 
     function execute() external {
-        address MCD_PAUSE    = CHANGELOG.getAddress("MCD_PAUSE");
-        address FLIPPER_MOM  = CHANGELOG.getAddress("FLIPPER_MOM");
-        address OSM_MOM      = CHANGELOG.getAddress("OSM_MOM");
+        address MCD_PAUSE   = CHANGELOG.getAddress("MCD_PAUSE");
+        address FLIPPER_MOM = CHANGELOG.getAddress("FLIPPER_MOM");
+        address OSM_MOM     = CHANGELOG.getAddress("OSM_MOM");
 
         // Change MCD_ADM address in the changelog (Chief)
         CHANGELOG.setAddress("MCD_ADM", MCD_ADM);
