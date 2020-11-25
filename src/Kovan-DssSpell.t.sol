@@ -34,9 +34,9 @@ contract Voter {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0x0);
+    address constant KOVAN_SPELL = address(0x05FaE2A9E80BB5088Bf77A64ecCCad8a521Bbd6e);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1604082804;
+    uint256 constant SPELL_CREATED = 1606316808;
 
     struct CollateralValues {
         uint256 line;
