@@ -669,7 +669,6 @@ contract DssSpellTest is DSTest, DSMath {
 
     function testExecuteSpellOldChief() public {
         vote();
-
         _runOldChief();
     }
 
