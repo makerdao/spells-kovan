@@ -12,6 +12,26 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
+interface VoteProxyFactoryAbstract {
+    function initiateLink(address) external;
+    function approveLink(address) external returns (VoteProxyAbstract);
+}
+
+interface VoteProxyAbstract {
+    function lock(uint256) external;
+    function vote(address[] calldata) external;
+}
+
+contract Voter {
+    function doApproveLink(VoteProxyFactoryAbstract voteProxyFactory, address cold) external returns (VoteProxyAbstract voteProxy) {
+        voteProxy = voteProxyFactory.approveLink(cold);
+    }
+
+    function doVote(VoteProxyAbstract voteProxy, address[] calldata votes) external {
+        voteProxy.vote(votes);
+    }
+}
+
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
     address constant KOVAN_SPELL = address(0x0);
@@ -79,6 +99,11 @@ contract DssSpellTest is DSTest, DSMath {
     // Specific for this spell
     DSAuthAbstract saiMom      = DSAuthAbstract(     0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b);
     DSAuthAbstract saiTop      = DSAuthAbstract(     0x5f00393547561DA3030ebF30e52F5DC0D5D3362c);
+
+    VoteProxyFactoryAbstract
+              voteProxyFactory
+                               = VoteProxyFactoryAbstract(
+                                                     0xEec40383cbeE179Be76D4D930c0ABD0D4beA672f);
 
     DssSpell spell;
 
@@ -630,6 +655,50 @@ contract DssSpellTest is DSTest, DSMath {
         // System launched, lifted address gets root access
         slate[0] = address(testSpell);
         newChief.vote(slate);
+        newChief.lift(address(testSpell));
+        assertTrue(newChief.isUserRoot(address(testSpell)));
+        testSpell.schedule();
+    }
+
+    function testRootExecuteSpellViaVoteProxy() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
+        oldChief.free(999999999999 ether);
+
+        Voter voter = new Voter();
+        voteProxyFactory.initiateLink(address(voter));
+        VoteProxyAbstract voteProxy = voter.doApproveLink(voteProxyFactory, address(this));
+
+        gov.approve(address(voteProxy), uint256(-1));
+
+        voteProxy.lock(80_000 ether);
+        address[] memory slate = new address[](1);
+
+        // Create spell for testing
+        TestSpell testSpell = new TestSpell();
+
+        // System not launched, lifted address doesn't get root access
+        slate[0] = address(testSpell);
+        voteProxy.vote(slate);
+        newChief.lift(address(testSpell));
+        assertTrue(!newChief.isUserRoot(address(testSpell)));
+
+        // Launch system
+        slate[0] = address(0);
+        voteProxy.vote(slate);
+        newChief.lift(address(0));
+        assertEq(newChief.live(), 0);
+        assertTrue(!newChief.isUserRoot(address(0)));
+        newChief.launch();
+        assertEq(newChief.live(), 1);
+        assertTrue(newChief.isUserRoot(address(0)));
+
+        // System launched, lifted address gets root access
+        slate[0] = address(testSpell);
+        voteProxy.vote(slate);
         newChief.lift(address(testSpell));
         assertTrue(newChief.isUserRoot(address(testSpell)));
         testSpell.schedule();
