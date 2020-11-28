@@ -5,38 +5,20 @@ import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
 
-import {DssSpell, SpellAction} from "./Kovan-DssSpell.sol";
+import {DssSpell, SpellAction, PsmAbstract, LerpAbstract} from "./Kovan-DssSpell.sol";
 
 interface Hevm {
     function warp(uint) external;
     function store(address,bytes32,bytes32) external;
 }
 
-interface VoteProxyFactoryAbstract {
-    function initiateLink(address) external;
-    function approveLink(address) external returns (VoteProxyAbstract);
-}
-
-interface VoteProxyAbstract {
-    function lock(uint256) external;
-    function vote(address[] calldata) external;
-}
-
-contract Voter {
-    function doApproveLink(VoteProxyFactoryAbstract voteProxyFactory, address cold) external returns (VoteProxyAbstract voteProxy) {
-        voteProxy = voteProxyFactory.approveLink(cold);
-    }
-
-    function doVote(VoteProxyAbstract voteProxy, address[] calldata votes) external {
-        voteProxy.vote(votes);
-    }
-}
-
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0x05FaE2A9E80BB5088Bf77A64ecCCad8a521Bbd6e);
+    address constant KOVAN_SPELL = address(
+      0xB24B55eCf513Cfb6F6a44295a08AF6dcDaD11B8f
+    );
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1606316808;
+    uint256 constant SPELL_CREATED = 1606579240;
 
     struct CollateralValues {
         uint256 line;
@@ -52,7 +34,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     struct SystemValues {
-        uint256 pot_dsr;
+        uint256 dsr_rate;
         uint256 vat_Line;
         uint256 pause_delay;
         uint256 vow_wait;
@@ -62,9 +44,6 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 vow_hump;
         uint256 cat_box;
         uint256 ilk_count;
-        address pause_authority;
-        address osm_mom_authority;
-        address flipper_mom_authority;
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
@@ -74,17 +53,16 @@ contract DssSpellTest is DSTest, DSMath {
     Rates rates;
 
     // KOVAN ADDRESSES
-    ChainlogAbstract changelog = ChainlogAbstract(   0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
-    DSChiefAbstract   oldChief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
-    DSChiefAbstract   newChief = DSChiefAbstract(    0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6);
+    DSChiefAbstract      chief = DSChiefAbstract(    0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6);
     VatAbstract            vat = VatAbstract(        0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
     CatAbstract            cat = CatAbstract(        0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
     VowAbstract            vow = VowAbstract(        0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b);
     PotAbstract            pot = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
+    DaiAbstract           dai = DaiAbstract(         0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa);
 
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
@@ -93,17 +71,15 @@ contract DssSpellTest is DSTest, DSMath {
     OsmMomAbstract      osmMom = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
     FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
 
+    // USDC-PSM specific
+    DSTokenAbstract         usdc = DSTokenAbstract(  0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5);
+    GemJoinAbstract  joinUSDCPSM = GemJoinAbstract(  0xC0157b47cf394a8418013e6C449Da97E85C5F624);
+    FlipAbstract     flipUSDCPSM = FlipAbstract(     0x5eB5D3B028CD255d79019f7C44a502b31bFFde9d);
+    PsmAbstract       psmUSDCPSM = PsmAbstract(      0xE1066Fa98bE742dD4195Efeb2cCeB65b30a6C4C1);
+    LerpAbstract     lerpUSDCPSM = LerpAbstract(     0x750610d2B5DfFF9cF778638D25F915c4b64eb901);
+
     // Faucet
     FaucetAbstract      faucet = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
-
-    // Specific for this spell
-    DSAuthAbstract saiMom      = DSAuthAbstract(     0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b);
-    DSAuthAbstract saiTop      = DSAuthAbstract(     0x5f00393547561DA3030ebF30e52F5DC0D5D3362c);
-
-    VoteProxyFactoryAbstract
-              voteProxyFactory
-                               = VoteProxyFactoryAbstract(
-                                                     0x1400798AA746457E467A1eb9b3F3f72C25314429);
 
     DssSpell spell;
 
@@ -176,19 +152,16 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all system configuration changes
         //
         afterSpell = SystemValues({
-            pot_dsr:               0,                   // In basis points
-            vat_Line:              1232 * MILLION,      // In whole Dai units
-            pause_delay:           60,                  // In seconds
-            vow_wait:              3600,                // In seconds
-            vow_dump:              2,                   // In whole Dai units
-            vow_sump:              50,                  // In whole Dai units
-            vow_bump:              10,                  // In whole Dai units
-            vow_hump:              500,                 // In whole Dai units
-            cat_box:               10 * THOUSAND,       // In whole Dai units
-            ilk_count:             18,                  // Num expected in system
-            pause_authority:       address(newChief),   // Pause authority
-            osm_mom_authority:     address(newChief),   // OsmMom authority
-            flipper_mom_authority: address(newChief)    // FlipperMom authority
+            dsr_rate:     0,               // In basis points
+            vat_Line:     1632 * MILLION,  // In whole Dai units
+            pause_delay:  60,              // In seconds
+            vow_wait:     3600,            // In seconds
+            vow_dump:     2,               // In whole Dai units
+            vow_sump:     50,              // In whole Dai units
+            vow_bump:     10,              // In whole Dai units
+            vow_hump:     500,             // In whole Dai units
+            cat_box:      10 * THOUSAND,   // In whole Dai units
+            ilk_count:    17               // Num expected in system
         });
 
         //
@@ -410,47 +383,51 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          1 hours,
             liquidations: 0
         });
+        afterSpell.collaterals["USDC-PSM"] = CollateralValues({
+            line:         400 * MILLION,
+            dust:         500,
+            pct:          0,
+            chop:         0,
+            dunk:         500,
+            mat:          10000,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 0
+        });
     }
 
     function vote() private {
-        if (oldChief.hat() != address(spell)) {
+        if (chief.hat() != address(spell)) {
             hevm.store(
                 address(gov),
                 keccak256(abi.encode(address(this), uint256(1))),
                 bytes32(uint256(999999999999 ether))
             );
-            gov.approve(address(oldChief), uint256(-1));
-            oldChief.lock(999999999999 ether);
+            gov.approve(address(chief), uint256(-1));
+            chief.lock(sub(gov.balanceOf(address(this)), 80000 ether));
+            // Note: This is added because chief needs to be activated first due to the chief switch
+            if (!chief.live()) {
+                address[] memory zeroYays = new address[](1);
+                zeroYays[0] = address(0);
+                chief.vote(zeroYays);
+                chief.launch();
+            }
 
             assertTrue(!spell.done());
 
             address[] memory yays = new address[](1);
             yays[0] = address(spell);
 
-            oldChief.vote(yays);
-            oldChief.lift(address(spell));
+            chief.vote(yays);
+            chief.lift(address(spell));
         }
-        assertEq(oldChief.hat(), address(spell));
+        assertEq(chief.hat(), address(spell));
     }
 
     function scheduleWaitAndCast() public {
         spell.schedule();
-
-        uint256 castTime = now + pause.delay();
-
-        uint256 day = (castTime / 1 days + 3) % 7;
-        if(day >= 5) {
-            castTime += 7 days - day * 86400;
-        }
-
-        uint256 hour = castTime / 1 hours % 24;
-        if (hour >= 21) {
-            castTime += 24 hours - hour * 3600 + 14 hours;
-        } else if (hour < 14) {
-            castTime += 14 hours - hour * 3600;
-        }
-
-        hevm.warp(castTime);
+        hevm.warp(now + pause.delay());
         spell.cast();
     }
 
@@ -462,14 +439,14 @@ contract DssSpellTest is DSTest, DSMath {
 
     function checkSystemValues(SystemValues storage values) internal {
         // dsr
-        uint expectedDSRRate = rates.rates(values.pot_dsr);
+        uint expectedDSRRate = rates.rates(values.dsr_rate);
         // make sure dsr is less than 100% APR
         // bc -l <<< 'scale=27; e( l(2.00)/(60 * 60 * 24 * 365) )'
         // 1000000021979553151239153027
         assertTrue(
             pot.dsr() >= RAY && pot.dsr() < 1000000021979553151239153027
         );
-        assertTrue(diffCalc(expectedRate(values.pot_dsr), yearlyYield(expectedDSRRate)) <= TOLERANCE);
+        assertTrue(diffCalc(expectedRate(values.dsr_rate), yearlyYield(expectedDSRRate)) <= TOLERANCE);
 
         {
         // Line values in RAD
@@ -532,14 +509,6 @@ contract DssSpellTest is DSTest, DSMath {
         // check number of ilks
         assertEq(reg.count(), values.ilk_count);
 
-        // check Pause authority
-        assertEq(pause.authority(), values.pause_authority);
-
-        // check OsmMom authority
-        assertEq(osmMom.authority(), values.osm_mom_authority);
-
-        // check FlipperMom authority
-        assertEq(flipMom.authority(), values.flipper_mom_authority);
     }
 
     function checkCollateralValues(bytes32 ilk, SystemValues storage values) internal {
@@ -621,228 +590,86 @@ contract DssSpellTest is DSTest, DSMath {
         }
     }
 
-    function testRootExecuteSpell() public {
+    function testSpellIsCast_USDC_INTEGRATION() public {
         vote();
         scheduleWaitAndCast();
         assertTrue(spell.done());
 
-        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
-        oldChief.free(999999999999 ether);
-        gov.approve(address(newChief), uint256(-1));
+        spot.poke("USDC-PSM");
 
-        newChief.lock(80_000 ether);
-        address[] memory slate = new address[](1);
+        // Check faucet amount
+        uint256 faucetAmount = faucet.amt(address(usdc));
+        uint256 faucetAmountWad = faucetAmount * (10 ** (18 - usdc.decimals()));
+        assertTrue(faucetAmount > 0);
+        faucet.gulp(address(usdc));
+        assertEq(usdc.balanceOf(address(this)), faucetAmount);
 
-        // Create spell for testing
-        TestSpell testSpell = new TestSpell();
+        // Authorization
+        assertEq(joinUSDCPSM.wards(pauseProxy), 1);
+        assertEq(joinUSDCPSM.wards(address(psmUSDCPSM)), 1);
+        assertEq(psmUSDCPSM.wards(address(lerpUSDCPSM)), 1);
+        assertEq(psmUSDCPSM.wards(pauseProxy), 1);
+        assertEq(lerpUSDCPSM.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinUSDCPSM)), 1);
+        assertEq(flipUSDCPSM.wards(address(end)), 1);
+        assertEq(flipUSDCPSM.wards(address(flipMom)), 1);
 
-        // System not launched, lifted address doesn't get root access
-        slate[0] = address(testSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testSpell));
-        assertTrue(!newChief.isUserRoot(address(testSpell)));
+        // Check psm + lerp is set up correctly
+        assertEq(psmUSDCPSM.tin(), WAD * 1 / 100);
+        assertEq(psmUSDCPSM.tout(), WAD * 1 / 1000);
+        assertTrue(lerpUSDCPSM.started());
+        assertEq(lerpUSDCPSM.startTime(), now);
+        assertTrue(!lerpUSDCPSM.done());
 
-        // Launch system
-        slate[0] = address(0);
-        newChief.vote(slate);
-        newChief.lift(address(0));
-        assertEq(newChief.live(), 0);
-        assertTrue(!newChief.isUserRoot(address(0)));
-        newChief.launch();
-        assertEq(newChief.live(), 1);
-        assertTrue(newChief.isUserRoot(address(0)));
+        // Convert USDC to DAI with a 1% fee
+        usdc.approve(address(joinUSDCPSM), faucetAmount);
+        psmUSDCPSM.sellGem(address(this), faucetAmount);
+        faucetAmount = faucetAmount * 99 / 100;
+        faucetAmountWad = faucetAmountWad * 99 / 100;
+        assertEq(usdc.balanceOf(address(this)), 0);
+        assertEq(dai.balanceOf(address(this)), faucetAmountWad);
 
-        // System launched, lifted address gets root access
-        slate[0] = address(testSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testSpell));
-        assertTrue(newChief.isUserRoot(address(testSpell)));
-        testSpell.schedule();
+        // Convert DAI to USDC with a 0.1% fee
+        faucetAmount = faucetAmount * 999 / 1000;
+        faucetAmountWad = faucetAmountWad * 999 / 1000;
+        dai.approve(address(psmUSDCPSM), faucetAmountWad);
+        psmUSDCPSM.buyGem(address(this), faucetAmount);
+        assertEq(usdc.balanceOf(address(this)), faucetAmount);
+        assertEq(dai.balanceOf(address(this)), 0);
+
+        // Convert USDC to DAI with a 0.55% fee (halfway through lerp)
+        hevm.warp(now + 3.5 days);
+        lerpUSDCPSM.tick();
+        assertTrue(!lerpUSDCPSM.done());
+        assertEq(psmUSDCPSM.tin(), WAD * 55 / 10000);
+        assertEq(psmUSDCPSM.tout(), WAD * 1 / 1000);
+        usdc.approve(address(joinUSDCPSM), faucetAmount);
+        psmUSDCPSM.sellGem(address(this), faucetAmount);
+        faucetAmount = faucetAmount * 9945 / 10000;
+        faucetAmountWad = faucetAmountWad * 9945 / 10000;
+        assertEq(usdc.balanceOf(address(this)), 0);
+        assertEq(dai.balanceOf(address(this)), faucetAmountWad);
+
+        // Convert DAI to USDC with a 1% fee
+        faucetAmount = faucetAmount * 99 / 100;
+        faucetAmountWad = faucetAmountWad * 99 / 100;
+        dai.approve(address(psmUSDCPSM), faucetAmountWad);
+        psmUSDCPSM.buyGem(address(this), faucetAmount);
+        assertEq(usdc.balanceOf(address(this)), faucetAmount);
+        assertEq(dai.balanceOf(address(this)), 0);
+
+        // Convert USDC to DAI with a 0.1% fee (lerp is done)
+        hevm.warp(now + 4 days);
+        lerpUSDCPSM.tick();
+        assertTrue(lerpUSDCPSM.done());
+        assertEq(psmUSDCPSM.tin(), WAD * 1 / 1000);
+        assertEq(psmUSDCPSM.tout(), WAD * 1 / 1000);
+        usdc.approve(address(joinUSDCPSM), faucetAmount);
+        psmUSDCPSM.sellGem(address(this), faucetAmount);
+        faucetAmount = faucetAmount * 999 / 1000;
+        faucetAmountWad = faucetAmountWad * 999 / 1000;
+        assertEq(usdc.balanceOf(address(this)), 0);
+        assertEq(dai.balanceOf(address(this)), faucetAmountWad);
     }
 
-    function testRootExecuteSpellViaVoteProxy() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
-        oldChief.free(999999999999 ether);
-
-        Voter voter = new Voter();
-        voteProxyFactory.initiateLink(address(voter));
-        VoteProxyAbstract voteProxy = voter.doApproveLink(voteProxyFactory, address(this));
-
-        gov.approve(address(voteProxy), uint256(-1));
-
-        voteProxy.lock(80_000 ether);
-        address[] memory slate = new address[](1);
-
-        // Create spell for testing
-        TestSpell testSpell = new TestSpell();
-
-        // System not launched, lifted address doesn't get root access
-        slate[0] = address(testSpell);
-        voteProxy.vote(slate);
-        newChief.lift(address(testSpell));
-        assertTrue(!newChief.isUserRoot(address(testSpell)));
-
-        // Launch system
-        slate[0] = address(0);
-        voteProxy.vote(slate);
-        newChief.lift(address(0));
-        assertEq(newChief.live(), 0);
-        assertTrue(!newChief.isUserRoot(address(0)));
-        newChief.launch();
-        assertEq(newChief.live(), 1);
-        assertTrue(newChief.isUserRoot(address(0)));
-
-        // System launched, lifted address gets root access
-        slate[0] = address(testSpell);
-        voteProxy.vote(slate);
-        newChief.lift(address(testSpell));
-        assertTrue(newChief.isUserRoot(address(testSpell)));
-        testSpell.schedule();
-    }
-
-    function testFailExecuteSpellNotLaunched() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
-        oldChief.free(999999999999 ether);
-        gov.approve(address(newChief), uint256(-1));
-
-        newChief.lock(80_000 ether);
-        address[] memory slate = new address[](1);
-
-        // Create spell for testing
-        TestSpell testSpell = new TestSpell();
-
-        // System not launched, lifted address doesn't get root access
-        slate[0] = address(testSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testSpell));
-        testSpell.schedule();
-    }
-
-    function _runOldChief() internal {
-        TestSpell testSpell = new TestSpell();
-
-        address[] memory slate = new address[](1);
-        slate[0] = address(testSpell);
-        oldChief.vote(slate);
-        oldChief.lift(address(testSpell));
-        testSpell.schedule();
-    }
-
-    function testExecuteSpellOldChief() public {
-        vote();
-        _runOldChief();
-    }
-
-    function testFailExecuteSpellOldChief() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        _runOldChief();
-    }
-
-    function testMoms() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
-        oldChief.free(999999999999 ether);
-        gov.approve(address(newChief), uint256(-1));
-
-        newChief.lock(80_000 ether);
-        address[] memory slate = new address[](1);
-
-        // Create spell for testing
-        TestMomsSpell testMomsSpell = new TestMomsSpell();
-
-        // System not launched, lifted address doesn't get root access
-        slate[0] = address(testMomsSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testMomsSpell));
-        assertTrue(!newChief.isUserRoot(address(testMomsSpell)));
-
-        // Launch system
-        slate[0] = address(0);
-        newChief.vote(slate);
-        newChief.lift(address(0));
-        newChief.launch();
-
-        // System launched, lifted address gets root access
-        slate[0] = address(testMomsSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testMomsSpell));
-        assertTrue(newChief.isUserRoot(address(testMomsSpell)));
-
-        FlipAbstract flip = FlipAbstract(changelog.getAddress("MCD_FLIP_ETH_A"));
-        OsmAbstract osm   = OsmAbstract(changelog.getAddress("PIP_ETH"));
-
-        assertEq(flip.wards(address(cat)), 1);
-        assertEq(osm.stopped(), 0);
-        testMomsSpell.cast();
-        assertEq(flip.wards(address(cat)), 0);
-        assertEq(osm.stopped(), 1);
-    }
-
-    function testSAIcontractsAuthorityChange() public {
-        assertEq(saiMom.authority(), address(oldChief));
-        assertEq(saiTop.authority(), address(oldChief));
-        vote();
-        spell.schedule();
-        assertEq(saiMom.authority(), address(0));
-        assertEq(saiTop.authority(), address(0));
-    }
-}
-
-contract SpellActionTest {
-    function execute() external {
-        // Random action to test authority
-        VatAbstract(ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F).getAddress("MCD_VAT")).rely(address(123));
-    }
-}
-
-contract TestSpell {
-    DSPauseAbstract public pause =
-        DSPauseAbstract(ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F).getAddress("MCD_PAUSE"));
-    address         public action;
-    bytes32         public tag;
-    uint256         public eta;
-    bytes           public sig;
-
-    constructor() public {
-        sig = abi.encodeWithSignature("execute()");
-        action = address(new SpellActionTest());
-        bytes32 _tag;
-        address _action = action;
-        assembly { _tag := extcodehash(_action) }
-        tag = _tag;
-    }
-
-    function schedule() public {
-        eta = now + DSPauseAbstract(pause).delay();
-        pause.plot(action, tag, sig, eta);
-    }
-}
-
-contract TestMomsSpell {
-    ChainlogAbstract changelog = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
-
-    FlipperMomAbstract public fMom =
-        FlipperMomAbstract(changelog.getAddress("FLIPPER_MOM"));
-
-    OsmMomAbstract public oMom =
-        OsmMomAbstract(changelog.getAddress("OSM_MOM"));
-
-    function cast() public {
-        fMom.deny(changelog.getAddress("MCD_FLIP_ETH_A"));
-        oMom.stop("ETH-A");
-    }
 }

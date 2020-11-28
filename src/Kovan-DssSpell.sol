@@ -16,57 +16,198 @@
 pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
-import "lib/dss-interfaces/src/dapp/DSAuthorityAbstract.sol";
+import "lib/dss-interfaces/src/dss/CatAbstract.sol";
+import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
+import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
+import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
+import "lib/dss-interfaces/src/dss/JugAbstract.sol";
+import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
+import "lib/dss-interfaces/src/dss/VatAbstract.sol";
+import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
-import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
 
+interface PsmAbstract {
+    function wards(address) external returns (uint256);
+    function vat() external returns (address);
+    function gemJoin() external returns (address);
+    function dai() external returns (address);
+    function daiJoin() external returns (address);
+    function ilk() external returns (bytes32);
+    function vow() external returns (address);
+    function tin() external returns (uint256);
+    function tout() external returns (uint256);
+    function file(bytes32 what, uint256 data) external;
+    function sellGem(address usr, uint256 gemAmt) external;
+    function buyGem(address usr, uint256 gemAmt) external;
+}
+
+interface LerpAbstract {
+    function wards(address) external returns (uint256);
+    function target() external returns (address);
+    function what() external returns (bytes32);
+    function start() external returns (uint256);
+    function end() external returns (uint256);
+    function duration() external returns (uint256);
+    function started() external returns (bool);
+    function done() external returns (bool);
+    function startTime() external returns (uint256);
+    function init() external;
+    function tick() external;
+}
 
 contract SpellAction {
     // KOVAN ADDRESSES
     //
     // The contracts in this list should correspond to MCD core contracts, verify
     //  against the current release list at:
-    //     https://changelog.makerdao.com/releases/kovan/active/contracts.json
+    //     https://changelog.makerdao.com/releases/kovan/1.1.3/contracts.json
 
-    ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
+    address constant MCD_VAT      = 0xbA987bDB501d131f766fEe8180Da5d81b34b69d9;
+    address constant MCD_CAT      = 0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958;
+    address constant MCD_JUG      = 0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD;
+    address constant MCD_SPOT     = 0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D;
+    address constant MCD_POT      = 0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb;
+    address constant MCD_END      = 0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F;
+    address constant MCD_DAI      = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa;
+    address constant MCD_JOIN_DAI = 0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c;
+    address constant MCD_VOW      = 0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b;
+    address constant FLIPPER_MOM  = 0x50dC6120c67E456AdA2059cfADFF0601499cf681;
+    address constant OSM_MOM      = 0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3;
+    address constant ILK_REGISTRY = 0xedE45A0522CA19e979e217064629778d6Cc2d9Ea;
 
-    address constant MCD_ADM            = 0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6;
-    address constant VOTE_PROXY_FACTORY = 0x1400798AA746457E467A1eb9b3F3f72C25314429;
+    address constant FAUCET       = 0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3;
+
+    address constant USDC               = 0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5;
+    address constant MCD_JOIN_USDC_PSM  = 0xC0157b47cf394a8418013e6C449Da97E85C5F624;
+    address constant MCD_FLIP_USDC_PSM  = 0x0Aa5615713afe4517A7d2fE184e853B73982D052;
+    address constant MCD_PSM_USDC_PSM   = 0xE1066Fa98bE742dD4195Efeb2cCeB65b30a6C4C1;
+    address constant LERP               = 0x750610d2B5DfFF9cF778638D25F915c4b64eb901;
+    address constant PIP_USDC           = 0x4c51c2584309b7BF328F89609FDd03B3b95fC677;
+
+    uint256 constant THOUSAND = 10**3;
+    uint256 constant MILLION = 10**6;
+    uint256 constant WAD = 10**18;
+    uint256 constant RAY = 10**27;
+    uint256 constant RAD = 10**45;
+
+    // Many of the settings that change weekly rely on the rate accumulator
+    // described at https://docs.makerdao.com/smart-contract-modules/rates-module
+    // To check this yourself, use the following rate calculation (example 8%):
+    //
+    // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
+    //
+    uint256 constant ZERO_PERCENT_RATE = 1000000000000000000000000000;
 
     function execute() external {
-        address MCD_PAUSE   = CHANGELOG.getAddress("MCD_PAUSE");
-        address FLIPPER_MOM = CHANGELOG.getAddress("FLIPPER_MOM");
-        address OSM_MOM     = CHANGELOG.getAddress("OSM_MOM");
+        bytes32 ilk = "USDC-PSM";
 
-        // Change MCD_ADM address in the changelog (Chief)
-        CHANGELOG.setAddress("MCD_ADM", MCD_ADM);
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_USDC_PSM).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_USDC_PSM).ilk() == ilk, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_USDC_PSM).gem() == USDC, "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_USDC_PSM).dec() == 6, "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_USDC_PSM).vat() == MCD_VAT, "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_USDC_PSM).cat() == MCD_CAT, "flip-cat-not-match");
+        require(FlipAbstract(MCD_FLIP_USDC_PSM).ilk() == ilk, "flip-ilk-not-match");
+        require(PsmAbstract(MCD_PSM_USDC_PSM).vat() == MCD_VAT, "psm-vat-not-match");
+        require(PsmAbstract(MCD_PSM_USDC_PSM).gemJoin() == MCD_JOIN_USDC_PSM, "psm-join-not-match");
+        require(PsmAbstract(MCD_PSM_USDC_PSM).dai() == MCD_DAI, "psm-dai-not-match");
+        require(PsmAbstract(MCD_PSM_USDC_PSM).daiJoin() == MCD_DAI, "psm-dai-join-not-match");
+        require(PsmAbstract(MCD_PSM_USDC_PSM).ilk() == ilk, "psm-ilk-not-match");
+        require(PsmAbstract(MCD_PSM_USDC_PSM).vow() == MCD_VOW, "psm-vow-not-match");
+        require(LerpAbstract(LERP).target() == MCD_PSM_USDC_PSM, "lerp-target-not-match");
+        require(LerpAbstract(LERP).what() == "tin", "lerp-what-not-match");
+        require(LerpAbstract(LERP).start() == 1 * WAD / 100, "lerp-start-not-match");
+        require(LerpAbstract(LERP).end() == 1 * WAD / 1000, "lerp-end-not-match");
+        require(LerpAbstract(LERP).duration() ==  7 days, "lerp-duration-not-match");
+        require(!LerpAbstract(LERP).started(), "lerp-not-started");
+        require(!LerpAbstract(LERP).done(), "lerp-not-done");
 
-        // Add VOTE_PROXY_FACTORY to the changelog (previous one was missing)
-        CHANGELOG.setAddress("VOTE_PROXY_FACTORY", VOTE_PROXY_FACTORY);
+        // Set the USDC PIP in the Spotter
+        SpotAbstract(MCD_SPOT).file(ilk, "pip", PIP_USDC);
 
-        // Bump version
-        CHANGELOG.setVersion("1.2.0");
+        // Set the USDC-PSM Flipper in the Cat
+        CatAbstract(MCD_CAT).file(ilk, "flip", MCD_FLIP_USDC_PSM);
 
-        // Set new Chief in the Pause
-        DSPauseAbstract(MCD_PAUSE).setAuthority(MCD_ADM);
+        // Init USDC-PSM ilk in Vat & Jug
+        VatAbstract(MCD_VAT).init(ilk);
+        JugAbstract(MCD_JUG).init(ilk);
 
-        // Set new Chief in the FlipperMom
-        FlipperMomAbstract(FLIPPER_MOM).setAuthority(MCD_ADM);
+        // Allow USDC-PSM Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_USDC_PSM);
+        // Allow the USDC-PSM Flipper to reduce the Cat litterbox on deal()
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_USDC_PSM);
+        // Allow Cat to kick auctions in USDC-PSM Flipper
+        FlipAbstract(MCD_FLIP_USDC_PSM).rely(MCD_CAT);
+        // Allow End to yank auctions in USDC-PSM Flipper
+        FlipAbstract(MCD_FLIP_USDC_PSM).rely(MCD_END);
+        // Allow FlipperMom to access to the USDC-PSM Flipper
+        FlipAbstract(MCD_FLIP_USDC_PSM).rely(FLIPPER_MOM);
+        // Disallow Cat to kick auctions in USDC-PSM Flipper
+        // !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
+        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_PSM);
 
-        // Set new Chief in the OsmMom
-        OsmMomAbstract(OSM_MOM).setAuthority(MCD_ADM);
+        // Allow OsmMom to access to the USDC Osm
+        // !!!!!!!! Only if PIP_USDC = Osm and hasn't been already relied due a previous deployed ilk
+        // OsmAbstract(PIP_USDC).rely(OSM_MOM);
+        // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_USDC = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk
+        // MedianAbstract(OsmAbstract(PIP_USDC).src()).kiss(PIP_USDC);
+        // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_USDC = Osm or PIP_USDC = Median and hasn't been already whitelisted due a previous deployed ilk
+        // OsmAbstract(PIP_USDC).kiss(MCD_SPOT);
+        // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_USDC = Osm or PIP_USDC = Median and hasn't been already whitelisted due a previous deployed ilk
+        // OsmAbstract(PIP_USDC).kiss(MCD_END);
+        // Set USDC Osm in the OsmMom for new ilk
+        // !!!!!!!! Only if PIP_USDC = Osm
+        // OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_USDC);
+
+        // Set the global debt ceiling
+        VatAbstract(MCD_VAT).file("Line", 1632 * MILLION * RAD);
+        // Set the USDC-PSM debt ceiling
+        VatAbstract(MCD_VAT).file(ilk, "line", 400 * MILLION * RAD);
+        // Set the USDC-PSM dust
+        VatAbstract(MCD_VAT).file(ilk, "dust", 500 * RAD);
+        // Set the Lot size
+        CatAbstract(MCD_CAT).file(ilk, "dunk", 500 * RAD);
+        // Set the USDC-PSM liquidation penalty (e.g. 13% => X = 113)
+        CatAbstract(MCD_CAT).file(ilk, "chop", 100 * WAD / 100);
+        // Set the USDC-PSM stability fee (e.g. 1% = 1000000000315522921573372069)
+        JugAbstract(MCD_JUG).file(ilk, "duty", ZERO_PERCENT_RATE);
+        // Set the USDC-PSM percentage between bids (e.g. 3% => X = 103)
+        FlipAbstract(MCD_FLIP_USDC_PSM).file("beg", 103 * WAD / 100);
+        // Set the USDC-PSM time max time between bids
+        FlipAbstract(MCD_FLIP_USDC_PSM).file("ttl", 1 hours);
+        // Set the USDC-PSM max auction duration to
+        FlipAbstract(MCD_FLIP_USDC_PSM).file("tau", 1 hours);
+        // Set the USDC-PSM min collateralization ratio (e.g. 150% => X = 150)
+        SpotAbstract(MCD_SPOT).file(ilk, "mat", 100 * RAY / 100);
+        // Set the USDC-PSM fee in (tin)
+        PsmAbstract(MCD_PSM_USDC_PSM).file("tin", 1 * WAD / 100);
+        // Set the USDC-PSM fee out (tout)
+        PsmAbstract(MCD_PSM_USDC_PSM).file("tout", 1 * WAD / 1000);
+
+        // Update USDC-PSM spot value in Vat
+        SpotAbstract(MCD_SPOT).poke(ilk);
+
+        // Add new ilk to the IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_USDC_PSM);
+
+        // Set gulp amount in faucet on kovan
+        // FaucetAbstract(FAUCET).setAmt(YFI, 1 * WAD);
+
+        // Initialize the lerp module to start the clock
+        LerpAbstract(LERP).init();
     }
 }
 
 contract DssSpell {
-    ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     DSPauseAbstract public pause =
-        DSPauseAbstract(CHANGELOG.getAddress("MCD_PAUSE"));
-
-    address constant SAI_MOM = 0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b;
-    address constant SAI_TOP = 0x5f00393547561DA3030ebF30e52F5DC0D5D3362c;
-
+        DSPauseAbstract(0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         public action;
     bytes32         public tag;
     uint256         public eta;
@@ -91,9 +232,6 @@ contract DssSpell {
         require(eta == 0, "This spell has already been scheduled");
         eta = now + DSPauseAbstract(pause).delay();
         pause.plot(action, tag, sig, eta);
-
-        DSAuthAbstract(SAI_MOM).setAuthority(address(0));
-        DSAuthAbstract(SAI_TOP).setAuthority(address(0));
     }
 
     function cast() public {
