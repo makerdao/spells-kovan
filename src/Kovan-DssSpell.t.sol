@@ -12,13 +12,31 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
+interface VoteProxyFactoryAbstract {
+    function initiateLink(address) external;
+    function approveLink(address) external returns (VoteProxyAbstract);
+}
+
+interface VoteProxyAbstract {
+    function lock(uint256) external;
+    function vote(address[] calldata) external;
+}
+
+contract Voter {
+    function doApproveLink(VoteProxyFactoryAbstract voteProxyFactory, address cold) external returns (VoteProxyAbstract voteProxy) {
+        voteProxy = voteProxyFactory.approveLink(cold);
+    }
+
+    function doVote(VoteProxyAbstract voteProxy, address[] calldata votes) external {
+        voteProxy.vote(votes);
+    }
+}
+
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(
-      0x21dE9a139ab51A0C4CAdf50D450b5e64ba226B93
-    );
+    address constant KOVAN_SPELL = address(0x0bb56165704cF98B8cCE88E56e811a1e2E60ffdd);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1606585588;
+    uint256 constant SPELL_CREATED = 1606831720;
 
     struct CollateralValues {
         uint256 line;
@@ -34,7 +52,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     struct SystemValues {
-        uint256 dsr_rate;
+        uint256 pot_dsr;
         uint256 vat_Line;
         uint256 pause_delay;
         uint256 vow_wait;
@@ -44,6 +62,9 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 vow_hump;
         uint256 cat_box;
         uint256 ilk_count;
+        address pause_authority;
+        address osm_mom_authority;
+        address flipper_mom_authority;
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
@@ -53,6 +74,7 @@ contract DssSpellTest is DSTest, DSMath {
     Rates rates;
 
     // KOVAN ADDRESSES
+    ChainlogAbstract changelog = ChainlogAbstract(   0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
     DSChiefAbstract      chief = DSChiefAbstract(    0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6);
@@ -62,7 +84,7 @@ contract DssSpellTest is DSTest, DSMath {
     PotAbstract            pot = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract            jug = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
-    DaiAbstract           dai = DaiAbstract(         0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa);
+    DaiAbstract            dai = DaiAbstract(        0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa);
 
     DSTokenAbstract        gov = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract            end = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
@@ -71,15 +93,15 @@ contract DssSpellTest is DSTest, DSMath {
     OsmMomAbstract      osmMom = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
     FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
 
-    // USDC-PSM specific
-    DSTokenAbstract         usdc = DSTokenAbstract(  0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5);
-    GemJoinAbstract  joinUSDCPSM = GemJoinAbstract(  0xC0157b47cf394a8418013e6C449Da97E85C5F624);
-    FlipAbstract     flipUSDCPSM = FlipAbstract(     0x5eB5D3B028CD255d79019f7C44a502b31bFFde9d);
-    PsmAbstract       psmUSDCPSM = PsmAbstract(      0xE1066Fa98bE742dD4195Efeb2cCeB65b30a6C4C1);
-    LerpAbstract     lerpUSDCPSM = LerpAbstract(     0x750610d2B5DfFF9cF778638D25F915c4b64eb901);
-
     // Faucet
     FaucetAbstract      faucet = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
+
+    // PSM-USDC-A specific
+    DSTokenAbstract         usdc = DSTokenAbstract(  0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5);
+    GemJoinAbstract  joinUSDCPSM = GemJoinAbstract(  0x882916CC149eB669F9e9240C001C8C90Ab37974c);
+    FlipAbstract     flipUSDCPSM = FlipAbstract(     0xA79F07275eA9080829e77F9f399F9f42bb79a58a);
+    PsmAbstract       psmUSDCPSM = PsmAbstract(      0x8D1B119fA7492C8c5b4125B53a44EA8b0e83d5e8);
+    LerpAbstract     lerpUSDCPSM = LerpAbstract(     0x06b55F7DF03aC8B21cA472612419571cfCe854E5);
 
     DssSpell spell;
 
@@ -143,7 +165,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function setUp() public {
-        hevm = Hevm(address(CHEAT_CODE));
+       hevm = Hevm(address(CHEAT_CODE));
         rates = new Rates();
 
         spell = KOVAN_SPELL != address(0) ? DssSpell(KOVAN_SPELL) : new DssSpell();
@@ -152,16 +174,19 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all system configuration changes
         //
         afterSpell = SystemValues({
-            dsr_rate:     0,               // In basis points
-            vat_Line:     1632 * MILLION,  // In whole Dai units
-            pause_delay:  60,              // In seconds
-            vow_wait:     3600,            // In seconds
-            vow_dump:     2,               // In whole Dai units
-            vow_sump:     50,              // In whole Dai units
-            vow_bump:     10,              // In whole Dai units
-            vow_hump:     500,             // In whole Dai units
-            cat_box:      10 * THOUSAND,   // In whole Dai units
-            ilk_count:    19               // Num expected in system
+            pot_dsr:               0,                   // In basis points
+            vat_Line:              1632 * MILLION,      // In whole Dai units
+            pause_delay:           60,                  // In seconds
+            vow_wait:              3600,                // In seconds
+            vow_dump:              2,                   // In whole Dai units
+            vow_sump:              50,                  // In whole Dai units
+            vow_bump:              10,                  // In whole Dai units
+            vow_hump:              500,                 // In whole Dai units
+            cat_box:               10 * THOUSAND,       // In whole Dai units
+            ilk_count:             19,                  // Num expected in system
+            pause_authority:       address(chief),      // Pause authority
+            osm_mom_authority:     address(chief),      // OsmMom authority
+            flipper_mom_authority: address(chief)       // FlipperMom authority
         });
 
         //
@@ -383,7 +408,7 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          1 hours,
             liquidations: 0
         });
-        afterSpell.collaterals["USDC-PSM"] = CollateralValues({
+        afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
             line:         400 * MILLION,
             dust:         10,
             pct:          0,
@@ -427,7 +452,22 @@ contract DssSpellTest is DSTest, DSMath {
 
     function scheduleWaitAndCast() public {
         spell.schedule();
-        hevm.warp(now + pause.delay());
+
+        uint256 castTime = now + pause.delay();
+
+        uint256 day = (castTime / 1 days + 3) % 7;
+        if(day >= 5) {
+            castTime += 7 days - day * 86400;
+        }
+
+        uint256 hour = castTime / 1 hours % 24;
+        if (hour >= 21) {
+            castTime += 24 hours - hour * 3600 + 14 hours;
+        } else if (hour < 14) {
+            castTime += 14 hours - hour * 3600;
+        }
+
+        hevm.warp(castTime);
         spell.cast();
     }
 
@@ -439,14 +479,14 @@ contract DssSpellTest is DSTest, DSMath {
 
     function checkSystemValues(SystemValues storage values) internal {
         // dsr
-        uint expectedDSRRate = rates.rates(values.dsr_rate);
+        uint expectedDSRRate = rates.rates(values.pot_dsr);
         // make sure dsr is less than 100% APR
         // bc -l <<< 'scale=27; e( l(2.00)/(60 * 60 * 24 * 365) )'
         // 1000000021979553151239153027
         assertTrue(
             pot.dsr() >= RAY && pot.dsr() < 1000000021979553151239153027
         );
-        assertTrue(diffCalc(expectedRate(values.dsr_rate), yearlyYield(expectedDSRRate)) <= TOLERANCE);
+        assertTrue(diffCalc(expectedRate(values.pot_dsr), yearlyYield(expectedDSRRate)) <= TOLERANCE);
 
         {
         // Line values in RAD
@@ -509,6 +549,14 @@ contract DssSpellTest is DSTest, DSMath {
         // check number of ilks
         assertEq(reg.count(), values.ilk_count);
 
+        // check Pause authority
+        assertEq(pause.authority(), values.pause_authority);
+
+        // check OsmMom authority
+        assertEq(osmMom.authority(), values.osm_mom_authority);
+
+        // check FlipperMom authority
+        assertEq(flipMom.authority(), values.flipper_mom_authority);
     }
 
     function checkCollateralValues(bytes32 ilk, SystemValues storage values) internal {
@@ -595,7 +643,7 @@ contract DssSpellTest is DSTest, DSMath {
         scheduleWaitAndCast();
         assertTrue(spell.done());
 
-        spot.poke("USDC-PSM");
+        spot.poke("PSM-USDC-A");
 
         // Check faucet amount
         uint256 faucetAmount = faucet.amt(address(usdc));

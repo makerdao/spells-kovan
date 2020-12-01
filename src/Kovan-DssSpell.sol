@@ -81,10 +81,10 @@ contract SpellAction {
     address constant FAUCET       = 0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3;
 
     address constant USDC               = 0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5;
-    address constant MCD_JOIN_USDC_PSM  = 0xC0157b47cf394a8418013e6C449Da97E85C5F624;
-    address constant MCD_FLIP_USDC_PSM  = 0x0Aa5615713afe4517A7d2fE184e853B73982D052;
-    address constant MCD_PSM_USDC_PSM   = 0xE1066Fa98bE742dD4195Efeb2cCeB65b30a6C4C1;
-    address constant LERP               = 0x750610d2B5DfFF9cF778638D25F915c4b64eb901;
+    address constant MCD_JOIN_USDC_PSM  = 0x882916CC149eB669F9e9240C001C8C90Ab37974c;
+    address constant MCD_FLIP_USDC_PSM  = 0xA79F07275eA9080829e77F9f399F9f42bb79a58a;
+    address constant MCD_PSM_USDC_PSM   = 0x8D1B119fA7492C8c5b4125B53a44EA8b0e83d5e8;
+    address constant LERP               = 0x06b55F7DF03aC8B21cA472612419571cfCe854E5;
     address constant PIP_USDC           = 0x4c51c2584309b7BF328F89609FDd03B3b95fC677;
 
     uint256 constant THOUSAND = 10**3;
@@ -102,7 +102,7 @@ contract SpellAction {
     uint256 constant ZERO_PERCENT_RATE = 1000000000000000000000000000;
 
     function execute() external {
-        bytes32 ilk = "USDC-PSM";
+        bytes32 ilk = "PSM-USDC-A";
 
         // Sanity checks
         require(GemJoinAbstract(MCD_JOIN_USDC_PSM).vat() == MCD_VAT, "join-vat-not-match");
@@ -129,24 +129,24 @@ contract SpellAction {
         // Set the USDC PIP in the Spotter
         SpotAbstract(MCD_SPOT).file(ilk, "pip", PIP_USDC);
 
-        // Set the USDC-PSM Flipper in the Cat
+        // Set the PSM-USDC-A Flipper in the Cat
         CatAbstract(MCD_CAT).file(ilk, "flip", MCD_FLIP_USDC_PSM);
 
-        // Init USDC-PSM ilk in Vat & Jug
-        VatAbstract(MCD_VAT).init(ilk);
+        // Init PSM-USDC-A ilk in Vat & Jug
+        // VatAbstract(MCD_VAT).init(ilk);
         JugAbstract(MCD_JUG).init(ilk);
 
-        // Allow USDC-PSM Join to modify Vat registry
+        // Allow PSM-USDC-A Join to modify Vat registry
         VatAbstract(MCD_VAT).rely(MCD_JOIN_USDC_PSM);
-        // Allow the USDC-PSM Flipper to reduce the Cat litterbox on deal()
+        // Allow the PSM-USDC-A Flipper to reduce the Cat litterbox on deal()
         CatAbstract(MCD_CAT).rely(MCD_FLIP_USDC_PSM);
-        // Allow Cat to kick auctions in USDC-PSM Flipper
+        // Allow Cat to kick auctions in PSM-USDC-A Flipper
         FlipAbstract(MCD_FLIP_USDC_PSM).rely(MCD_CAT);
-        // Allow End to yank auctions in USDC-PSM Flipper
+        // Allow End to yank auctions in PSM-USDC-A Flipper
         FlipAbstract(MCD_FLIP_USDC_PSM).rely(MCD_END);
-        // Allow FlipperMom to access to the USDC-PSM Flipper
+        // Allow FlipperMom to access to the PSM-USDC-A Flipper
         FlipAbstract(MCD_FLIP_USDC_PSM).rely(FLIPPER_MOM);
-        // Disallow Cat to kick auctions in USDC-PSM Flipper
+        // Disallow Cat to kick auctions in PSM-USDC-A Flipper
         // !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
         FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_PSM);
 
@@ -168,30 +168,31 @@ contract SpellAction {
 
         // Set the global debt ceiling
         VatAbstract(MCD_VAT).file("Line", 1632 * MILLION * RAD);
-        // Set the USDC-PSM debt ceiling
+        // Set the PSM-USDC-A debt ceiling
         VatAbstract(MCD_VAT).file(ilk, "line", 400 * MILLION * RAD);
-        // Set the USDC-PSM dust
+        // Set the PSM-USDC-A dust
         VatAbstract(MCD_VAT).file(ilk, "dust", 10 * RAD);
         // Set the Lot size
         CatAbstract(MCD_CAT).file(ilk, "dunk", 500 * RAD);
-        // Set the USDC-PSM liquidation penalty (e.g. 13% => X = 113)
+        // Set the PSM-USDC-A liquidation penalty (e.g. 13% => X = 113)
         CatAbstract(MCD_CAT).file(ilk, "chop", 100 * WAD / 100);
-        // Set the USDC-PSM stability fee (e.g. 1% = 1000000000315522921573372069)
+        // Set the PSM-USDC-A stability fee (e.g. 1% = 1000000000315522921573372069)
+        JugAbstract(MCD_JUG).drip(ilk);
         JugAbstract(MCD_JUG).file(ilk, "duty", ZERO_PERCENT_RATE);
-        // Set the USDC-PSM percentage between bids (e.g. 3% => X = 103)
+        // Set the PSM-USDC-A percentage between bids (e.g. 3% => X = 103)
         FlipAbstract(MCD_FLIP_USDC_PSM).file("beg", 103 * WAD / 100);
-        // Set the USDC-PSM time max time between bids
+        // Set the PSM-USDC-A time max time between bids
         FlipAbstract(MCD_FLIP_USDC_PSM).file("ttl", 1 hours);
-        // Set the USDC-PSM max auction duration to
+        // Set the PSM-USDC-A max auction duration to
         FlipAbstract(MCD_FLIP_USDC_PSM).file("tau", 1 hours);
-        // Set the USDC-PSM min collateralization ratio (e.g. 150% => X = 150)
+        // Set the PSM-USDC-A min collateralization ratio (e.g. 150% => X = 150)
         SpotAbstract(MCD_SPOT).file(ilk, "mat", 100 * RAY / 100);
-        // Set the USDC-PSM fee in (tin)
+        // Set the PSM-USDC-A fee in (tin)
         PsmAbstract(MCD_PSM_USDC_PSM).file("tin", 1 * WAD / 100);
-        // Set the USDC-PSM fee out (tout)
+        // Set the PSM-USDC-A fee out (tout)
         PsmAbstract(MCD_PSM_USDC_PSM).file("tout", 1 * WAD / 1000);
 
-        // Update USDC-PSM spot value in Vat
+        // Update PSM-USDC-A spot value in Vat
         SpotAbstract(MCD_SPOT).poke(ilk);
 
         // Add new ilk to the IlkRegistry
