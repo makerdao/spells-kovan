@@ -16,11 +16,8 @@
 pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
-import "lib/dss-interfaces/src/dapp/DSAuthorityAbstract.sol";
-import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
-import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
-
+import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
@@ -29,43 +26,30 @@ contract SpellAction {
     //  against the current release list at:
     //     https://changelog.makerdao.com/releases/kovan/active/contracts.json
 
-    ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
+    ChainlogAbstract constant CHANGELOG =
+        ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    address constant MCD_ADM            = 0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6;
-    address constant VOTE_PROXY_FACTORY = 0x1400798AA746457E467A1eb9b3F3f72C25314429;
+    address constant MCD_DC_IAM = 0x0000000000000000000000000000000000000000;
 
     function execute() external {
-        address MCD_PAUSE   = CHANGELOG.getAddress("MCD_PAUSE");
-        address FLIPPER_MOM = CHANGELOG.getAddress("FLIPPER_MOM");
-        address OSM_MOM     = CHANGELOG.getAddress("OSM_MOM");
+        address MCD_VAT = CHANGELOG.getAddress("MCD_VAT");
 
-        // Change MCD_ADM address in the changelog (Chief)
-        CHANGELOG.setAddress("MCD_ADM", MCD_ADM);
+        // Give permissions to the MCD_DC_IAM to file() the vat
+        VatAbstract(MCD_VAT).rely(MCD_DC_IAM);
 
-        // Add VOTE_PROXY_FACTORY to the changelog (previous one was missing)
-        CHANGELOG.setAddress("VOTE_PROXY_FACTORY", VOTE_PROXY_FACTORY);
+        // Add MCD_DC_IAM to the changelog
+        CHANGELOG.setAddress("MCD_DC_IAM", MCD_DC_IAM);
 
         // Bump version
-        CHANGELOG.setVersion("1.2.0");
-
-        // Set new Chief in the Pause
-        DSPauseAbstract(MCD_PAUSE).setAuthority(MCD_ADM);
-
-        // Set new Chief in the FlipperMom
-        FlipperMomAbstract(FLIPPER_MOM).setAuthority(MCD_ADM);
-
-        // Set new Chief in the OsmMom
-        OsmMomAbstract(OSM_MOM).setAuthority(MCD_ADM);
+        CHANGELOG.setVersion("1.2.1");
     }
 }
 
 contract DssSpell {
-    ChainlogAbstract constant CHANGELOG = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
+    ChainlogAbstract constant CHANGELOG =
+        ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     DSPauseAbstract public pause =
         DSPauseAbstract(CHANGELOG.getAddress("MCD_PAUSE"));
-
-    address constant SAI_MOM = 0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b;
-    address constant SAI_TOP = 0x5f00393547561DA3030ebF30e52F5DC0D5D3362c;
 
     address         public action;
     bytes32         public tag;
@@ -91,9 +75,6 @@ contract DssSpell {
         require(eta == 0, "This spell has already been scheduled");
         eta = now + DSPauseAbstract(pause).delay();
         pause.plot(action, tag, sig, eta);
-
-        DSAuthAbstract(SAI_MOM).setAuthority(address(0));
-        DSAuthAbstract(SAI_TOP).setAuthority(address(0));
     }
 
     function cast() public {

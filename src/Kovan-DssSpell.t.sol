@@ -12,29 +12,9 @@ interface Hevm {
     function store(address,bytes32,bytes32) external;
 }
 
-interface VoteProxyFactoryAbstract {
-    function initiateLink(address) external;
-    function approveLink(address) external returns (VoteProxyAbstract);
-}
-
-interface VoteProxyAbstract {
-    function lock(uint256) external;
-    function vote(address[] calldata) external;
-}
-
-contract Voter {
-    function doApproveLink(VoteProxyFactoryAbstract voteProxyFactory, address cold) external returns (VoteProxyAbstract voteProxy) {
-        voteProxy = voteProxyFactory.approveLink(cold);
-    }
-
-    function doVote(VoteProxyAbstract voteProxy, address[] calldata votes) external {
-        voteProxy.vote(votes);
-    }
-}
-
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0x05FaE2A9E80BB5088Bf77A64ecCCad8a521Bbd6e);
+    address constant KOVAN_SPELL = address(0);
     // this needs to be updated
     uint256 constant SPELL_CREATED = 1606316808;
 
@@ -77,8 +57,7 @@ contract DssSpellTest is DSTest, DSMath {
     ChainlogAbstract changelog = ChainlogAbstract(   0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
     DSPauseAbstract      pause = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
     address         pauseProxy =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
-    DSChiefAbstract   oldChief = DSChiefAbstract(    0xbBFFC76e94B34F72D96D054b31f6424249c1337d);
-    DSChiefAbstract   newChief = DSChiefAbstract(    0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6);
+    DSChiefAbstract      chief = DSChiefAbstract(    0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6);
     VatAbstract            vat = VatAbstract(        0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
     CatAbstract            cat = CatAbstract(        0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
     VowAbstract            vow = VowAbstract(        0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b);
@@ -99,11 +78,6 @@ contract DssSpellTest is DSTest, DSMath {
     // Specific for this spell
     DSAuthAbstract saiMom      = DSAuthAbstract(     0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b);
     DSAuthAbstract saiTop      = DSAuthAbstract(     0x5f00393547561DA3030ebF30e52F5DC0D5D3362c);
-
-    VoteProxyFactoryAbstract
-              voteProxyFactory
-                               = VoteProxyFactoryAbstract(
-                                                     0x1400798AA746457E467A1eb9b3F3f72C25314429);
 
     DssSpell spell;
 
@@ -186,9 +160,9 @@ contract DssSpellTest is DSTest, DSMath {
             vow_hump:              500,                 // In whole Dai units
             cat_box:               10 * THOUSAND,       // In whole Dai units
             ilk_count:             18,                  // Num expected in system
-            pause_authority:       address(newChief),   // Pause authority
-            osm_mom_authority:     address(newChief),   // OsmMom authority
-            flipper_mom_authority: address(newChief)    // FlipperMom authority
+            pause_authority:       address(chief),      // Pause authority
+            osm_mom_authority:     address(chief),      // OsmMom authority
+            flipper_mom_authority: address(chief)       // FlipperMom authority
         });
 
         //
@@ -413,24 +387,39 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function vote() private {
-        if (oldChief.hat() != address(spell)) {
+        if (chief.hat() != address(spell)) {
             hevm.store(
                 address(gov),
                 keccak256(abi.encode(address(this), uint256(1))),
                 bytes32(uint256(999999999999 ether))
             );
-            gov.approve(address(oldChief), uint256(-1));
-            oldChief.lock(999999999999 ether);
+            gov.approve(address(chief), uint256(-1));
+            chief.lock(999999999999 ether);
+
+            address[] memory slate = new address[](1);
+
+            if (chief.live() == 0) {
+                // Launch system
+                slate[0] = address(0);
+                chief.vote(slate);
+                if (chief.hat() != address(0)) {
+                    chief.lift(address(0));
+                }
+                assertEq(chief.live(), 0);
+                assertTrue(!chief.isUserRoot(address(0)));
+                chief.launch();
+                assertEq(chief.live(), 1);
+                assertTrue(chief.isUserRoot(address(0)));
+            }
 
             assertTrue(!spell.done());
 
-            address[] memory yays = new address[](1);
-            yays[0] = address(spell);
+            slate[0] = address(spell);
 
-            oldChief.vote(yays);
-            oldChief.lift(address(spell));
+            chief.vote(slate);
+            chief.lift(address(spell));
         }
-        assertEq(oldChief.hat(), address(spell));
+        assertEq(chief.hat(), address(spell));
     }
 
     function scheduleWaitAndCast() public {
@@ -621,228 +610,4 @@ contract DssSpellTest is DSTest, DSMath {
         }
     }
 
-    function testRootExecuteSpell() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
-        oldChief.free(999999999999 ether);
-        gov.approve(address(newChief), uint256(-1));
-
-        newChief.lock(80_000 ether);
-        address[] memory slate = new address[](1);
-
-        // Create spell for testing
-        TestSpell testSpell = new TestSpell();
-
-        // System not launched, lifted address doesn't get root access
-        slate[0] = address(testSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testSpell));
-        assertTrue(!newChief.isUserRoot(address(testSpell)));
-
-        // Launch system
-        slate[0] = address(0);
-        newChief.vote(slate);
-        newChief.lift(address(0));
-        assertEq(newChief.live(), 0);
-        assertTrue(!newChief.isUserRoot(address(0)));
-        newChief.launch();
-        assertEq(newChief.live(), 1);
-        assertTrue(newChief.isUserRoot(address(0)));
-
-        // System launched, lifted address gets root access
-        slate[0] = address(testSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testSpell));
-        assertTrue(newChief.isUserRoot(address(testSpell)));
-        testSpell.schedule();
-    }
-
-    function testRootExecuteSpellViaVoteProxy() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
-        oldChief.free(999999999999 ether);
-
-        Voter voter = new Voter();
-        voteProxyFactory.initiateLink(address(voter));
-        VoteProxyAbstract voteProxy = voter.doApproveLink(voteProxyFactory, address(this));
-
-        gov.approve(address(voteProxy), uint256(-1));
-
-        voteProxy.lock(80_000 ether);
-        address[] memory slate = new address[](1);
-
-        // Create spell for testing
-        TestSpell testSpell = new TestSpell();
-
-        // System not launched, lifted address doesn't get root access
-        slate[0] = address(testSpell);
-        voteProxy.vote(slate);
-        newChief.lift(address(testSpell));
-        assertTrue(!newChief.isUserRoot(address(testSpell)));
-
-        // Launch system
-        slate[0] = address(0);
-        voteProxy.vote(slate);
-        newChief.lift(address(0));
-        assertEq(newChief.live(), 0);
-        assertTrue(!newChief.isUserRoot(address(0)));
-        newChief.launch();
-        assertEq(newChief.live(), 1);
-        assertTrue(newChief.isUserRoot(address(0)));
-
-        // System launched, lifted address gets root access
-        slate[0] = address(testSpell);
-        voteProxy.vote(slate);
-        newChief.lift(address(testSpell));
-        assertTrue(newChief.isUserRoot(address(testSpell)));
-        testSpell.schedule();
-    }
-
-    function testFailExecuteSpellNotLaunched() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
-        oldChief.free(999999999999 ether);
-        gov.approve(address(newChief), uint256(-1));
-
-        newChief.lock(80_000 ether);
-        address[] memory slate = new address[](1);
-
-        // Create spell for testing
-        TestSpell testSpell = new TestSpell();
-
-        // System not launched, lifted address doesn't get root access
-        slate[0] = address(testSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testSpell));
-        testSpell.schedule();
-    }
-
-    function _runOldChief() internal {
-        TestSpell testSpell = new TestSpell();
-
-        address[] memory slate = new address[](1);
-        slate[0] = address(testSpell);
-        oldChief.vote(slate);
-        oldChief.lift(address(testSpell));
-        testSpell.schedule();
-    }
-
-    function testExecuteSpellOldChief() public {
-        vote();
-        _runOldChief();
-    }
-
-    function testFailExecuteSpellOldChief() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        _runOldChief();
-    }
-
-    function testMoms() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        DSTokenAbstract(oldChief.IOU()).approve(address(oldChief), uint256(-1));
-        oldChief.free(999999999999 ether);
-        gov.approve(address(newChief), uint256(-1));
-
-        newChief.lock(80_000 ether);
-        address[] memory slate = new address[](1);
-
-        // Create spell for testing
-        TestMomsSpell testMomsSpell = new TestMomsSpell();
-
-        // System not launched, lifted address doesn't get root access
-        slate[0] = address(testMomsSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testMomsSpell));
-        assertTrue(!newChief.isUserRoot(address(testMomsSpell)));
-
-        // Launch system
-        slate[0] = address(0);
-        newChief.vote(slate);
-        newChief.lift(address(0));
-        newChief.launch();
-
-        // System launched, lifted address gets root access
-        slate[0] = address(testMomsSpell);
-        newChief.vote(slate);
-        newChief.lift(address(testMomsSpell));
-        assertTrue(newChief.isUserRoot(address(testMomsSpell)));
-
-        FlipAbstract flip = FlipAbstract(changelog.getAddress("MCD_FLIP_ETH_A"));
-        OsmAbstract osm   = OsmAbstract(changelog.getAddress("PIP_ETH"));
-
-        assertEq(flip.wards(address(cat)), 1);
-        assertEq(osm.stopped(), 0);
-        testMomsSpell.cast();
-        assertEq(flip.wards(address(cat)), 0);
-        assertEq(osm.stopped(), 1);
-    }
-
-    function testSAIcontractsAuthorityChange() public {
-        assertEq(saiMom.authority(), address(oldChief));
-        assertEq(saiTop.authority(), address(oldChief));
-        vote();
-        spell.schedule();
-        assertEq(saiMom.authority(), address(0));
-        assertEq(saiTop.authority(), address(0));
-    }
-}
-
-contract SpellActionTest {
-    function execute() external {
-        // Random action to test authority
-        VatAbstract(ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F).getAddress("MCD_VAT")).rely(address(123));
-    }
-}
-
-contract TestSpell {
-    DSPauseAbstract public pause =
-        DSPauseAbstract(ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F).getAddress("MCD_PAUSE"));
-    address         public action;
-    bytes32         public tag;
-    uint256         public eta;
-    bytes           public sig;
-
-    constructor() public {
-        sig = abi.encodeWithSignature("execute()");
-        action = address(new SpellActionTest());
-        bytes32 _tag;
-        address _action = action;
-        assembly { _tag := extcodehash(_action) }
-        tag = _tag;
-    }
-
-    function schedule() public {
-        eta = now + DSPauseAbstract(pause).delay();
-        pause.plot(action, tag, sig, eta);
-    }
-}
-
-contract TestMomsSpell {
-    ChainlogAbstract changelog = ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
-
-    FlipperMomAbstract public fMom =
-        FlipperMomAbstract(changelog.getAddress("FLIPPER_MOM"));
-
-    OsmMomAbstract public oMom =
-        OsmMomAbstract(changelog.getAddress("OSM_MOM"));
-
-    function cast() public {
-        fMom.deny(changelog.getAddress("MCD_FLIP_ETH_A"));
-        oMom.stop("ETH-A");
-    }
 }
