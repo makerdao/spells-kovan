@@ -79,6 +79,11 @@ contract DssSpellTest is DSTest, DSMath {
     DSAuthAbstract saiMom      = DSAuthAbstract(     0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b);
     DSAuthAbstract saiTop      = DSAuthAbstract(     0x5f00393547561DA3030ebF30e52F5DC0D5D3362c);
 
+    DSTokenAbstract       renbtc = DSTokenAbstract(     0xe3dD56821f8C422849AF4816fE9B3c53c6a2F0Bd);
+    GemJoinAbstract  joinRENBTCA = GemJoinAbstract(     0x12F1F6c7E5fDF1B671CebFBDE974341847d0Caa4);
+    OsmAbstract        pipRENBTC = OsmAbstract(         0x2f38a1bD385A9B395D01f2Cbf767b4527663edDB);
+    FlipAbstract     flipRENBTCA = FlipAbstract(        0x2a2E2436370e98505325111A6b98F63d158Fedc4);
+
     DssSpell spell;
 
     // CHEAT_CODE = 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D
@@ -151,7 +156,7 @@ contract DssSpellTest is DSTest, DSMath {
         //
         afterSpell = SystemValues({
             pot_dsr:               0,                   // In basis points
-            vat_Line:              1232 * MILLION,      // In whole Dai units
+            vat_Line:              1234 * MILLION,      // In whole Dai units
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
             vow_dump:              2,                   // In whole Dai units
@@ -159,7 +164,7 @@ contract DssSpellTest is DSTest, DSMath {
             vow_bump:              10,                  // In whole Dai units
             vow_hump:              500,                 // In whole Dai units
             cat_box:               10 * THOUSAND,       // In whole Dai units
-            ilk_count:             18,                  // Num expected in system
+            ilk_count:             19,                  // Num expected in system
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief)       // FlipperMom authority
@@ -383,6 +388,18 @@ contract DssSpellTest is DSTest, DSMath {
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 0
+        });
+        afterSpell.collaterals["RENBTC-A"] = CollateralValues({
+            line:         2 * MILLION,
+            dust:         100,
+            pct:          600,
+            chop:         1300,
+            dunk:         500,
+            mat:          17500,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
         });
     }
 
@@ -608,6 +625,68 @@ contract DssSpellTest is DSTest, DSMath {
         for(uint i = 0; i < ilks.length; i++) {
             checkCollateralValues(ilks[i],  afterSpell);
         }
+    }
+
+    function testSpellIsCast_RENBTC_A_INTEGRATION() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        pipRENBTC.poke();
+        hevm.warp(now + 3601);
+        pipRENBTC.poke();
+        spot.poke("RENBTC-A");
+
+        // Check faucet amount
+        uint256 faucetAmount = faucet.amt(address(renbtc));
+        assertTrue(faucetAmount > 0);
+        faucet.gulp(address(renbtc));
+        assertEq(renbtc.balanceOf(address(this)), faucetAmount);
+
+        // Authorization
+        assertEq(joinRENBTCA.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinRENBTCA)), 1);
+        assertEq(flipRENBTCA.wards(address(end)), 1);
+        assertEq(flipRENBTCA.wards(address(flipMom)), 1);
+        assertEq(pipRENBTC.wards(address(osmMom)), 1);
+        assertEq(pipRENBTC.bud(address(spot)), 1);
+        assertEq(pipRENBTC.bud(address(end)), 1);
+        assertEq(MedianAbstract(pipRENBTC.src()).bud(address(pipRENBTC)), 1);
+
+        // Join to adapter
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
+        renbtc.approve(address(joinRENBTCA), faucetAmount);
+        joinRENBTCA.join(address(this), faucetAmount);
+        assertEq(renbtc.balanceOf(address(this)), 0);
+        assertEq(vat.gem("RENBTC-A", address(this)), faucetAmount);
+
+        // Deposit collateral, generate DAI
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob("RENBTC-A", address(this), address(this), address(this), int(faucetAmount), int(100 * WAD));
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
+        assertEq(vat.dai(address(this)), 100 * RAD);
+
+        // Payback DAI, withdraw collateral
+        vat.frob("RENBTC-A", address(this), address(this), address(this), -int(faucetAmount), -int(100 * WAD));
+        assertEq(vat.gem("RENBTC-A", address(this)), faucetAmount);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        joinRENBTCA.exit(address(this), faucetAmount);
+        assertEq(renbtc.balanceOf(address(this)), faucetAmount);
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        renbtc.approve(address(joinRENBTCA), faucetAmount);
+        joinRENBTCA.join(address(this), faucetAmount);
+        (,,uint256 spotV,,) = vat.ilks("RENBTC-A");
+        // dart max amount of DAI
+        vat.frob("RENBTC-A", address(this), address(this), address(this), int(faucetAmount), int(mul(faucetAmount, spotV) / RAY));
+        hevm.warp(now + 1);
+        jug.drip("RENBTC-A");
+        assertEq(flipRENBTCA.kicks(), 0);
+        cat.bite("RENBTC-A", address(this));
+        assertEq(flipRENBTCA.kicks(), 1);
     }
 
 }
