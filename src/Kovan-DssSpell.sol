@@ -18,6 +18,7 @@ pragma solidity 0.5.12;
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
 import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
+import "lib/dss-interfaces/src/dss/DssAutoLineAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
@@ -29,16 +30,27 @@ contract SpellAction {
     ChainlogAbstract constant CHANGELOG =
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    address constant MCD_DC_IAM = 0x0000000000000000000000000000000000000000;
+    address constant MCD_IAM_AUTO_LINE  = 0x0D0ccf65cED62D6CfC4DA7Ca85a0f833cB8889E4;
+
+    // decimals & precision
+    uint256 constant public WAD         = 10 ** 18;
+    uint256 constant public RAY         = 10 ** 27;
+    uint256 constant public RAD         = 10 ** 45;
 
     function execute() external {
         address MCD_VAT = CHANGELOG.getAddress("MCD_VAT");
 
-        // Give permissions to the MCD_DC_IAM to file() the vat
-        VatAbstract(MCD_VAT).rely(MCD_DC_IAM);
+        // Give permissions to the MCD_IAM_AUTO_LINE to file() the vat
+        VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
 
-        // Add MCD_DC_IAM to the changelog
-        CHANGELOG.setAddress("MCD_DC_IAM", MCD_DC_IAM);
+        // Add MCD_IAM_AUTO_LINE to the changelog
+        CHANGELOG.setAddress("MCD_IAM_AUTO_LINE", MCD_IAM_AUTO_LINE);
+
+        // Rely MCD_IAM_AUTO_LINE in MCD_VAT
+        VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
+
+        // Set ilks in MCD_IAM_AUTO_LINE
+        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk("ETH-A", 1_000_000_000 * RAD, 10_000_000 * RAD, 3600);
 
         // Bump version
         CHANGELOG.setVersion("1.2.1");

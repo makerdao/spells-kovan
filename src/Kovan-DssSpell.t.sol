@@ -76,8 +76,8 @@ contract DssSpellTest is DSTest, DSMath {
     FaucetAbstract      faucet = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
 
     // Specific for this spell
-    DSAuthAbstract saiMom      = DSAuthAbstract(     0x72Ee9496b0867Dfe5E8B280254Da55e51E34D27b);
-    DSAuthAbstract saiTop      = DSAuthAbstract(     0x5f00393547561DA3030ebF30e52F5DC0D5D3362c);
+    DssAutoLineAbstract autoLine
+                               = DssAutoLineAbstract(0x0D0ccf65cED62D6CfC4DA7Ca85a0f833cB8889E4);
 
     DssSpell spell;
 
