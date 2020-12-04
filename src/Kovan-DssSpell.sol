@@ -48,8 +48,8 @@ contract SpellAction {
 
     // RENBTC-A
     address constant RENBTC             = 0xe3dD56821f8C422849AF4816fE9B3c53c6a2F0Bd;
-    address constant MCD_JOIN_RENBTC_A  = 0x882916CC149eB669F9e9240C001C8C90Ab37974c;
-    address constant MCD_FLIP_RENBTC_A  = 0xA79F07275eA9080829e77F9f399F9f42bb79a58a;
+    address constant MCD_JOIN_RENBTC_A  = 0x12F1F6c7E5fDF1B671CebFBDE974341847d0Caa4;
+    address constant MCD_FLIP_RENBTC_A  = 0x2a2E2436370e98505325111A6b98F63d158Fedc4;
     address constant PIP_RENBTC         = 0x2f38a1bD385A9B395D01f2Cbf767b4527663edDB;
     bytes32 constant RENBTC_ILK         = "RENBTC-A";
 
