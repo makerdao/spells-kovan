@@ -138,7 +138,7 @@ contract SpellAction {
 
 contract DssSpellTestchain {
     DSPauseAbstract public pause =
-        DSPauseAbstract(0xcB283aD50b70444AEE310288F7aF33D05c1884A2);
+        DSPauseAbstract(0xA7fD71f86a79B9595Bc74dB12226E7298097581B);
     address         public action;
     bytes32         public tag;
     uint256         public eta;
