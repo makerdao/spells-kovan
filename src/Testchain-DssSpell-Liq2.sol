@@ -66,10 +66,10 @@ contract SpellAction {
     // The contracts in this list should correspond to MCD on testchain, which can be verified at
     // https://github.com/makerdao/testchain/blob/a293003c3a68474b12e303f54de6e455cefee82c/out/addresses-mcd.json
 
-    address constant MCD_VAT             = 0xb002A319887185e56d787A5c90900e13834a85E3;
-    address constant MCD_VOW             = 0x32fE44E2061A19419C0F112596B6f6ea77EC6511;
-    address constant MCD_FLIP_ETH_A      = 0xc1F5856c066cfdD59D405DfCf1e77F667537bc99;
-    address constant MCD_JUG             = 0x2125C30dA5DcA0819aEC5e4cdbF58Bfe91918e43;
+    address constant MCD_VAT             = 0x2125C30dA5DcA0819aEC5e4cdbF58Bfe91918e43;
+    address constant MCD_VOW             = 0x9F3CEceFEb8bCCEd859A983cB3A9b4DA65D79bD1;
+    address constant MCD_FLIP_ETH_A      = 0x970b3b28EBD466f2eC181630D4c3C93DfE280448;
+    address constant MCD_JUG             = 0x32fE44E2061A19419C0F112596B6f6ea77EC6511;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -138,7 +138,7 @@ contract SpellAction {
 
 contract DssSpellTestchain {
     DSPauseAbstract public pause =
-        DSPauseAbstract(0xbacD4966540aAF7223CC9DC39a3ea1E4322Aba78);
+        DSPauseAbstract(0xcB283aD50b70444AEE310288F7aF33D05c1884A2);
     address         public action;
     bytes32         public tag;
     uint256         public eta;
