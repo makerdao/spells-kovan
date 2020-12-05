@@ -1,19 +1,16 @@
+interface ERC20 {
+    function decimals() external returns (uint8);
+}
+
 contract SpellAction {
-    address constant MCD_VAT = ;
-    address constant MCD_CAT = ;
-    address constant MCD_JUG = ;
-    address constant MCD_SPOT = ;
-    address constant MCD_POT = ;
-    address constant MCD_END = ;
-    address constant FLIPPER_MOM = ;
-    address constant OSM_MOM = ; // Only if PIP_TOKEN = Osm
-    address constant ILK_REGISTRY = ;
-    address constant FAUCET = ;
+    ChainlogAbstract constant CHANGELOG =
+        ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
     address constant TOKEN = ;
     address constant MCD_JOIN_TOKEN_LETTER = ;
     address constant MCD_FLIP_TOKEN_LETTER = ;
     address constant PIP_TOKEN = ;
+    bytes32 constant ILK_TOKEN_A = "TOKEN-LETTER";
 
     uint256 constant THOUSAND = 10**3;
     uint256 constant MILLION = 10**6;
@@ -30,26 +27,35 @@ contract SpellAction {
     uint256 constant public X_PERCENT_RATE = ;
 
     function execute() external {
-        bytes32 ilk = "TOKEN-LETTER";
+        address MCD_VAT = CHANGELOG.getAddress("MCD_VAT");
+        address MCD_CAT = CHANGELOG.getAddress("MCD_CAT");
+        address MCD_JUG = CHANGELOG.getAddress("MCD_JUG");
+        address MCD_SPOT = CHANGELOG.getAddress("MCD_SPOT");
+        address MCD_POT = CHANGELOG.getAddress("MCD_POT");
+        address MCD_END = CHANGELOG.getAddress("MCD_END");
+        address FLIPPER_MOM = CHANGELOG.getAddress("FLIPPER_MOM");
+        address OSM_MOM = CHANGELOG.getAddress("OSM_MOM"); // Only if PIP_TOKEN = Osm
+        address ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
+        address FAUCET = CHANGELOG.getAddress("FAUCET");
 
         // Sanity checks
         require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).vat() == MCD_VAT, "join-vat-not-match");
-        require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).ilk() == ilk, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).ilk() == ILK_TOKEN_A, "join-ilk-not-match");
         require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).gem() == TOKEN, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).dec() == 18, "join-dec-not-match");
+        require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).dec() == ERC20(RENBTC).decimals(), "join-dec-not-match");
         require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).vat() == MCD_VAT, "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).cat() == MCD_CAT, "flip-cat-not-match");
-        require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).ilk() == ilk, "flip-ilk-not-match");
+        require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).ilk() == ILK_TOKEN_A, "flip-ilk-not-match");
 
         // Set the TOKEN PIP in the Spotter
-        SpotAbstract(MCD_SPOT).file(ilk, "pip", PIP_TOKEN);
+        SpotAbstract(MCD_SPOT).file(ILK_TOKEN_A, "pip", PIP_TOKEN);
 
         // Set the TOKEN-LETTER Flipper in the Cat
-        CatAbstract(MCD_CAT).file(ilk, "flip", MCD_FLIP_TOKEN_LETTER);
+        CatAbstract(MCD_CAT).file(ILK_TOKEN_A, "flip", MCD_FLIP_TOKEN_LETTER);
 
         // Init TOKEN-LETTER ilk in Vat & Jug
-        VatAbstract(MCD_VAT).init(ilk);
-        JugAbstract(MCD_JUG).init(ilk);
+        VatAbstract(MCD_VAT).init(ILK_TOKEN_A);
+        JugAbstract(MCD_JUG).init(ILK_TOKEN_A);
 
         // Allow TOKEN-LETTER Join to modify Vat registry
         VatAbstract(MCD_VAT).rely(MCD_JOIN_TOKEN_LETTER);
@@ -79,20 +85,20 @@ contract SpellAction {
         OsmAbstract(PIP_TOKEN).kiss(MCD_END);
         // Set TOKEN Osm in the OsmMom for new ilk
         // !!!!!!!! Only if PIP_TOKEN = Osm
-        OsmMomAbstract(OSM_MOM).setOsm(ilk, PIP_TOKEN);
+        OsmMomAbstract(OSM_MOM).setOsm(ILK_TOKEN_A, PIP_TOKEN);
 
         // Set the global debt ceiling
         VatAbstract(MCD_VAT).file("Line", X * MILLION * RAD);
         // Set the TOKEN-LETTER debt ceiling
-        VatAbstract(MCD_VAT).file(ilk, "line", X * MILLION * RAD);
+        VatAbstract(MCD_VAT).file(ILK_TOKEN_A, "line", X * MILLION * RAD);
         // Set the TOKEN-LETTER dust
-        VatAbstract(MCD_VAT).file(ilk, "dust", X * RAD);
+        VatAbstract(MCD_VAT).file(ILK_TOKEN_A, "dust", X * RAD);
         // Set the Lot size
-        CatAbstract(MCD_CAT).file(ilk, "dunk", X * THOUSAND * RAD);
+        CatAbstract(MCD_CAT).file(ILK_TOKEN_A, "dunk", X * THOUSAND * RAD);
         // Set the TOKEN-LETTER liquidation penalty (e.g. 13% => X = 113)
-        CatAbstract(MCD_CAT).file(ilk, "chop", X * WAD / 100);
+        CatAbstract(MCD_CAT).file(ILK_TOKEN_A, "chop", X * WAD / 100);
         // Set the TOKEN-LETTER stability fee (e.g. 1% = 1000000000315522921573372069)
-        JugAbstract(MCD_JUG).file(ilk, "duty", X_PERCENT_RATE);
+        JugAbstract(MCD_JUG).file(ILK_TOKEN_A, "duty", X_PERCENT_RATE);
         // Set the TOKEN-LETTER percentage between bids (e.g. 3% => X = 103)
         FlipAbstract(MCD_FLIP_TOKEN_LETTER).file("beg", X * WAD / 100);
         // Set the TOKEN-LETTER time max time between bids
@@ -100,15 +106,23 @@ contract SpellAction {
         // Set the TOKEN-LETTER max auction duration to
         FlipAbstract(MCD_FLIP_TOKEN_LETTER).file("tau", X hours);
         // Set the TOKEN-LETTER min collateralization ratio (e.g. 150% => X = 150)
-        SpotAbstract(MCD_SPOT).file(ilk, "mat", X * RAY / 100);
+        SpotAbstract(MCD_SPOT).file(ILK_TOKEN_A, "mat", X * RAY / 100);
 
         // Update TOKEN-LETTER spot value in Vat
-        SpotAbstract(MCD_SPOT).poke(ilk);
+        SpotAbstract(MCD_SPOT).poke(ILK_TOKEN_A);
 
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_TOKEN_LETTER);
 
         // Set gulp amount in faucet on kovan (only use WAD for decimals = 18)
         FaucetAbstract(FAUCET).setAmt(TOKEN, X * WAD);
+
+        CHANGELOG.setAddress("TOKEN", TOKEN);
+        CHANGELOG.setAddress("MCD_JOIN_TOKEN_LETTER", MCD_JOIN_TOKEN_LETTER);
+        CHANGELOG.setAddress("MCD_FLIP_TOKEN_LETTER", MCD_FLIP_TOKEN_LETTER);
+        CHANGELOG.setAddress("PIP_TOKEN", PIP_TOKEN);
+
+        // Bump version
+        CHANGELOG.setVersion("X.X.X");
     }
 }

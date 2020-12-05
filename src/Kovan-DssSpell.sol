@@ -27,6 +27,10 @@ import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
 import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
 
+interface ERC20 {
+    function decimals() external returns (uint8);
+}
+
 contract SpellAction {
     // KOVAN ADDRESSES
     //
@@ -79,7 +83,7 @@ contract SpellAction {
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).vat() == MCD_VAT, "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).ilk() == RENBTC_ILK, "join-ilk-not-match");
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).gem() == RENBTC, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_RENBTC_A).dec() == 8, "join-dec-not-match");
+        require(GemJoinAbstract(MCD_JOIN_RENBTC_A).dec() == ERC20(RENBTC).decimals(), "join-dec-not-match");
         require(FlipAbstract(MCD_FLIP_RENBTC_A).vat() == MCD_VAT, "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_RENBTC_A).cat() == MCD_CAT, "flip-cat-not-match");
         require(FlipAbstract(MCD_FLIP_RENBTC_A).ilk() == RENBTC_ILK, "flip-ilk-not-match");
