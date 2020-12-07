@@ -20,6 +20,25 @@ import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 import "lib/dss-interfaces/src/dss/DssAutoLineAbstract.sol";
 
+
+import "lib/dss-interfaces/src/dapp/DSAuthorityAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/CatAbstract.sol";
+import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
+import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
+import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
+import "lib/dss-interfaces/src/dss/JugAbstract.sol";
+import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
+import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
+
+interface ERC20 {
+    function decimals() external returns (uint8);
+}
+
 contract SpellAction {
     // KOVAN ADDRESSES
     //
@@ -32,25 +51,126 @@ contract SpellAction {
 
     address constant MCD_IAM_AUTO_LINE  = 0x0D0ccf65cED62D6CfC4DA7Ca85a0f833cB8889E4;
 
+    /// UNI-A
+    address constant UNI = 0x0C527850e5D6B2B406F1d65895d5b17c5A29Ce51;
+    address constant MCD_JOIN_UNI_A = 0xb6E6EE050B4a74C8cc1DfdE62cAC8C6d9D8F4CAa;
+    address constant MCD_FLIP_UNI_A = 0x6EE8a47eA5d7cF0C951eDc57141Eb9593A36e680;
+    address constant PIP_UNI = 0xe573a75BF4827658F6D600FD26C205a3fe34ee28;
+    bytes32 constant ILK_UNI_A = "UNI-A";
+
     // decimals & precision
+    uint256 constant MILLION = 10**6;
     uint256 constant public WAD         = 10 ** 18;
     uint256 constant public RAY         = 10 ** 27;
     uint256 constant public RAD         = 10 ** 45;
 
+    // DC IAM
+    address constant MCD_DC_IAM = 0x0000000000000000000000000000000000000000;
+
+    // Many of the settings that change weekly rely on the rate accumulator
+    // described at https://docs.makerdao.com/smart-contract-modules/rates-module
+    // To check this yourself, use the following rate calculation (example 8%):
+    //
+    // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
+    //
+    uint256 constant public THREE_PERCENT_RATE = 1000000000937303470807876289;
+
     function execute() external {
-        address MCD_VAT = CHANGELOG.getAddress("MCD_VAT");
 
-        // Give permissions to the MCD_IAM_AUTO_LINE to file() the vat
-        VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
+        address  MCD_VAT = CHANGELOG.getAddress("MCD_VAT");
+        address  MCD_CAT = CHANGELOG.getAddress("MCD_CAT");
+        address  MCD_JUG = CHANGELOG.getAddress("MCD_JUG");
+        address  MCD_SPOT = CHANGELOG.getAddress("MCD_SPOT");
+        address  MCD_END = CHANGELOG.getAddress("MCD_END");
+        address  FLIPPER_MOM = CHANGELOG.getAddress("FLIPPER_MOM");
+        address  OSM_MOM = CHANGELOG.getAddress("OSM_MOM"); // Only if PIP_UNI = Osm
+        address  ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
+        address  FAUCET = CHANGELOG.getAddress("FAUCET");
 
-        // Add MCD_IAM_AUTO_LINE to the changelog
-        CHANGELOG.setAddress("MCD_IAM_AUTO_LINE", MCD_IAM_AUTO_LINE);
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_UNI_A).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_UNI_A).ilk() == ILK_UNI_A, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_UNI_A).gem() == UNI, "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_UNI_A).dec() == ERC20(UNI).decimals(), "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_UNI_A).vat() == MCD_VAT, "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_UNI_A).cat() == MCD_CAT, "flip-cat-not-match");
+        require(FlipAbstract(MCD_FLIP_UNI_A).ilk() == ILK_UNI_A, "flip-ilk-not-match");
 
-        // Rely MCD_IAM_AUTO_LINE in MCD_VAT
-        VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
+        // Set the UNI PIP in the Spotter
+        SpotAbstract(MCD_SPOT).file(ILK_UNI_A, "pip", PIP_UNI);
 
-        // Set ilks in MCD_IAM_AUTO_LINE
-        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk("ETH-A", 1_000_000_000 * RAD, 10_000_000 * RAD, 3600);
+        // Set the UNI-A Flipper in the Cat
+        CatAbstract(MCD_CAT).file(ILK_UNI_A, "flip", MCD_FLIP_UNI_A);
+
+        // Init UNI-A ilk in Vat & Jug
+        VatAbstract(MCD_VAT).init(ILK_UNI_A);
+        JugAbstract(MCD_JUG).init(ILK_UNI_A);
+
+        // Allow UNI-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_UNI_A);
+        // Allow the UNI-A Flipper to reduce the Cat litterbox on deal()
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_UNI_A);
+        // Allow Cat to kick auctions in UNI-A Flipper
+        FlipAbstract(MCD_FLIP_UNI_A).rely(MCD_CAT);
+        // Allow End to yank auctions in UNI-A Flipper
+        FlipAbstract(MCD_FLIP_UNI_A).rely(MCD_END);
+        // Allow FlipperMom to access to the UNI-A Flipper
+        FlipAbstract(MCD_FLIP_UNI_A).rely(FLIPPER_MOM);
+        // Disallow Cat to kick auctions in UNI-A Flipper
+        // !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
+        //FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_UNI_A);
+
+        // Allow OsmMom to access to the UNI Osm
+        // !!!!!!!! Only if PIP_UNI = Osm and hasn't been already relied due a previous deployed ilk
+        OsmAbstract(PIP_UNI).rely(OSM_MOM);
+        // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_UNI = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk
+        MedianAbstract(OsmAbstract(PIP_UNI).src()).kiss(PIP_UNI);
+        // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_UNI = Osm or PIP_UNI = Median and hasn't been already whitelisted due a previous deployed ilk
+        OsmAbstract(PIP_UNI).kiss(MCD_SPOT);
+        // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_UNI = Osm or PIP_UNI = Median and hasn't been already whitelisted due a previous deployed ilk
+        OsmAbstract(PIP_UNI).kiss(MCD_END);
+        // Set UNI Osm in the OsmMom for new ilk
+        // !!!!!!!! Only if PIP_UNI = Osm
+        OsmMomAbstract(OSM_MOM).setOsm(ILK_UNI_A, PIP_UNI);
+
+        // Set the global debt ceiling
+        VatAbstract(MCD_VAT).file("Line", 1247 * MILLION * RAD);
+        // Set the UNI-A debt ceiling
+        VatAbstract(MCD_VAT).file(ILK_UNI_A, "line", 15 * MILLION * RAD);
+        // Set the UNI-A dust
+        VatAbstract(MCD_VAT).file(ILK_UNI_A, "dust", 100 * RAD);
+        // Set the Lot size
+        CatAbstract(MCD_CAT).file(ILK_UNI_A, "dunk", 500 * RAD);
+        // Set the UNI-A liquidation penalty (e.g. 13% => X = 113)
+        CatAbstract(MCD_CAT).file(ILK_UNI_A, "chop", 113 * WAD / 100);
+        // Set the UNI-A stability fee (e.g. 1% = 1000000000315522921573372069)
+        JugAbstract(MCD_JUG).file(ILK_UNI_A, "duty", THREE_PERCENT_RATE);
+        // Set the UNI-A percentage between bids (e.g. 3% => X = 103)
+        FlipAbstract(MCD_FLIP_UNI_A).file("beg", 103 * WAD / 100);
+        // Set the UNI-A time max time between bids
+        FlipAbstract(MCD_FLIP_UNI_A).file("ttl", 1 hours);
+        // Set the UNI-A max auction duration to
+        FlipAbstract(MCD_FLIP_UNI_A).file("tau", 1 hours);
+        // Set the UNI-A min collateralization ratio (e.g. 150% => X = 150)
+        SpotAbstract(MCD_SPOT).file(ILK_UNI_A, "mat", 175 * RAY / 100);
+
+        // Update UNI-A spot value in Vat
+        SpotAbstract(MCD_SPOT).poke(ILK_UNI_A);
+
+        // Add new ilk to the IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_UNI_A);
+
+        // Set gulp amount in faucet on kovan (only use WAD for decimals = 18)
+        FaucetAbstract(FAUCET).setAmt(UNI, 2500 * WAD);
+
+        // Update the changelog
+        CHANGELOG.setAddress("UNI", UNI);
+        CHANGELOG.setAddress("MCD_JOIN_UNI_A", MCD_JOIN_UNI_A);
+        CHANGELOG.setAddress("MCD_FLIP_UNI_A", MCD_FLIP_UNI_A);
+        CHANGELOG.setAddress("PIP_UNI", PIP_UNI);
 
         // Bump version
         CHANGELOG.setVersion("1.2.1");

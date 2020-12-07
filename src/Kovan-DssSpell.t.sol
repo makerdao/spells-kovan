@@ -72,12 +72,15 @@ contract DssSpellTest is DSTest, DSMath {
     OsmMomAbstract      osmMom = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
     FlipperMomAbstract flipMom = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
 
+    // UNI-A specific
+    DSTokenAbstract       uni = DSTokenAbstract(0x0C527850e5D6B2B406F1d65895d5b17c5A29Ce51);
+    GemJoinAbstract  joinUNIA = GemJoinAbstract(0xb6E6EE050B4a74C8cc1DfdE62cAC8C6d9D8F4CAa);
+    FlipAbstract     flipUNIA = FlipAbstract(0x6EE8a47eA5d7cF0C951eDc57141Eb9593A36e680);
+    OsmAbstract        pipUNI = OsmAbstract(0xe573a75BF4827658F6D600FD26C205a3fe34ee28);
+    MedianAbstract    medUNIA = MedianAbstract(0x8Bc53b706D5e20Ee3d8b9B68DE326B1953b11cC1);
+
     // Faucet
     FaucetAbstract      faucet = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
-
-    // Specific for this spell
-    DssAutoLineAbstract autoLine
-                               = DssAutoLineAbstract(0x0D0ccf65cED62D6CfC4DA7Ca85a0f833cB8889E4);
 
     DssSpell spell;
 
@@ -151,7 +154,7 @@ contract DssSpellTest is DSTest, DSMath {
         //
         afterSpell = SystemValues({
             pot_dsr:               0,                   // In basis points
-            vat_Line:              1232 * MILLION,      // In whole Dai units
+            vat_Line:              1247 * MILLION,      // In whole Dai units
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
             vow_dump:              2,                   // In whole Dai units
@@ -159,7 +162,7 @@ contract DssSpellTest is DSTest, DSMath {
             vow_bump:              10,                  // In whole Dai units
             vow_hump:              500,                 // In whole Dai units
             cat_box:               10 * THOUSAND,       // In whole Dai units
-            ilk_count:             18,                  // Num expected in system
+            ilk_count:             19,                  // Num expected in system
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief)       // FlipperMom authority
@@ -383,6 +386,18 @@ contract DssSpellTest is DSTest, DSMath {
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 0
+        });
+        afterSpell.collaterals["UNI-A"] = CollateralValues({
+            line:         15 * MILLION,
+            dust:         100,
+            pct:          300,
+            chop:         1300,
+            dunk:         500,
+            mat:          17500,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
         });
     }
 
@@ -609,5 +624,71 @@ contract DssSpellTest is DSTest, DSMath {
             checkCollateralValues(ilks[i],  afterSpell);
         }
     }
+
+    function testSpellIsCast_UNI_INTEGRATION() public {
+       vote();
+       scheduleWaitAndCast();
+       assertTrue(spell.done());
+
+       pipUNI.poke();
+       hevm.warp(now + 3601);
+       pipUNI.poke();
+       spot.poke("UNI-A");
+
+       // Check faucet amount
+       uint256 faucetAmount = faucet.amt(address(uni));
+       uint256 faucetAmountWad = faucetAmount * (10 ** (18 - uni.decimals()));
+       assertTrue(faucetAmount > 0);
+       faucet.gulp(address(uni));
+       assertEq(uni.balanceOf(address(this)), faucetAmount);
+
+       // Check median matches pip.src()
+       assertEq(pipUNI.src(), address(medUNIA));
+
+       // Authorization
+       assertEq(joinUNIA.wards(pauseProxy), 1);
+       assertEq(vat.wards(address(joinUNIA)), 1);
+       assertEq(flipUNIA.wards(address(end)), 1);
+       assertEq(flipUNIA.wards(address(flipMom)), 1);
+       assertEq(pipUNI.wards(address(osmMom)), 1);
+       assertEq(pipUNI.bud(address(spot)), 1);
+       assertEq(pipUNI.bud(address(end)), 1);
+       assertEq(MedianAbstract(pipUNI.src()).bud(address(pipUNI)), 1);
+
+       // Join to adapter
+       assertEq(vat.gem("UNI-A", address(this)), 0);
+       uni.approve(address(joinUNIA), faucetAmount);
+       joinUNIA.join(address(this), faucetAmount);
+       assertEq(uni.balanceOf(address(this)), 0);
+       assertEq(vat.gem("UNI-A", address(this)), faucetAmountWad);
+
+       // Deposit collateral, generate DAI
+       assertEq(vat.dai(address(this)), 0);
+       vat.frob("UNI-A", address(this), address(this), address(this), int(faucetAmountWad), int(100 * WAD));
+       assertEq(vat.gem("UNI-A", address(this)), 0);
+       assertEq(vat.dai(address(this)), 100 * RAD);
+
+       // Payback DAI, withdraw collateral
+       vat.frob("UNI-A", address(this), address(this), address(this), -int(faucetAmountWad), -int(100 * WAD));
+       assertEq(vat.gem("UNI-A", address(this)), faucetAmountWad);
+       assertEq(vat.dai(address(this)), 0);
+
+       // Withdraw from adapter
+       joinUNIA.exit(address(this), faucetAmount);
+       assertEq(uni.balanceOf(address(this)), faucetAmount);
+       assertEq(vat.gem("UNI-A", address(this)), 0);
+
+       // Generate new DAI to force a liquidation
+       uni.approve(address(joinUNIA), faucetAmount);
+       joinUNIA.join(address(this), faucetAmount);
+       (,,uint256 spotV,,) = vat.ilks("UNI-A");
+       // dart max amount of DAI
+       vat.frob("UNI-A", address(this), address(this), address(this), int(faucetAmountWad), int(mul(faucetAmountWad, spotV) / RAY));
+       hevm.warp(now + 1);
+       jug.drip("UNI-A");
+       assertEq(flipUNIA.kicks(), 0);
+       cat.bite("UNI-A", address(this));
+       assertEq(flipUNIA.kicks(), 1);
+   }
 
 }
