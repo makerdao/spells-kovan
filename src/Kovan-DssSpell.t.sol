@@ -634,7 +634,7 @@ contract DssSpellTest is DSTest, DSMath {
                 assertTrue(aL_line > 0);
                 assertEq(aL_line, values.collaterals[ilk].aL_line * RAD);
                 assertEq(aL_gap, values.collaterals[ilk].aL_gap * RAD);
-                assertEq(aL_ttl, values.collaterals[ilk].ttl);
+                assertEq(aL_ttl, values.collaterals[ilk].aL_ttl);
                 assertTrue((aL_line >= RAD && aL_line < BILLION * RAD) || aL_line == 0);  // eq 0 or gt eq 1 RAD and lt 1B
             }
             uint256 normalizedTestDust = values.collaterals[ilk].dust * RAD;
