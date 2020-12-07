@@ -18,22 +18,16 @@ pragma solidity 0.5.12;
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
 import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
-import "lib/dss-interfaces/src/dss/DssAutoLineAbstract.sol";
-
-
-import "lib/dss-interfaces/src/dapp/DSAuthorityAbstract.sol";
-import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
-import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
-import "lib/dss-interfaces/src/dss/CatAbstract.sol";
+import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
-import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
-import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/JugAbstract.sol";
-import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
+import "lib/dss-interfaces/src/dss/CatAbstract.sol";
+import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
+import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
+import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
-import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
-import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
+import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
 
 interface ERC20 {
     function decimals() external returns (uint8);
@@ -86,6 +80,9 @@ contract SpellAction {
         address  OSM_MOM = CHANGELOG.getAddress("OSM_MOM"); // Only if PIP_UNI = Osm
         address  ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
         address  FAUCET = CHANGELOG.getAddress("FAUCET");
+
+        // Give permissions to the MCD_DC_IAM to file() the vat
+        VatAbstract(MCD_VAT).rely(MCD_DC_IAM);
 
         // Sanity checks
         require(GemJoinAbstract(MCD_JOIN_UNI_A).vat() == MCD_VAT, "join-vat-not-match");
@@ -167,6 +164,7 @@ contract SpellAction {
         FaucetAbstract(FAUCET).setAmt(UNI, 2500 * WAD);
 
         // Update the changelog
+        CHANGELOG.setAddress("MCD_DC_IAM", MCD_DC_IAM);
         CHANGELOG.setAddress("UNI", UNI);
         CHANGELOG.setAddress("MCD_JOIN_UNI_A", MCD_JOIN_UNI_A);
         CHANGELOG.setAddress("MCD_FLIP_UNI_A", MCD_FLIP_UNI_A);
