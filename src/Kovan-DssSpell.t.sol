@@ -189,9 +189,9 @@ contract DssSpellTest is DSTest, DSMath {
         });
         afterSpell.collaterals["ETH-B"] = CollateralValues({
             aL_enabled:   true,
-            aL_line:      500 * MILLION,
+            aL_line:      50 * MILLION,
             aL_gap:       5 * MILLION,
-            aL_ttl:       1 hours,
+            aL_ttl:       12 hours,
             line:         0 * MILLION,     // Not being checked as there is auto line
             dust:         100,
             pct:          600,

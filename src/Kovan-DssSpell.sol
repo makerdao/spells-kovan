@@ -53,7 +53,7 @@ contract SpellAction {
         VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
 
         // Set ilks in MCD_IAM_AUTO_LINE
-        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk("ETH-B", 500_000_000 * RAD, 5_000_000 * RAD, 3600);
+        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk("ETH-B", 50_000_000 * RAD, 5_000_000 * RAD, 60 * 60 * 12);
 
         // Bump version
         CHANGELOG.setVersion("1.2.1");
