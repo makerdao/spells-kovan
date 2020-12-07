@@ -43,6 +43,9 @@ contract SpellAction {
         // Give permissions to the MCD_IAM_AUTO_LINE to file() the vat
         VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
 
+        // Set the Line to equal the sum of current ilk lines
+        VatAbstract(MCD_VAT).file("Line", 1_227_000_000 * RAD);
+
         // Add MCD_IAM_AUTO_LINE to the changelog
         CHANGELOG.setAddress("MCD_IAM_AUTO_LINE", MCD_IAM_AUTO_LINE);
 
@@ -50,7 +53,7 @@ contract SpellAction {
         VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
 
         // Set ilks in MCD_IAM_AUTO_LINE
-        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk("ETH-A", 1_000_000_000 * RAD, 10_000_000 * RAD, 3600);
+        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk("ETH-B", 500_000_000 * RAD, 5_000_000 * RAD, 3600);
 
         // Bump version
         CHANGELOG.setVersion("1.2.1");
