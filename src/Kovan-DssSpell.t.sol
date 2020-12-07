@@ -625,11 +625,13 @@ contract DssSpellTest is DSTest, DSMath {
             // Convert whole Dai units to expected RAD
             uint256 normalizedTestLine = values.collaterals[ilk].line * RAD;
             sumlines += values.collaterals[ilk].line;
+            (uint256 aL_line, uint256 aL_gap, uint256 aL_ttl,,) = autoLine.ilks(ilk);
             if (!values.collaterals[ilk].aL_enabled) {
+                assertTrue(aL_line == 0);
                 assertEq(line, normalizedTestLine);
                 assertTrue((line >= RAD && line < BILLION * RAD) || line == 0);  // eq 0 or gt eq 1 RAD and lt 1B
             } else {
-                (uint256 aL_line, uint256 aL_gap, uint256 aL_ttl,,) = autoLine.ilks(ilk);
+                assertTrue(aL_line > 0);
                 assertEq(aL_line, values.collaterals[ilk].aL_line * RAD);
                 assertEq(aL_gap, values.collaterals[ilk].aL_gap * RAD);
                 assertEq(aL_ttl, values.collaterals[ilk].ttl);
