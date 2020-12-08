@@ -27,10 +27,7 @@ import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
 import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
-
-interface ERC20 {
-    function decimals() external returns (uint8);
-}
+import "lib/dss-interfaces/src/dss/DssAutoLineAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
@@ -42,14 +39,14 @@ contract SpellAction {
     ChainlogAbstract constant CHANGELOG =
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    uint256 constant THOUSAND = 10**3;
-    uint256 constant MILLION = 10**6;
-    uint256 constant WAD = 10**18;
-    uint256 constant RAY = 10**27;
-    uint256 constant RAD = 10**45;
+    address constant MCD_IAM_AUTO_LINE  = 0x0D0ccf65cED62D6CfC4DA7Ca85a0f833cB8889E4;
 
-    // DC IAM
-    address constant MCD_DC_IAM = 0x0000000000000000000000000000000000000000;
+    // decimals & precision
+    uint256 constant public THOUSAND    = 10 ** 3;
+    uint256 constant public MILLION     = 10 ** 6;
+    uint256 constant public WAD         = 10 ** 18;
+    uint256 constant public RAY         = 10 ** 27;
+    uint256 constant public RAD         = 10 ** 45;
 
     // RENBTC-A
     address constant RENBTC             = 0xe3dD56821f8C422849AF4816fE9B3c53c6a2F0Bd;
@@ -77,8 +74,17 @@ contract SpellAction {
         address FAUCET = CHANGELOG.getAddress("FAUCET");
         address OSM_MOM = CHANGELOG.getAddress("OSM_MOM");
 
-        // Give permissions to the MCD_DC_IAM to file() the vat
-        VatAbstract(MCD_VAT).rely(MCD_DC_IAM);
+        // Give permissions to the MCD_IAM_AUTO_LINE to file() the vat
+        VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
+
+        // Set the Line to equal the sum of current ilk lines
+        VatAbstract(MCD_VAT).file("Line", 1_227_000_000 * RAD);
+
+        // Add MCD_IAM_AUTO_LINE to the changelog
+        CHANGELOG.setAddress("MCD_IAM_AUTO_LINE", MCD_IAM_AUTO_LINE);
+
+        // Rely MCD_IAM_AUTO_LINE in MCD_VAT
+        VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
 
         // Add RENBTC-A ilk
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).vat() == MCD_VAT, "join-vat-not-match");
@@ -158,6 +164,9 @@ contract SpellAction {
 
         // Set gulp amount in faucet on kovan
         FaucetAbstract(FAUCET).setAmt(RENBTC, 10 ** 7);
+
+        // Set ilks in MCD_IAM_AUTO_LINE
+        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk("ETH-B", 50_000_000 * RAD, 5_000_000 * RAD, 60 * 60 * 12);
 
         // Update the changelog
         CHANGELOG.setAddress("MCD_DC_IAM", MCD_DC_IAM);
