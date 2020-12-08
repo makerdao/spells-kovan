@@ -1,6 +1,15 @@
-interface ERC20 {
-    function decimals() external returns (uint8);
-}
+import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
+import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
+import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
+import "lib/dss-interfaces/src/dss/VatAbstract.sol";
+import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
+import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
+import "lib/dss-interfaces/src/dss/JugAbstract.sol";
+import "lib/dss-interfaces/src/dss/CatAbstract.sol";
+import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
+import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
+import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
 
 contract SpellAction {
     ChainlogAbstract constant CHANGELOG =
@@ -42,7 +51,7 @@ contract SpellAction {
         require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).vat() == MCD_VAT, "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).ilk() == ILK_TOKEN_A, "join-ilk-not-match");
         require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).gem() == TOKEN, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).dec() == ERC20(RENBTC).decimals(), "join-dec-not-match");
+        require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).dec() == DSTokenAbstract(RENBTC).decimals(), "join-dec-not-match");
         require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).vat() == MCD_VAT, "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).cat() == MCD_CAT, "flip-cat-not-match");
         require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).ilk() == ILK_TOKEN_A, "flip-ilk-not-match");

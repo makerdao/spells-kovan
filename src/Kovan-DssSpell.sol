@@ -16,6 +16,7 @@
 pragma solidity 0.5.12;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
+import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
 import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
@@ -83,7 +84,7 @@ contract SpellAction {
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).vat() == MCD_VAT, "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).ilk() == RENBTC_ILK, "join-ilk-not-match");
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).gem() == RENBTC, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_RENBTC_A).dec() == ERC20(RENBTC).decimals(), "join-dec-not-match");
+        require(GemJoinAbstract(MCD_JOIN_RENBTC_A).dec() == DSTokenAbstract(RENBTC).decimals(), "join-dec-not-match");
         require(FlipAbstract(MCD_FLIP_RENBTC_A).vat() == MCD_VAT, "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_RENBTC_A).cat() == MCD_CAT, "flip-cat-not-match");
         require(FlipAbstract(MCD_FLIP_RENBTC_A).ilk() == RENBTC_ILK, "flip-ilk-not-match");
