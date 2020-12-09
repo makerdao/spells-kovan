@@ -57,7 +57,7 @@ contract SpellAction {
     bytes32 constant RENBTC_ILK         = "RENBTC-A";
 
     // DC IAM
-    address constant MCD_IAM_AUTO_LINE = 0x0D0ccf65cED62D6CfC4DA7Ca85a0f833cB8889E4;
+    address constant MCD_IAM_AUTO_LINE = 0xe7D7d61c0ed9306B6c93E7C65F6C9DDF38b9320b;
 
     // decimals & precision
     uint256 constant public THOUSAND    = 10 ** 3;
