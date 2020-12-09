@@ -10,14 +10,16 @@ import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
 import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
-import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";                             import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
 import "lib/dss-interfaces/src/dss/DssAutoLineAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
     //
     // The contracts in this list should correspond to MCD core contracts, verify
-    //  against the current release list at:                                            //     https://changelog.makerdao.com/releases/kovan/active/contracts.json
+    //  against the current release list at:
+    //     https://changelog.makerdao.com/releases/kovan/active/contracts.json
     ChainlogAbstract constant CHANGELOG =
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
