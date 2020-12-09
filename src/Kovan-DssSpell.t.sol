@@ -752,6 +752,10 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellAutoLineAuth() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
         assertEq(vat.wards(address(autoLine)), 1);
     }
 
