@@ -271,7 +271,9 @@ contract SpellAction {
         VatAbstract(MCD_VAT).file("Line", 1249 * MILLION * RAD);
 
         // Set ilks in MCD_IAM_AUTO_LINE
-        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk("ETH-B", 50_000_000 * RAD, 5_000_000 * RAD, 60 * 60 * 12);
+        DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk(
+            "ETH-B", 50_000_000 * RAD, 5_000_000 * RAD, 12 hours
+        );
 
         // add MCD_IAM_AUTO_LINE
         CHANGELOG.setAddress("MCD_IAM_AUTO_LINE", MCD_IAM_AUTO_LINE);

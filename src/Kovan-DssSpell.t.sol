@@ -173,7 +173,7 @@ contract DssSpellTest is DSTest, DSMath {
             vow_bump:              10,                  // In whole Dai units
             vow_hump:              500,                 // In whole Dai units
             cat_box:               10 * THOUSAND,       // In whole Dai units
-            ilk_count:             19,                  // Num expected in system
+            ilk_count:             20,                  // Num expected in system
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief)       // FlipperMom authority
