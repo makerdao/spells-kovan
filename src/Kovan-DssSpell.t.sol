@@ -751,6 +751,10 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues(afterSpell);
     }
 
+    function testSpellAutoLineAuth() public {
+        assertEq(vat.wards(address(autoLine)), 1);
+    }
+
     function testSpellIsCast_RENBTC_A_INTEGRATION() public {
         vote();
         scheduleWaitAndCast();
