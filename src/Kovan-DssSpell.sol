@@ -48,7 +48,7 @@ contract SpellAction {
     address constant MCD_FLIP_UNI_A     = 0x6EE8a47eA5d7cF0C951eDc57141Eb9593A36e680;
     address constant PIP_UNI            = 0xe573a75BF4827658F6D600FD26C205a3fe34ee28;
     bytes32 constant ILK_UNI_A          = "UNI-A";
-    
+
     // RENBTC-A
     address constant RENBTC             = 0xe3dD56821f8C422849AF4816fE9B3c53c6a2F0Bd;
     address constant MCD_JOIN_RENBTC_A  = 0x12F1F6c7E5fDF1B671CebFBDE974341847d0Caa4;
@@ -58,7 +58,7 @@ contract SpellAction {
 
     // DC IAM
     address constant MCD_IAM_AUTO_LINE = 0x0D0ccf65cED62D6CfC4DA7Ca85a0f833cB8889E4;
-    
+
     // decimals & precision
     uint256 constant public THOUSAND    = 10 ** 3;
     uint256 constant public MILLION     = 10 ** 6;
@@ -80,7 +80,6 @@ contract SpellAction {
         address MCD_CAT = CHANGELOG.getAddress("MCD_CAT");
         address MCD_JUG = CHANGELOG.getAddress("MCD_JUG");
         address MCD_SPOT = CHANGELOG.getAddress("MCD_SPOT");
-        address MCD_POT = CHANGELOG.getAddress("MCD_POT");
         address MCD_END = CHANGELOG.getAddress("MCD_END");
         address FLIPPER_MOM = CHANGELOG.getAddress("FLIPPER_MOM");
         address OSM_MOM = CHANGELOG.getAddress("OSM_MOM"); // Only if PIP_TOKEN = Osm
@@ -90,7 +89,7 @@ contract SpellAction {
         //
         // Add UNI
         //
-        
+
         // Sanity checks
         require(GemJoinAbstract(MCD_JOIN_UNI_A).vat() == MCD_VAT, "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_UNI_A).ilk() == ILK_UNI_A, "join-ilk-not-match");
@@ -173,11 +172,11 @@ contract SpellAction {
         CHANGELOG.setAddress("MCD_JOIN_UNI_A", MCD_JOIN_UNI_A);
         CHANGELOG.setAddress("MCD_FLIP_UNI_A", MCD_FLIP_UNI_A);
         CHANGELOG.setAddress("PIP_UNI", PIP_UNI);
-        
+
         //
         // Add renBTC
         //
-        
+
         // Add RENBTC-A ilk
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).vat() == MCD_VAT, "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).ilk() == RENBTC_ILK, "join-ilk-not-match");
@@ -264,10 +263,10 @@ contract SpellAction {
         //
         // MIP25: Debt Ceiling Instant Access Module
         //
-        
+
         // Give permissions to the MCD_IAM_AUTO_LINE to file() the vat
         VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
-        
+
         // Set the global debt ceiling
         VatAbstract(MCD_VAT).file("Line", 1249 * MILLION * RAD);
 
@@ -276,7 +275,7 @@ contract SpellAction {
 
         // add MCD_IAM_AUTO_LINE
         CHANGELOG.setAddress("MCD_IAM_AUTO_LINE", MCD_IAM_AUTO_LINE);
-        
+
         // Bump version
         CHANGELOG.setVersion("1.2.1");
     }

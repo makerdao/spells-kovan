@@ -471,6 +471,10 @@ contract DssSpellTest is DSTest, DSMath {
             liquidations: 0
         });
         afterSpell.collaterals["UNI-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
             line:         15 * MILLION,
             dust:         100,
             pct:          300,
@@ -483,6 +487,10 @@ contract DssSpellTest is DSTest, DSMath {
             liquidations: 1
         });
         afterSpell.collaterals["RENBTC-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
             line:         2 * MILLION,
             dust:         100,
             pct:          600,
