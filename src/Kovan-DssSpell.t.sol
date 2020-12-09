@@ -752,6 +752,14 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues(afterSpell);
     }
 
+    function testSpellAutoLineAuth() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        assertEq(vat.wards(address(autoLine)), 1);
+    }
+
     function testSpellIsCast_UNI_INTEGRATION() public {
        vote();
        scheduleWaitAndCast();
