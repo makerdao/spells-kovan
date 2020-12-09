@@ -53,7 +53,7 @@ contract SpellAction {
     address constant MCD_JOIN_RENBTC_A = 0x12F1F6c7E5fDF1B671CebFBDE974341847d0Caa4;
     address constant MCD_FLIP_RENBTC_A = 0x2a2E2436370e98505325111A6b98F63d158Fedc4;
     address constant PIP_RENBTC        = 0x2f38a1bD385A9B395D01f2Cbf767b4527663edDB;
-    bytes32 constant RENBTC_ILK        = "RENBTC-A";
+    bytes32 constant ILK_RENBTC_A      = "RENBTC-A";
 
     // DC IAM
     address constant MCD_IAM_AUTO_LINE = 0xe7D7d61c0ed9306B6c93E7C65F6C9DDF38b9320b;
@@ -178,21 +178,21 @@ contract SpellAction {
 
         // Add RENBTC-A ilk
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).vat() == MCD_VAT, "join-vat-not-match");
-        require(GemJoinAbstract(MCD_JOIN_RENBTC_A).ilk() == RENBTC_ILK, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_RENBTC_A).ilk() == ILK_RENBTC_A, "join-ilk-not-match");
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).gem() == RENBTC, "join-gem-not-match");
         require(GemJoinAbstract(MCD_JOIN_RENBTC_A).dec() == DSTokenAbstract(RENBTC).decimals(), "join-dec-not-match");
         require(FlipAbstract(MCD_FLIP_RENBTC_A).vat() == MCD_VAT, "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_RENBTC_A).cat() == MCD_CAT, "flip-cat-not-match");
-        require(FlipAbstract(MCD_FLIP_RENBTC_A).ilk() == RENBTC_ILK, "flip-ilk-not-match");
+        require(FlipAbstract(MCD_FLIP_RENBTC_A).ilk() == ILK_RENBTC_A, "flip-ilk-not-match");
 
-        SpotAbstract(MCD_SPOT).file(RENBTC_ILK, "pip", PIP_RENBTC);
+        SpotAbstract(MCD_SPOT).file(ILK_RENBTC_A, "pip", PIP_RENBTC);
 
         // Set the RENBTC-A Flipper in the Cat
-        CatAbstract(MCD_CAT).file(RENBTC_ILK, "flip", MCD_FLIP_RENBTC_A);
+        CatAbstract(MCD_CAT).file(ILK_RENBTC_A, "flip", MCD_FLIP_RENBTC_A);
 
         // Init RENBTC-A ilk in Vat & Jug
-        VatAbstract(MCD_VAT).init(RENBTC_ILK);
-        JugAbstract(MCD_JUG).init(RENBTC_ILK);
+        VatAbstract(MCD_VAT).init(ILK_RENBTC_A);
+        JugAbstract(MCD_JUG).init(ILK_RENBTC_A);
 
         // Allow RENBTC-A Join to modify Vat registry
         VatAbstract(MCD_VAT).rely(MCD_JOIN_RENBTC_A);
@@ -222,18 +222,18 @@ contract SpellAction {
         // OsmAbstract(PIP_RENBTC).kiss(MCD_END);
         // Set RENBTC Osm in the OsmMom for new ilk
         // !!!!!!!! Only if PIP_RENBTC = Osm
-        OsmMomAbstract(OSM_MOM).setOsm(RENBTC_ILK, PIP_RENBTC);
+        OsmMomAbstract(OSM_MOM).setOsm(ILK_RENBTC_A, PIP_RENBTC);
 
         // Set the RENBTC-A debt ceiling
-        VatAbstract(MCD_VAT).file(RENBTC_ILK, "line", 2 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file(ILK_RENBTC_A, "line", 2 * MILLION * RAD);
         // Set the RENBTC-A dust
-        VatAbstract(MCD_VAT).file(RENBTC_ILK, "dust", 100 * RAD);
+        VatAbstract(MCD_VAT).file(ILK_RENBTC_A, "dust", 100 * RAD);
         // Set the Lot size
-        CatAbstract(MCD_CAT).file(RENBTC_ILK, "dunk", 500 * RAD);
+        CatAbstract(MCD_CAT).file(ILK_RENBTC_A, "dunk", 500 * RAD);
         // Set the RENBTC-A liquidation penalty (e.g. 13% => X = 113)
-        CatAbstract(MCD_CAT).file(RENBTC_ILK, "chop", 113 * WAD / 100);
+        CatAbstract(MCD_CAT).file(ILK_RENBTC_A, "chop", 113 * WAD / 100);
         // Set the RENBTC-A stability fee (e.g. 1% = 1000000000315522921573372069)
-        JugAbstract(MCD_JUG).file(RENBTC_ILK, "duty", SIX_PERCENT_RATE);
+        JugAbstract(MCD_JUG).file(ILK_RENBTC_A, "duty", SIX_PERCENT_RATE);
         // Set the RENBTC-A percentage between bids (e.g. 3% => X = 103)
         FlipAbstract(MCD_FLIP_RENBTC_A).file("beg", 103 * WAD / 100);
         // Set the RENBTC-A time max time between bids
@@ -241,10 +241,10 @@ contract SpellAction {
         // Set the RENBTC-A max auction duration to
         FlipAbstract(MCD_FLIP_RENBTC_A).file("tau", 1 hours);
         // Set theRENBTC-A min collateralization ratio (e.g. 150% => X = 150)
-        SpotAbstract(MCD_SPOT).file(RENBTC_ILK, "mat", 175 * RAY / 100);
+        SpotAbstract(MCD_SPOT).file(ILK_RENBTC_A, "mat", 175 * RAY / 100);
 
         // Update RENBTC-A spot value in Vat
-        SpotAbstract(MCD_SPOT).poke(RENBTC_ILK);
+        SpotAbstract(MCD_SPOT).poke(ILK_RENBTC_A);
 
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_RENBTC_A);
