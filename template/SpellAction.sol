@@ -10,8 +10,14 @@ import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
 import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";                             import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
+import "lib/dss-interfaces/src/dss/DssAutoLineAbstract.sol";
 
 contract SpellAction {
+    // KOVAN ADDRESSES
+    //
+    // The contracts in this list should correspond to MCD core contracts, verify
+    //  against the current release list at:                                            //     https://changelog.makerdao.com/releases/kovan/active/contracts.json
     ChainlogAbstract constant CHANGELOG =
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
@@ -21,11 +27,12 @@ contract SpellAction {
     address constant PIP_TOKEN = ;
     bytes32 constant ILK_TOKEN_A = "TOKEN-LETTER";
 
+    // decimals & precision
     uint256 constant THOUSAND = 10**3;
-    uint256 constant MILLION = 10**6;
-    uint256 constant WAD = 10**18;
-    uint256 constant RAY = 10**27;
-    uint256 constant RAD = 10**45;
+    uint256 constant MILLION  = 10**6;
+    uint256 constant WAD      = 10**18;
+    uint256 constant RAY      = 10**27;
+    uint256 constant RAD      = 10**45;
 
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
@@ -51,7 +58,7 @@ contract SpellAction {
         require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).vat() == MCD_VAT, "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).ilk() == ILK_TOKEN_A, "join-ilk-not-match");
         require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).gem() == TOKEN, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).dec() == DSTokenAbstract(RENBTC).decimals(), "join-dec-not-match");
+        require(GemJoinAbstract(MCD_JOIN_TOKEN_LETTER).dec() == DSTokenAbstract(TOKEN).decimals(), "join-dec-not-match");
         require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).vat() == MCD_VAT, "flip-vat-not-match");
         require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).cat() == MCD_CAT, "flip-cat-not-match");
         require(FlipAbstract(MCD_FLIP_TOKEN_LETTER).ilk() == ILK_TOKEN_A, "flip-ilk-not-match");

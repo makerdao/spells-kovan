@@ -77,21 +77,22 @@ contract DssSpellTest is DSTest, DSMath {
     FlipperMomAbstract flipMom   = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
     DssAutoLineAbstract autoLine = DssAutoLineAbstract(0xe7D7d61c0ed9306B6c93E7C65F6C9DDF38b9320b);
 
-    // UNI-A specific
-    DSTokenAbstract       uni = DSTokenAbstract(0x0C527850e5D6B2B406F1d65895d5b17c5A29Ce51);
-    GemJoinAbstract  joinUNIA = GemJoinAbstract(0xb6E6EE050B4a74C8cc1DfdE62cAC8C6d9D8F4CAa);
-    FlipAbstract     flipUNIA = FlipAbstract(0x6EE8a47eA5d7cF0C951eDc57141Eb9593A36e680);
-    OsmAbstract        pipUNI = OsmAbstract(0xe573a75BF4827658F6D600FD26C205a3fe34ee28);
-    MedianAbstract    medUNIA = MedianAbstract(0x8Bc53b706D5e20Ee3d8b9B68DE326B1953b11cC1);
-
     // Faucet
     FaucetAbstract      faucet   = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
 
+    // UNI-A specific
+    DSTokenAbstract       uni = DSTokenAbstract(       0x0C527850e5D6B2B406F1d65895d5b17c5A29Ce51);
+    GemJoinAbstract  joinUNIA = GemJoinAbstract(       0xb6E6EE050B4a74C8cc1DfdE62cAC8C6d9D8F4CAa);
+    FlipAbstract     flipUNIA = FlipAbstract(          0x6EE8a47eA5d7cF0C951eDc57141Eb9593A36e680);
+    OsmAbstract        pipUNI = OsmAbstract(           0xe573a75BF4827658F6D600FD26C205a3fe34ee28);
+    MedianAbstract    medUNIA = MedianAbstract(        0x8Bc53b706D5e20Ee3d8b9B68DE326B1953b11cC1);
+
     // Specific for this spell
-    DSTokenAbstract       renbtc = DSTokenAbstract(     0xe3dD56821f8C422849AF4816fE9B3c53c6a2F0Bd);
-    GemJoinAbstract  joinRENBTCA = GemJoinAbstract(     0x12F1F6c7E5fDF1B671CebFBDE974341847d0Caa4);
-    FlipAbstract     flipRENBTCA = FlipAbstract(        0x2a2E2436370e98505325111A6b98F63d158Fedc4);
-    OsmAbstract        pipRENBTC = OsmAbstract(         0x2f38a1bD385A9B395D01f2Cbf767b4527663edDB);
+    DSTokenAbstract       renbtc = DSTokenAbstract(    0xe3dD56821f8C422849AF4816fE9B3c53c6a2F0Bd);
+    GemJoinAbstract  joinRENBTCA = GemJoinAbstract(    0x12F1F6c7E5fDF1B671CebFBDE974341847d0Caa4);
+    FlipAbstract     flipRENBTCA = FlipAbstract(       0x2a2E2436370e98505325111A6b98F63d158Fedc4);
+    OsmAbstract        pipRENBTC = OsmAbstract(        0x2f38a1bD385A9B395D01f2Cbf767b4527663edDB);
+    OsmAbstract        medRENBTC = MedianAbstract(     0x229508e7b3d18063CF8248f03CBbEd94e27Ec3da);
 
     DssSpell spell;
 
@@ -751,69 +752,6 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues(afterSpell);
     }
 
-    function testSpellIsCast_RENBTC_A_INTEGRATION() public {
-        vote();
-        scheduleWaitAndCast();
-        assertTrue(spell.done());
-
-        pipRENBTC.poke();
-        hevm.warp(now + 3601);
-        pipRENBTC.poke();
-        spot.poke("RENBTC-A");
-
-        // Check faucet amount
-        uint256 faucetAmount = faucet.amt(address(renbtc));
-        uint256 faucetAmountWad = faucetAmount * (10 ** (18 - renbtc.decimals()));
-        assertTrue(faucetAmount > 0);
-        faucet.gulp(address(renbtc));
-        assertEq(renbtc.balanceOf(address(this)), faucetAmount);
-
-        // Authorization
-        assertEq(joinRENBTCA.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(joinRENBTCA)), 1);
-        assertEq(flipRENBTCA.wards(address(end)), 1);
-        assertEq(flipRENBTCA.wards(address(flipMom)), 1);
-        assertEq(pipRENBTC.wards(address(osmMom)), 1);
-        assertEq(pipRENBTC.bud(address(spot)), 1);
-        assertEq(pipRENBTC.bud(address(end)), 1);
-        // assertEq(MedianAbstract(pipRENBTC.src()).bud(address(pipRENBTC)), 1);
-
-        // Join to adapter
-        assertEq(vat.gem("RENBTC-A", address(this)), 0);
-        renbtc.approve(address(joinRENBTCA), faucetAmount);
-        joinRENBTCA.join(address(this), faucetAmount);
-        assertEq(renbtc.balanceOf(address(this)), 0);
-        assertEq(vat.gem("RENBTC-A", address(this)), faucetAmountWad);
-
-        // Deposit collateral, generate DAI
-        assertEq(vat.dai(address(this)), 0);
-        vat.frob("RENBTC-A", address(this), address(this), address(this), int(faucetAmountWad), int(100 * WAD));
-        assertEq(vat.gem("RENBTC-A", address(this)), 0);
-        assertEq(vat.dai(address(this)), 100 * RAD);
-
-        // Payback DAI, withdraw collateral
-        vat.frob("RENBTC-A", address(this), address(this), address(this), -int(faucetAmountWad), -int(100 * WAD));
-        assertEq(vat.gem("RENBTC-A", address(this)), faucetAmountWad);
-        assertEq(vat.dai(address(this)), 0);
-
-        // Withdraw from adapter
-        joinRENBTCA.exit(address(this), faucetAmount);
-        assertEq(renbtc.balanceOf(address(this)), faucetAmount);
-        assertEq(vat.gem("RENBTC-A", address(this)), 0);
-
-        // Generate new DAI to force a liquidation
-        renbtc.approve(address(joinRENBTCA), faucetAmount);
-        joinRENBTCA.join(address(this), faucetAmount);
-        (,,uint256 spotV,,) = vat.ilks("RENBTC-A");
-        // dart max amount of DAI
-        vat.frob("RENBTC-A", address(this), address(this), address(this), int(faucetAmountWad), int(mul(faucetAmountWad, spotV) / RAY));
-        hevm.warp(now + 1);
-        jug.drip("RENBTC-A");
-        assertEq(flipRENBTCA.kicks(), 0);
-        cat.bite("RENBTC-A", address(this));
-        assertEq(flipRENBTCA.kicks(), 1);
-    }
-
     function testSpellIsCast_UNI_INTEGRATION() public {
        vote();
        scheduleWaitAndCast();
@@ -879,5 +817,71 @@ contract DssSpellTest is DSTest, DSMath {
        cat.bite("UNI-A", address(this));
        assertEq(flipUNIA.kicks(), 1);
    }
+
+    function testSpellIsCast_RENBTC_A_INTEGRATION() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        pipRENBTC.poke();
+        hevm.warp(now + 3601);
+        pipRENBTC.poke();
+        spot.poke("RENBTC-A");
+
+        // Check faucet amount
+        uint256 faucetAmount = faucet.amt(address(renbtc));
+        uint256 faucetAmountWad = faucetAmount * (10 ** (18 - renbtc.decimals()));
+        assertTrue(faucetAmount > 0);
+        faucet.gulp(address(renbtc));
+        assertEq(renbtc.balanceOf(address(this)), faucetAmount);
+
+        // Check median matches pip.src()
+        assertEq(pipRENBTC.src(), address(medRENBTC));
+
+        // Authorization
+        assertEq(joinRENBTCA.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinRENBTCA)), 1);
+        assertEq(flipRENBTCA.wards(address(end)), 1);
+        assertEq(flipRENBTCA.wards(address(flipMom)), 1);
+        assertEq(pipRENBTC.wards(address(osmMom)), 1);
+        assertEq(pipRENBTC.bud(address(spot)), 1);
+        assertEq(pipRENBTC.bud(address(end)), 1);
+        assertEq(MedianAbstract(pipRENBTC.src()).bud(address(pipRENBTC)), 1);
+
+        // Join to adapter
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
+        renbtc.approve(address(joinRENBTCA), faucetAmount);
+        joinRENBTCA.join(address(this), faucetAmount);
+        assertEq(renbtc.balanceOf(address(this)), 0);
+        assertEq(vat.gem("RENBTC-A", address(this)), faucetAmountWad);
+
+        // Deposit collateral, generate DAI
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob("RENBTC-A", address(this), address(this), address(this), int(faucetAmountWad), int(100 * WAD));
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
+        assertEq(vat.dai(address(this)), 100 * RAD);
+
+        // Payback DAI, withdraw collateral
+        vat.frob("RENBTC-A", address(this), address(this), address(this), -int(faucetAmountWad), -int(100 * WAD));
+        assertEq(vat.gem("RENBTC-A", address(this)), faucetAmountWad);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        joinRENBTCA.exit(address(this), faucetAmount);
+        assertEq(renbtc.balanceOf(address(this)), faucetAmount);
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        renbtc.approve(address(joinRENBTCA), faucetAmount);
+        joinRENBTCA.join(address(this), faucetAmount);
+        (,,uint256 spotV,,) = vat.ilks("RENBTC-A");
+        // dart max amount of DAI
+        vat.frob("RENBTC-A", address(this), address(this), address(this), int(faucetAmountWad), int(mul(faucetAmountWad, spotV) / RAY));
+        hevm.warp(now + 1);
+        jug.drip("RENBTC-A");
+        assertEq(flipRENBTCA.kicks(), 0);
+        cat.bite("RENBTC-A", address(this));
+        assertEq(flipRENBTCA.kicks(), 1);
+    }
 
 }
