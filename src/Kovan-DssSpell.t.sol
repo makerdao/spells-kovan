@@ -75,7 +75,7 @@ contract DssSpellTest is DSTest, DSMath {
 
     OsmMomAbstract      osmMom   = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
     FlipperMomAbstract flipMom   = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
-    DssAutoLineAbstract autoLine = DssAutoLineAbstract(0x0D0ccf65cED62D6CfC4DA7Ca85a0f833cB8889E4);
+    DssAutoLineAbstract autoLine = DssAutoLineAbstract(0xe7D7d61c0ed9306B6c93E7C65F6C9DDF38b9320b);
 
     // UNI-A specific
     DSTokenAbstract       uni = DSTokenAbstract(0x0C527850e5D6B2B406F1d65895d5b17c5A29Ce51);
