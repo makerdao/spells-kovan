@@ -75,15 +75,15 @@ contract SpellAction {
     uint256 constant SIX_PERCENT_RATE   = 1000000001847694957439350562;
 
     function execute() external {
-        address MCD_VAT = CHANGELOG.getAddress("MCD_VAT");
-        address MCD_CAT = CHANGELOG.getAddress("MCD_CAT");
-        address MCD_JUG = CHANGELOG.getAddress("MCD_JUG");
-        address MCD_SPOT = CHANGELOG.getAddress("MCD_SPOT");
-        address MCD_END = CHANGELOG.getAddress("MCD_END");
-        address FLIPPER_MOM = CHANGELOG.getAddress("FLIPPER_MOM");
-        address OSM_MOM = CHANGELOG.getAddress("OSM_MOM"); // Only if PIP_TOKEN = Osm
+        address MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
+        address MCD_CAT      = CHANGELOG.getAddress("MCD_CAT");
+        address MCD_JUG      = CHANGELOG.getAddress("MCD_JUG");
+        address MCD_SPOT     = CHANGELOG.getAddress("MCD_SPOT");
+        address MCD_END      = CHANGELOG.getAddress("MCD_END");
+        address FLIPPER_MOM  = CHANGELOG.getAddress("FLIPPER_MOM");
+        address OSM_MOM      = CHANGELOG.getAddress("OSM_MOM"); // Only if PIP_TOKEN = Osm
         address ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
-        address FAUCET = CHANGELOG.getAddress("FAUCET");
+        address FAUCET       = CHANGELOG.getAddress("FAUCET");
 
         //
         // Add UNI
