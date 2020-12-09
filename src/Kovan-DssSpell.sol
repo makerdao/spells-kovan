@@ -71,6 +71,9 @@ contract SpellAction {
     //
     // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
     //
+    // A table of rates can be found at
+    //    https://ipfs.io/ipfs/QmefQMseb3AiTapiAKKexdKHig8wroKuZbmLtPLv4u2YwW
+    //
     uint256 constant THREE_PERCENT_RATE = 1000000000937303470807876289;
     uint256 constant SIX_PERCENT_RATE   = 1000000001847694957439350562;
 
