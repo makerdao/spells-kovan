@@ -260,15 +260,15 @@ contract SpellAction {
         CHANGELOG.setAddress("MCD_FLIP_RENBTC_A", MCD_FLIP_RENBTC_A);
         CHANGELOG.setAddress("PIP_RENBTC", PIP_RENBTC);
 
+        // Set the global debt ceiling
+        VatAbstract(MCD_VAT).file("Line", 1244 * MILLION * RAD);
+
         //
         // MIP25: Debt Ceiling Instant Access Module
         //
 
         // Give permissions to the MCD_IAM_AUTO_LINE to file() the vat
         VatAbstract(MCD_VAT).rely(MCD_IAM_AUTO_LINE);
-
-        // Set the global debt ceiling
-        VatAbstract(MCD_VAT).file("Line", 1249 * MILLION * RAD);
 
         // Set ilks in MCD_IAM_AUTO_LINE
         DssAutoLineAbstract(MCD_IAM_AUTO_LINE).setIlk(
