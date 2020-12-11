@@ -14,9 +14,9 @@ interface Hevm {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0x5788c625cCE1Faf2f40679351eb8b11ac1c3E7f2);
+    address constant KOVAN_SPELL = address(0xB44518419921CC1732E0EAfCBf82555BA3253bA8);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1607573512;
+    uint256 constant SPELL_CREATED = 1607710120;
 
     struct CollateralValues {
         bool aL_enabled;
@@ -37,7 +37,6 @@ contract DssSpellTest is DSTest, DSMath {
 
     struct SystemValues {
         uint256 pot_dsr;
-        uint256 vat_Line;
         uint256 pause_delay;
         uint256 vow_wait;
         uint256 vow_dump;
@@ -68,6 +67,8 @@ contract DssSpellTest is DSTest, DSMath {
     PotAbstract            pot   = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
     JugAbstract            jug   = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
     SpotAbstract          spot   = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
+    DaiAbstract            dai   = DaiAbstract(        0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa);
+    DaiJoinAbstract    daiJoin   = DaiJoinAbstract(    0x5AA71a3ae1C0bd6ac27A1f28e1415fFFB6F15B8c);
 
     DSTokenAbstract        gov   = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract            end   = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
@@ -496,6 +497,10 @@ contract DssSpellTest is DSTest, DSMath {
             liquidations: 1
         });
         afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
             line:         500 * MILLION,
             dust:         10,
             pct:          0,
@@ -571,8 +576,6 @@ contract DssSpellTest is DSTest, DSMath {
 
         {
         // Line values in RAD
-        uint normalizedLine = values.vat_Line * RAD;
-        assertEq(vat.Line(), normalizedLine);
         assertTrue(
             (vat.Line() >= RAD && vat.Line() < 100 * BILLION * RAD) ||
             vat.Line() == 0

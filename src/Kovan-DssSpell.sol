@@ -21,6 +21,7 @@ import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
 import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
+import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/JugAbstract.sol";
 import "lib/dss-interfaces/src/dss/CatAbstract.sol";
 import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
@@ -105,10 +106,11 @@ contract SpellAction {
         address MCD_JUG      = CHANGELOG.getAddress("MCD_JUG");
         address MCD_SPOT     = CHANGELOG.getAddress("MCD_SPOT");
         address MCD_END      = CHANGELOG.getAddress("MCD_END");
+        address MCD_VOW      = CHANGELOG.getAddress("MCD_VOW");
+        address MCD_DAI      = CHANGELOG.getAddress("MCD_DAI");
+        address MCD_JOIN_DAI = CHANGELOG.getAddress("MCD_JOIN_DAI");
         address FLIPPER_MOM  = CHANGELOG.getAddress("FLIPPER_MOM");
-        address OSM_MOM      = CHANGELOG.getAddress("OSM_MOM"); // Only if PIP_TOKEN = Osm
         address ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
-        address FAUCET       = CHANGELOG.getAddress("FAUCET");
 
         //
         // Add PSM-USDC-A
@@ -137,14 +139,14 @@ contract SpellAction {
         require(!LerpAbstract(LERP).done(), "lerp-not-done");
 
         // Set the USDC PIP in the Spotter
-        SpotAbstract(MCD_SPOT).file(ilk, "pip", PIP_USDC);
+        SpotAbstract(MCD_SPOT).file(ILK_PSM_USDC_A, "pip", PIP_USDC);
 
         // Set the PSM-USDC-A Flipper in the Cat
-        CatAbstract(MCD_CAT).file(ilk, "flip", MCD_FLIP_USDC_PSM);
+        CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "flip", MCD_FLIP_USDC_PSM);
 
         // Init PSM-USDC-A ilk in Vat & Jug
         // VatAbstract(MCD_VAT).init(ilk);
-        JugAbstract(MCD_JUG).init(ilk);
+        JugAbstract(MCD_JUG).init(ILK_PSM_USDC_A);
 
         // Allow PSM-USDC-A Join to modify Vat registry
         VatAbstract(MCD_VAT).rely(MCD_JOIN_USDC_PSM);
@@ -163,16 +165,16 @@ contract SpellAction {
         // Set the global debt ceiling
         VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 500 * MILLION * RAD);
         // Set the PSM-USDC-A debt ceiling
-        VatAbstract(MCD_VAT).file(ilk, "line", 500 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file(ILK_PSM_USDC_A, "line", 500 * MILLION * RAD);
         // Set the PSM-USDC-A dust
-        VatAbstract(MCD_VAT).file(ilk, "dust", 10 * RAD);
+        VatAbstract(MCD_VAT).file(ILK_PSM_USDC_A, "dust", 10 * RAD);
         // Set the Lot size
-        CatAbstract(MCD_CAT).file(ilk, "dunk", 500 * RAD);
+        CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "dunk", 500 * RAD);
         // Set the PSM-USDC-A liquidation penalty (e.g. 13% => X = 113)
-        CatAbstract(MCD_CAT).file(ilk, "chop", 100 * WAD / 100);
+        CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "chop", 100 * WAD / 100);
         // Set the PSM-USDC-A stability fee (e.g. 1% = 1000000000315522921573372069)
-        JugAbstract(MCD_JUG).drip(ilk);
-        JugAbstract(MCD_JUG).file(ilk, "duty", ZERO_PERCENT_RATE);
+        JugAbstract(MCD_JUG).drip(ILK_PSM_USDC_A);
+        JugAbstract(MCD_JUG).file(ILK_PSM_USDC_A, "duty", ZERO_PERCENT_RATE);
         // Set the PSM-USDC-A percentage between bids (e.g. 3% => X = 103)
         FlipAbstract(MCD_FLIP_USDC_PSM).file("beg", 103 * WAD / 100);
         // Set the PSM-USDC-A time max time between bids
@@ -180,14 +182,14 @@ contract SpellAction {
         // Set the PSM-USDC-A max auction duration to
         FlipAbstract(MCD_FLIP_USDC_PSM).file("tau", 1 hours);
         // Set the PSM-USDC-A min collateralization ratio (e.g. 150% => X = 150)
-        SpotAbstract(MCD_SPOT).file(ilk, "mat", 100 * RAY / 100);
+        SpotAbstract(MCD_SPOT).file(ILK_PSM_USDC_A, "mat", 100 * RAY / 100);
         // Set the PSM-USDC-A fee in (tin)
         PsmAbstract(MCD_PSM_USDC_PSM).file("tin", 1 * WAD / 100);
         // Set the PSM-USDC-A fee out (tout)
         PsmAbstract(MCD_PSM_USDC_PSM).file("tout", 1 * WAD / 1000);
 
         // Update PSM-USDC-A spot value in Vat
-        SpotAbstract(MCD_SPOT).poke(ilk);
+        SpotAbstract(MCD_SPOT).poke(ILK_PSM_USDC_A);
 
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_USDC_PSM);
