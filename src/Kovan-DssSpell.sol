@@ -90,7 +90,7 @@ contract SpellAction {
 
 
         //
-        // MIP21: Debt Ceiling Instant Access Module
+        // MIP21
         //
 
 
