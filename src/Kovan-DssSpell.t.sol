@@ -506,7 +506,7 @@ contract DssSpellTest is DSTest, DSMath {
             ttl:          1 hours,
             tau:          1 hours,
             liquidations: 0
-        })
+        });
     }
 
     function vote() private {
