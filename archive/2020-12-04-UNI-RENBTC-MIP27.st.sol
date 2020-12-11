@@ -5,7 +5,7 @@ import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
 
-import {DssSpell, SpellAction, PsmAbstract, LerpAbstract} from "./Kovan-DssSpell.sol";
+import {DssSpell, SpellAction} from "./Kovan-DssSpell.sol";
 
 interface Hevm {
     function warp(uint) external;
@@ -45,10 +45,10 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 vow_bump;
         uint256 vow_hump;
         uint256 cat_box;
+        uint256 ilk_count;
         address pause_authority;
         address osm_mom_authority;
         address flipper_mom_authority;
-        uint256 ilk_count;
         mapping (bytes32 => CollateralValues) collaterals;
     }
 
@@ -80,12 +80,19 @@ contract DssSpellTest is DSTest, DSMath {
     // Faucet
     FaucetAbstract      faucet   = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
 
-    // PSM-USDC-A specific
-    DSTokenAbstract         usdc = DSTokenAbstract(  0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5);
-    GemJoinAbstract  joinUSDCPSM = GemJoinAbstract(  0x882916CC149eB669F9e9240C001C8C90Ab37974c);
-    FlipAbstract     flipUSDCPSM = FlipAbstract(     0xA79F07275eA9080829e77F9f399F9f42bb79a58a);
-    PsmAbstract       psmUSDCPSM = PsmAbstract(      0x8D1B119fA7492C8c5b4125B53a44EA8b0e83d5e8);
-    LerpAbstract     lerpUSDCPSM = LerpAbstract(     0x06b55F7DF03aC8B21cA472612419571cfCe854E5);
+    // UNI-A specific
+    DSTokenAbstract       uni = DSTokenAbstract(       0x0C527850e5D6B2B406F1d65895d5b17c5A29Ce51);
+    GemJoinAbstract  joinUNIA = GemJoinAbstract(       0xb6E6EE050B4a74C8cc1DfdE62cAC8C6d9D8F4CAa);
+    FlipAbstract     flipUNIA = FlipAbstract(          0x6EE8a47eA5d7cF0C951eDc57141Eb9593A36e680);
+    OsmAbstract        pipUNI = OsmAbstract(           0xe573a75BF4827658F6D600FD26C205a3fe34ee28);
+    MedianAbstract    medUNIA = MedianAbstract(        0x8Bc53b706D5e20Ee3d8b9B68DE326B1953b11cC1);
+
+    // Specific for this spell
+    DSTokenAbstract       renbtc = DSTokenAbstract(    0xe3dD56821f8C422849AF4816fE9B3c53c6a2F0Bd);
+    GemJoinAbstract  joinRENBTCA = GemJoinAbstract(    0x12F1F6c7E5fDF1B671CebFBDE974341847d0Caa4);
+    FlipAbstract     flipRENBTCA = FlipAbstract(       0x2a2E2436370e98505325111A6b98F63d158Fedc4);
+    OsmAbstract        pipRENBTC = OsmAbstract(        0x2f38a1bD385A9B395D01f2Cbf767b4527663edDB);
+    // OsmAbstract        medRENBTC = MedianAbstract(     0x229508e7b3d18063CF8248f03CBbEd94e27Ec3da);
 
     DssSpell spell;
 
@@ -149,7 +156,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function setUp() public {
-       hevm = Hevm(address(CHEAT_CODE));
+        hevm = Hevm(address(CHEAT_CODE));
         rates = new Rates();
 
         spell = KOVAN_SPELL != address(0) ? DssSpell(KOVAN_SPELL) : new DssSpell();
@@ -159,6 +166,7 @@ contract DssSpellTest is DSTest, DSMath {
         //
         afterSpell = SystemValues({
             pot_dsr:               0,                   // In basis points
+            vat_Line:              1244 * MILLION,      // In whole Dai units
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
             vow_dump:              2,                   // In whole Dai units
@@ -166,10 +174,10 @@ contract DssSpellTest is DSTest, DSMath {
             vow_bump:              10,                  // In whole Dai units
             vow_hump:              500,                 // In whole Dai units
             cat_box:               10 * THOUSAND,       // In whole Dai units
+            ilk_count:             20,                  // Num expected in system
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
-            flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             21                   // Num expected in system
+            flipper_mom_authority: address(chief)       // FlipperMom authority
         });
 
         //
@@ -495,18 +503,6 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          1 hours,
             liquidations: 1
         });
-        afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
-            line:         500 * MILLION,
-            dust:         10,
-            pct:          0,
-            chop:         0,
-            dunk:         500,
-            mat:          10000,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 0
-        })
     }
 
     function vote() private {
@@ -520,6 +516,20 @@ contract DssSpellTest is DSTest, DSMath {
             chief.lock(999999999999 ether);
 
             address[] memory slate = new address[](1);
+
+            if (chief.live() == 0) {
+                // Launch system
+                slate[0] = address(0);
+                chief.vote(slate);
+                if (chief.hat() != address(0)) {
+                    chief.lift(address(0));
+                }
+                assertEq(chief.live(), 0);
+                assertTrue(!chief.isUserRoot(address(0)));
+                chief.launch();
+                assertEq(chief.live(), 1);
+                assertTrue(chief.isUserRoot(address(0)));
+            }
 
             assertTrue(!spell.done());
 
@@ -627,6 +637,9 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(cat.box(), normalizedBox);
         }
 
+        // check number of ilks
+        assertEq(reg.count(), values.ilk_count);
+
         // check Pause authority
         assertEq(pause.authority(), values.pause_authority);
 
@@ -635,12 +648,10 @@ contract DssSpellTest is DSTest, DSMath {
 
         // check FlipperMom authority
         assertEq(flipMom.authority(), values.flipper_mom_authority);
-
-        // check number of ilks
-        assertEq(reg.count(), values.ilk_count);
     }
 
     function checkCollateralValues(SystemValues storage values) internal {
+        uint256 sumlines;
         bytes32[] memory ilks = reg.list();
         for(uint256 i = 0; i < ilks.length; i++) {
             bytes32 ilk = ilks[i];
@@ -657,6 +668,7 @@ contract DssSpellTest is DSTest, DSMath {
             (,,, uint256 line, uint256 dust) = vat.ilks(ilk);
             // Convert whole Dai units to expected RAD
             uint256 normalizedTestLine = values.collaterals[ilk].line * RAD;
+            sumlines += values.collaterals[ilk].line;
             (uint256 aL_line, uint256 aL_gap, uint256 aL_ttl,,) = autoLine.ilks(ilk);
             if (!values.collaterals[ilk].aL_enabled) {
                 assertTrue(aL_line == 0);
@@ -715,6 +727,7 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(join.wards(address(pauseProxy)), 1); // Check pause_proxy ward
             }
         }
+        assertEq(sumlines, values.vat_Line);
     }
 
     function testSpellIsCast() public {
@@ -739,84 +752,144 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues(afterSpell);
     }
 
-    function testSpellIsCast_PSM_USDC_A_INTEGRATION() public {
+    function testSpellAutoLineAuth() public {
         vote();
         scheduleWaitAndCast();
         assertTrue(spell.done());
 
-        spot.poke("PSM-USDC-A");
+        assertEq(vat.wards(address(autoLine)), 1);
+    }
+
+    function testSpellIsCast_UNI_INTEGRATION() public {
+       vote();
+       scheduleWaitAndCast();
+       assertTrue(spell.done());
+
+       pipUNI.poke();
+       hevm.warp(now + 3601);
+       pipUNI.poke();
+       spot.poke("UNI-A");
+
+       // Check faucet amount
+       uint256 faucetAmount = faucet.amt(address(uni));
+       uint256 faucetAmountWad = faucetAmount * (10 ** (18 - uni.decimals()));
+       assertTrue(faucetAmount > 0);
+       faucet.gulp(address(uni));
+       assertEq(uni.balanceOf(address(this)), faucetAmount);
+
+       // Check median matches pip.src()
+       assertEq(pipUNI.src(), address(medUNIA));
+
+       // Authorization
+       assertEq(joinUNIA.wards(pauseProxy), 1);
+       assertEq(vat.wards(address(joinUNIA)), 1);
+       assertEq(flipUNIA.wards(address(end)), 1);
+       assertEq(flipUNIA.wards(address(flipMom)), 1);
+       assertEq(pipUNI.wards(address(osmMom)), 1);
+       assertEq(pipUNI.bud(address(spot)), 1);
+       assertEq(pipUNI.bud(address(end)), 1);
+       assertEq(MedianAbstract(pipUNI.src()).bud(address(pipUNI)), 1);
+
+       // Join to adapter
+       assertEq(vat.gem("UNI-A", address(this)), 0);
+       uni.approve(address(joinUNIA), faucetAmount);
+       joinUNIA.join(address(this), faucetAmount);
+       assertEq(uni.balanceOf(address(this)), 0);
+       assertEq(vat.gem("UNI-A", address(this)), faucetAmountWad);
+
+       // Deposit collateral, generate DAI
+       assertEq(vat.dai(address(this)), 0);
+       vat.frob("UNI-A", address(this), address(this), address(this), int(faucetAmountWad), int(100 * WAD));
+       assertEq(vat.gem("UNI-A", address(this)), 0);
+       assertEq(vat.dai(address(this)), 100 * RAD);
+
+       // Payback DAI, withdraw collateral
+       vat.frob("UNI-A", address(this), address(this), address(this), -int(faucetAmountWad), -int(100 * WAD));
+       assertEq(vat.gem("UNI-A", address(this)), faucetAmountWad);
+       assertEq(vat.dai(address(this)), 0);
+
+       // Withdraw from adapter
+       joinUNIA.exit(address(this), faucetAmount);
+       assertEq(uni.balanceOf(address(this)), faucetAmount);
+       assertEq(vat.gem("UNI-A", address(this)), 0);
+
+       // Generate new DAI to force a liquidation
+       uni.approve(address(joinUNIA), faucetAmount);
+       joinUNIA.join(address(this), faucetAmount);
+       (,,uint256 spotV,,) = vat.ilks("UNI-A");
+       // dart max amount of DAI
+       vat.frob("UNI-A", address(this), address(this), address(this), int(faucetAmountWad), int(mul(faucetAmountWad, spotV) / RAY));
+       hevm.warp(now + 1);
+       jug.drip("UNI-A");
+       assertEq(flipUNIA.kicks(), 0);
+       cat.bite("UNI-A", address(this));
+       assertEq(flipUNIA.kicks(), 1);
+   }
+
+    function testSpellIsCast_RENBTC_A_INTEGRATION() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        pipRENBTC.poke();
+        hevm.warp(now + 3601);
+        pipRENBTC.poke();
+        spot.poke("RENBTC-A");
 
         // Check faucet amount
-        uint256 faucetAmount = faucet.amt(address(usdc));
-        uint256 faucetAmountWad = faucetAmount * (10 ** (18 - usdc.decimals()));
-        uint256 oneUsdc = 10 ** usdc.decimals();
+        uint256 faucetAmount = faucet.amt(address(renbtc));
+        uint256 faucetAmountWad = faucetAmount * (10 ** (18 - renbtc.decimals()));
         assertTrue(faucetAmount > 0);
-        faucet.gulp(address(usdc));
-        assertEq(usdc.balanceOf(address(this)), faucetAmount);
+        faucet.gulp(address(renbtc));
+        assertEq(renbtc.balanceOf(address(this)), faucetAmount);
+
+        // Check median matches pip.src()
+        // assertEq(pipRENBTC.src(), address(medRENBTC));
 
         // Authorization
-        assertEq(joinUSDCPSM.wards(pauseProxy), 1);
-        assertEq(joinUSDCPSM.wards(address(psmUSDCPSM)), 1);
-        assertEq(psmUSDCPSM.wards(address(lerpUSDCPSM)), 1);
-        assertEq(psmUSDCPSM.wards(pauseProxy), 1);
-        assertEq(lerpUSDCPSM.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(joinUSDCPSM)), 1);
-        assertEq(flipUSDCPSM.wards(address(end)), 1);
-        assertEq(flipUSDCPSM.wards(address(flipMom)), 1);
+        assertEq(joinRENBTCA.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinRENBTCA)), 1);
+        assertEq(flipRENBTCA.wards(address(end)), 1);
+        assertEq(flipRENBTCA.wards(address(flipMom)), 1);
+        assertEq(pipRENBTC.wards(address(osmMom)), 1);
+        assertEq(pipRENBTC.bud(address(spot)), 1);
+        assertEq(pipRENBTC.bud(address(end)), 1);
+        // assertEq(MedianAbstract(pipRENBTC.src()).bud(address(pipRENBTC)), 1);
 
-        // Check psm + lerp is set up correctly
-        assertEq(psmUSDCPSM.tin(), WAD * 1 / 100);
-        assertEq(psmUSDCPSM.tout(), WAD * 1 / 1000);
-        assertTrue(lerpUSDCPSM.started());
-        assertEq(lerpUSDCPSM.startTime(), now);
-        assertTrue(!lerpUSDCPSM.done());
+        // Join to adapter
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
+        renbtc.approve(address(joinRENBTCA), faucetAmount);
+        joinRENBTCA.join(address(this), faucetAmount);
+        assertEq(renbtc.balanceOf(address(this)), 0);
+        assertEq(vat.gem("RENBTC-A", address(this)), faucetAmountWad);
 
-        // Convert all USDC to DAI with a 1% fee
-        usdc.approve(address(joinUSDCPSM), faucetAmount);
-        psmUSDCPSM.sellGem(address(this), faucetAmount);
-        faucetAmount = faucetAmount * 99 / 100;
-        faucetAmountWad = faucetAmount * (10 ** (18 - usdc.decimals()));
-        assertEq(usdc.balanceOf(address(this)), 0);
-        assertEq(dai.balanceOf(address(this)), faucetAmountWad);
+        // Deposit collateral, generate DAI
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob("RENBTC-A", address(this), address(this), address(this), int(faucetAmountWad), int(100 * WAD));
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
+        assertEq(vat.dai(address(this)), 100 * RAD);
 
-        // Convert 50 DAI to USDC with a 0.1% fee
-        faucetAmount = 50 * oneUsdc;
-        dai.approve(address(psmUSDCPSM), uint256(-1));
-        psmUSDCPSM.buyGem(address(this), faucetAmount);
-        dai.transfer(address(0), dai.balanceOf(address(this)));     // Throw away extra
-        assertEq(usdc.balanceOf(address(this)), faucetAmount);
+        // Payback DAI, withdraw collateral
+        vat.frob("RENBTC-A", address(this), address(this), address(this), -int(faucetAmountWad), -int(100 * WAD));
+        assertEq(vat.gem("RENBTC-A", address(this)), faucetAmountWad);
+        assertEq(vat.dai(address(this)), 0);
 
-        // Convert 50 USDC to DAI with a 0.55% fee (halfway through lerp)
-        hevm.warp(now + 3.5 days);
-        lerpUSDCPSM.tick();
-        assertTrue(!lerpUSDCPSM.done());
-        assertEq(psmUSDCPSM.tin(), WAD * 55 / 10000);
-        assertEq(psmUSDCPSM.tout(), WAD * 1 / 1000);
-        usdc.approve(address(joinUSDCPSM), faucetAmount);
-        psmUSDCPSM.sellGem(address(this), faucetAmount);
-        faucetAmount = faucetAmount * 9945 / 10000;
-        faucetAmountWad = faucetAmount * (10 ** (18 - usdc.decimals()));
-        assertEq(usdc.balanceOf(address(this)), 0);
-        assertEq(dai.balanceOf(address(this)), faucetAmountWad);
+        // Withdraw from adapter
+        joinRENBTCA.exit(address(this), faucetAmount);
+        assertEq(renbtc.balanceOf(address(this)), faucetAmount);
+        assertEq(vat.gem("RENBTC-A", address(this)), 0);
 
-        // Convert 20 DAI to USDC with a 1% fee
-        faucetAmount = 20 * oneUsdc;
-        psmUSDCPSM.buyGem(address(this), faucetAmount);
-        dai.transfer(address(0), dai.balanceOf(address(this)));     // Throw away extra
-        assertEq(usdc.balanceOf(address(this)), faucetAmount);
-
-        // Convert 20 USDC to DAI with a 0.1% fee (lerp is done)
-        hevm.warp(now + 4 days);
-        lerpUSDCPSM.tick();
-        assertTrue(lerpUSDCPSM.done());
-        assertEq(psmUSDCPSM.tin(), WAD * 1 / 1000);
-        assertEq(psmUSDCPSM.tout(), WAD * 1 / 1000);
-        usdc.approve(address(joinUSDCPSM), faucetAmount);
-        psmUSDCPSM.sellGem(address(this), faucetAmount);
-        faucetAmount = faucetAmount * 999 / 1000;
-        faucetAmountWad = faucetAmount * (10 ** (18 - usdc.decimals()));
-        assertEq(usdc.balanceOf(address(this)), 0);
-        assertEq(dai.balanceOf(address(this)), faucetAmountWad);
+        // Generate new DAI to force a liquidation
+        renbtc.approve(address(joinRENBTCA), faucetAmount);
+        joinRENBTCA.join(address(this), faucetAmount);
+        (,,uint256 spotV,,) = vat.ilks("RENBTC-A");
+        // dart max amount of DAI
+        vat.frob("RENBTC-A", address(this), address(this), address(this), int(faucetAmountWad), int(mul(faucetAmountWad, spotV) / RAY));
+        hevm.warp(now + 1);
+        jug.drip("RENBTC-A");
+        assertEq(flipRENBTCA.kicks(), 0);
+        cat.bite("RENBTC-A", address(this));
+        assertEq(flipRENBTCA.kicks(), 1);
     }
 
 }
