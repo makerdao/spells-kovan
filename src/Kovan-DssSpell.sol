@@ -88,7 +88,6 @@ contract SpellAction {
         //
 
 
-
         //
         // MIP21
         //
