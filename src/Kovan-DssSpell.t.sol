@@ -20,6 +20,7 @@ import "ds-math/math.sol";
 import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
+import "./test/addresses_kovan.sol";
 
 import {DssSpell, SpellAction} from "./Kovan-DssSpell.sol";
 
@@ -75,31 +76,32 @@ contract DssSpellTest is DSTest, DSMath {
 
     SystemValues afterSpell;
 
-    Hevm hevm;
-    Rates rates;
+    Hevm      hevm;
+    Rates     rates = new Rates();
+    Addresses addr  = new Addresses();
 
     // KOVAN ADDRESSES
-    ChainlogAbstract changelog   = ChainlogAbstract(   0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
-    DSPauseAbstract      pause   = DSPauseAbstract(    0x8754E6ecb4fe68DaA5132c2886aB39297a5c7189);
-    address         pauseProxy   =                     0x0e4725db88Bb038bBa4C4723e91Ba183BE11eDf3;
-    DSChiefAbstract      chief   = DSChiefAbstract(    0x27E0c9567729Ea6e3241DE74B3dE499b7ddd3fe6);
-    VatAbstract            vat   = VatAbstract(        0xbA987bDB501d131f766fEe8180Da5d81b34b69d9);
-    CatAbstract            cat   = CatAbstract(        0xdDb5F7A3A5558b9a6a1f3382BD75E2268d1c6958);
-    VowAbstract            vow   = VowAbstract(        0x0F4Cbe6CBA918b7488C26E29d9ECd7368F38EA3b);
-    PotAbstract            pot   = PotAbstract(        0xEA190DBDC7adF265260ec4dA6e9675Fd4f5A78bb);
-    JugAbstract            jug   = JugAbstract(        0xcbB7718c9F39d05aEEDE1c472ca8Bf804b2f1EaD);
-    SpotAbstract          spot   = SpotAbstract(       0x3a042de6413eDB15F2784f2f97cC68C7E9750b2D);
+    ChainlogAbstract changelog   = ChainlogAbstract(   addr.addr("CHANGELOG"));
+    DSPauseAbstract      pause   = DSPauseAbstract(    addr.addr("MCD_PAUSE"));
+    address         pauseProxy   =                     addr.addr("MCD_PAUSE_PROXY");
+    DSChiefAbstract      chief   = DSChiefAbstract(    addr.addr("MCD_ADM"));
+    VatAbstract            vat   = VatAbstract(        addr.addr("MCD_VAT"));
+    CatAbstract            cat   = CatAbstract(        addr.addr("MCD_CAT"));
+    VowAbstract            vow   = VowAbstract(        addr.addr("MCD_VOW"));
+    PotAbstract            pot   = PotAbstract(        addr.addr("MCD_POT"));
+    JugAbstract            jug   = JugAbstract(        addr.addr("MCD_JUG"));
+    SpotAbstract          spot   = SpotAbstract(       addr.addr("MCD_SPOT"));
 
-    DSTokenAbstract        gov   = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
-    EndAbstract            end   = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
-    IlkRegistryAbstract    reg   = IlkRegistryAbstract(0xedE45A0522CA19e979e217064629778d6Cc2d9Ea);
+    DSTokenAbstract        gov   = DSTokenAbstract(    addr.addr("MCD_GOV"));
+    EndAbstract            end   = EndAbstract(        addr.addr("MCD_END"));
+    IlkRegistryAbstract    reg   = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
 
-    OsmMomAbstract      osmMom   = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
-    FlipperMomAbstract flipMom   = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
-    DssAutoLineAbstract autoLine = DssAutoLineAbstract(0xe7D7d61c0ed9306B6c93E7C65F6C9DDF38b9320b);
+    OsmMomAbstract      osmMom   = OsmMomAbstract(     addr.addr("OSM_MOM"));
+    FlipperMomAbstract flipMom   = FlipperMomAbstract( addr.addr("FLIPPER_MOM"));
+    DssAutoLineAbstract autoLine = DssAutoLineAbstract(addr.addr("MCD_IAM_AUTO_LINE"));
 
     // Faucet
-    FaucetAbstract      faucet   = FaucetAbstract(     0x57aAeAE905376a4B1899bA81364b4cE2519CBfB3);
+    FaucetAbstract      faucet   = FaucetAbstract(     addr.addr("FAUCET"));
 
     // Spell-specific addresses
 
@@ -168,7 +170,6 @@ contract DssSpellTest is DSTest, DSMath {
 
     function setUp() public {
         hevm = Hevm(address(CHEAT_CODE));
-        rates = new Rates();
 
         spell = KOVAN_SPELL != address(0) ? DssSpell(KOVAN_SPELL) : new DssSpell();
 
