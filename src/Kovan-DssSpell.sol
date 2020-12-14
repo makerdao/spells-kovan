@@ -100,25 +100,24 @@ contract SpellAction {
 }
 
 contract DssSpell {
-    ChainlogAbstract constant CHANGELOG =
+    ChainlogAbstract  constant CHANGELOG =
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
-    DSPauseAbstract public pause =
+    DSPauseAbstract   public pause =
         DSPauseAbstract(CHANGELOG.getAddress("MCD_PAUSE"));
 
-    address         public action;
-    bytes32         public tag;
-    uint256         public eta;
-    bytes           public sig;
-    uint256         public expiration;
-    bool            public done;
+    address immutable public action;
+    bytes32 immutable public tag;
+    uint256 immutable public expiration;
+    uint256           public eta;
+    bytes             public sig;
+    bool              public done;
 
-    string constant public description = "Kovan Spell Deploy";
+    string   constant public description = "Kovan Spell Deploy";
 
     constructor() public {
         sig = abi.encodeWithSignature("execute()");
-        action = address(new SpellAction());
         bytes32 _tag;
-        address _action = action;
+        address _action = action = address(new SpellAction());
         assembly { _tag := extcodehash(_action) }
         tag = _tag;
         expiration = now + 30 days;
