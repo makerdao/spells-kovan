@@ -28,6 +28,7 @@ import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
 import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmAbstract.sol";
+import "lib/dss-interfaces/src/dss/LPOsmAbstract.sol";
 import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
 import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
 import "lib/dss-interfaces/src/dss/DssAutoLineAbstract.sol";
@@ -51,7 +52,7 @@ contract SpellAction {
 
     address constant MCD_JOIN_UNIV2DAIETH_A = 0xd61b8EB7f4890F25BD6016bC3FFbB8f0e08A55FF;
     address constant MCD_FLIP_UNIV2DAIETH_A = 0x0B6C3512C8D4300d566b286FC4a554dAC217AaA6;
-    address constant PIP_UNIV2DAIETH        = 0x1ae7d6891a5fdaafad2fe6d894bffea48f8b2454;
+    address constant PIP_UNIV2DAIETH        = 0x1AE7D6891a5fdAafAd2FE6D894bffEa48F8b2454;
     address constant UNIV2DAIETH            = 0xFD5608515A47C37afbA68960c1916b79af9491D0;
     bytes32 constant ILK_UNIV2DAIETH_A      = "UNIV2DAIETH-A";
 
@@ -219,17 +220,16 @@ contract SpellAction {
 
         // Allow OsmMom to access to the UNIV2DAIETH Osm
         // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm and hasn't been already relied due a previous deployed ilk
-        OsmAbstract(PIP_UNIV2DAIETH).rely(OSM_MOM);
+        LPOsmAbstract(PIP_UNIV2DAIETH).rely(OSM_MOM);
         // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
         // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk
-        MedianAbstract(OsmAbstract(PIP_UNIV2DAIETH).orb0()).kiss(PIP_UNIV2DAIETH);
-        MedianAbstract(OsmAbstract(PIP_UNIV2DAIETH).orb1()).kiss(PIP_UNIV2DAIETH);
+        MedianAbstract(LPOsmAbstract(PIP_UNIV2DAIETH).orb1()).kiss(PIP_UNIV2DAIETH);
         // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
         // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm or PIP_UNIV2DAIETH = Median and hasn't been already whitelisted due a previous deployed ilk
-        OsmAbstract(PIP_UNIV2DAIETH).kiss(MCD_SPOT);
+        LPOsmAbstract(PIP_UNIV2DAIETH).kiss(MCD_SPOT);
         // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
         // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm or PIP_UNIV2DAIETH = Median and hasn't been already whitelisted due a previous deployed ilk
-        OsmAbstract(PIP_UNIV2DAIETH).kiss(MCD_END);
+        LPOsmAbstract(PIP_UNIV2DAIETH).kiss(MCD_END);
         // Set UNIV2DAIETH Osm in the OsmMom for new ilk
         // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm
         OsmMomAbstract(OSM_MOM).setOsm(ILK_UNIV2DAIETH_A, PIP_UNIV2DAIETH);

@@ -106,7 +106,7 @@ contract DssSpellTest is DSTest, DSMath {
     DSTokenAbstract     lp = DSTokenAbstract(addr.addr("UNIV2DAIETH"));
     GemJoinAbstract lpJoin = GemJoinAbstract(addr.addr("MCD_JOIN_UNIV2DAIETH_A"));
     FlipAbstract    lpFlip = FlipAbstract(   addr.addr("MCD_FLIP_UNIV2DAIETH_A"));
-    LPOsmAbstract    lpPip = OsmAbstract(    addr.addr("PIP_UNIV2DAIETH"));
+    LPOsmAbstract    lpPip = LPOsmAbstract(  addr.addr("PIP_UNIV2DAIETH"));
     MedianAbstract    orb0 = MedianAbstract( lpPip.orb0());
     MedianAbstract    orb1 = MedianAbstract( lpPip.orb0());
 
@@ -879,9 +879,9 @@ contract DssSpellTest is DSTest, DSMath {
        spot.poke(ilk);
 
        // Check faucet amount
-       uint256 faucetAmount = faucet.amt(address(uni));
+       uint256 faucetAmount = faucet.amt(address(lp));
        assertTrue(faucetAmount > 0);
-       faucet.gulp(address(uni));
+       faucet.gulp(address(lp));
        assertEq(lp.balanceOf(address(this)), faucetAmount);
 
        // Check median matches pip.src()
