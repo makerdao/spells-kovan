@@ -680,7 +680,7 @@ contract DssSpellTest is DSTest, DSMath {
             (,,, uint256 line, uint256 dust) = vat.ilks(ilk);
             // Convert whole Dai units to expected RAD
             uint256 normalizedTestLine = values.collaterals[ilk].line * RAD;
-            sumlines += values.collaterals[ilk].line;
+            sumlines += line;
             (uint256 aL_line, uint256 aL_gap, uint256 aL_ttl,,) = autoLine.ilks(ilk);
             if (!values.collaterals[ilk].aL_enabled) {
                 assertTrue(aL_line == 0);
@@ -739,7 +739,7 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(join.wards(address(pauseProxy)), 1); // Check pause_proxy ward
             }
         }
-        assertEq(sumlines, values.vat_Line);
+        assertEq(sumlines, values.vat_Line * RAD);
     }
 
     function testSpellIsCast() public {
