@@ -42,7 +42,12 @@ contract SpellAction {
     ChainlogAbstract constant CHANGELOG =
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    // TODO Aave
+    // AAVE-A
+    address constant AAVE = 0x7B339a530Eed72683F56868deDa87BbC64fD9a12;
+    address constant MCD_JOIN_AAVE_A = 0x9f1Ed3219035e6bDb19E0D95d316c7c39ad302EC;
+    address constant MCD_FLIP_AAVE_A = 0x3c84d572749096b67e4899A95430201DF79b8403;
+    address constant PIP_AAVE = 0xd2d9B1355Ea96567E7D6C7A6945f5c7ec8150Cc9;
+    bytes32 constant ILK_AAVE_A = "AAVE-A";
 
     // TODO UNI-V2-DAI-WETH
 
@@ -50,7 +55,6 @@ contract SpellAction {
 
 
     // decimals & precision
-    uint256 constant THOUSAND = 10 ** 3;
     uint256 constant MILLION  = 10 ** 6;
     uint256 constant WAD      = 10 ** 18;
     uint256 constant RAY      = 10 ** 27;
@@ -66,6 +70,7 @@ contract SpellAction {
     //    https://ipfs.io/ipfs/QmefQMseb3AiTapiAKKexdKHig8wroKuZbmLtPLv4u2YwW
     //
     uint256 constant THREE_PERCENT_RATE = 1000000000937303470807876289;
+    uint256 constant SIX_PERCENT_RATE   = 1000000001847694957439350562;
 
     function execute() external {
         address MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
@@ -82,7 +87,90 @@ contract SpellAction {
         // Add Aave
         //
 
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_AAVE_A).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_AAVE_A).ilk() == ILK_AAVE_A, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_AAVE_A).gem() == AAVE, "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_AAVE_A).dec() == DSTokenAbstract(AAVE).decimals(), "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_AAVE_A).vat() == MCD_VAT, "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_AAVE_A).cat() == MCD_CAT, "flip-cat-not-match");
+        require(FlipAbstract(MCD_FLIP_AAVE_A).ilk() == ILK_AAVE_A, "flip-ilk-not-match");
 
+        // Set the AAVE PIP in the Spotter
+        SpotAbstract(MCD_SPOT).file(ILK_AAVE_A, "pip", PIP_AAVE);
+
+        // Set the AAVE-A Flipper in the Cat
+        CatAbstract(MCD_CAT).file(ILK_AAVE_A, "flip", MCD_FLIP_AAVE_A);
+
+        // Init AAVE-A ilk in Vat & Jug
+        VatAbstract(MCD_VAT).init(ILK_AAVE_A);
+        JugAbstract(MCD_JUG).init(ILK_AAVE_A);
+
+        // Allow AAVE-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_AAVE_A);
+        // Allow the AAVE-A Flipper to reduce the Cat litterbox on deal()
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_AAVE_A);
+        // Allow Cat to kick auctions in AAVE-A Flipper
+        FlipAbstract(MCD_FLIP_AAVE_A).rely(MCD_CAT);
+        // Allow End to yank auctions in AAVE-A Flipper
+        FlipAbstract(MCD_FLIP_AAVE_A).rely(MCD_END);
+        // Allow FlipperMom to access to the AAVE-A Flipper
+        FlipAbstract(MCD_FLIP_AAVE_A).rely(FLIPPER_MOM);
+        // Disallow Cat to kick auctions in AAVE-A Flipper
+        // !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
+        //FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_AAVE_A);
+
+        // Allow OsmMom to access to the AAVE Osm
+        // !!!!!!!! Only if PIP_AAVE = Osm and hasn't been already relied due a previous deployed ilk
+        OsmAbstract(PIP_AAVE).rely(OSM_MOM);
+        // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_AAVE = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk
+        MedianAbstract(OsmAbstract(PIP_AAVE).src()).kiss(PIP_AAVE);
+        // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_AAVE = Osm or PIP_AAVE = Median and hasn't been already whitelisted due a previous deployed ilk
+        OsmAbstract(PIP_AAVE).kiss(MCD_SPOT);
+        // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_AAVE = Osm or PIP_AAVE = Median and hasn't been already whitelisted due a previous deployed ilk
+        OsmAbstract(PIP_AAVE).kiss(MCD_END);
+        // Set AAVE Osm in the OsmMom for new ilk
+        // !!!!!!!! Only if PIP_AAVE = Osm
+        OsmMomAbstract(OSM_MOM).setOsm(ILK_AAVE_A, PIP_AAVE);
+
+        // Set the global debt ceiling
+        VatAbstract(MCD_VAT).file("Line", 1254 * MILLION * RAD);
+        // Set the AAVE-A debt ceiling
+        VatAbstract(MCD_VAT).file(ILK_AAVE_A, "line", 10 * MILLION * RAD);
+        // Set the AAVE-A dust
+        VatAbstract(MCD_VAT).file(ILK_AAVE_A, "dust", 100 * RAD);
+        // Set the Lot size
+        CatAbstract(MCD_CAT).file(ILK_AAVE_A, "dunk", 500 * RAD);
+        // Set the AAVE-A liquidation penalty (e.g. 13% => X = 113)
+        CatAbstract(MCD_CAT).file(ILK_AAVE_A, "chop", 113 * WAD / 100);
+        // Set the AAVE-A stability fee (e.g. 1% = 1000000000315522921573372069)
+        JugAbstract(MCD_JUG).file(ILK_AAVE_A, "duty", SIX_PERCENT_RATE);
+        // Set the AAVE-A percentage between bids (e.g. 3% => X = 103)
+        FlipAbstract(MCD_FLIP_AAVE_A).file("beg", 103 * WAD / 100);
+        // Set the AAVE-A time max time between bids
+        FlipAbstract(MCD_FLIP_AAVE_A).file("ttl", 1 hours);
+        // Set the AAVE-A max auction duration to
+        FlipAbstract(MCD_FLIP_AAVE_A).file("tau", 1 hours);
+        // Set the AAVE-A min collateralization ratio (e.g. 150% => X = 150)
+        SpotAbstract(MCD_SPOT).file(ILK_AAVE_A, "mat", 175 * RAY / 100);
+
+        // Update AAVE-A spot value in Vat
+        SpotAbstract(MCD_SPOT).poke(ILK_AAVE_A);
+
+        // Add new ilk to the IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_AAVE_A);
+
+        // Set gulp amount in faucet on kovan (only use WAD for decimals = 18)
+        FaucetAbstract(FAUCET).setAmt(AAVE, 2500 * WAD);
+
+        // Update the changelog
+        CHANGELOG.setAddress("AAVE", AAVE);
+        CHANGELOG.setAddress("MCD_JOIN_AAVE_A", MCD_JOIN_AAVE_A);
+        CHANGELOG.setAddress("MCD_FLIP_AAVE_A", MCD_FLIP_AAVE_A);
+        CHANGELOG.setAddress("PIP_AAVE", PIP_AAVE);
 
         //
         // Add UniswapV2 WETH/DAI
