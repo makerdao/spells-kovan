@@ -83,6 +83,11 @@ contract SpellAction {
         address ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
         address FAUCET       = CHANGELOG.getAddress("FAUCET");
 
+        // Set the global debt ceiling
+        // + 20 M to fix an error introduced in previous spell not counting the previous 20M of ETH-B (before introducing IAM) 
+        // + 10 M for AAVE-A
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 20 * MILLION * RAD + 10 * MILLION * RAD);
+
         //
         // Add Aave
         //
@@ -136,8 +141,6 @@ contract SpellAction {
         // !!!!!!!! Only if PIP_AAVE = Osm
         OsmMomAbstract(OSM_MOM).setOsm(ILK_AAVE_A, PIP_AAVE);
 
-        // Set the global debt ceiling
-        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 10 * MILLION * RAD);
         // Set the AAVE-A debt ceiling
         VatAbstract(MCD_VAT).file(ILK_AAVE_A, "line", 10 * MILLION * RAD);
         // Set the AAVE-A dust
