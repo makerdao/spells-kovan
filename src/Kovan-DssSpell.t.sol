@@ -59,7 +59,6 @@ contract DssSpellTest is DSTest, DSMath {
 
     struct SystemValues {
         uint256 pot_dsr;
-        uint256 vat_Line;
         uint256 pause_delay;
         uint256 vow_wait;
         uint256 vow_dump;
@@ -186,7 +185,6 @@ contract DssSpellTest is DSTest, DSMath {
         //
         afterSpell = SystemValues({
             pot_dsr:               0,                   // In basis points
-            vat_Line:              1254 * MILLION,      // In whole Dai units
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
             vow_dump:              2,                   // In whole Dai units
@@ -617,8 +615,6 @@ contract DssSpellTest is DSTest, DSMath {
 
         {
         // Line values in RAD
-        uint normalizedLine = values.vat_Line * RAD;
-        assertEq(vat.Line(), normalizedLine);
         assertTrue(
             (vat.Line() >= RAD && vat.Line() < 100 * BILLION * RAD) ||
             vat.Line() == 0
@@ -704,7 +700,7 @@ contract DssSpellTest is DSTest, DSMath {
             (,,, uint256 line, uint256 dust) = vat.ilks(ilk);
             // Convert whole Dai units to expected RAD
             uint256 normalizedTestLine = values.collaterals[ilk].line * RAD;
-            sumlines += values.collaterals[ilk].line;
+            sumlines += line;
             (uint256 aL_line, uint256 aL_gap, uint256 aL_ttl,,) = autoLine.ilks(ilk);
             if (!values.collaterals[ilk].aL_enabled) {
                 assertTrue(aL_line == 0);
@@ -763,7 +759,7 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(join.wards(address(pauseProxy)), 1); // Check pause_proxy ward
             }
         }
-        assertEq(sumlines, values.vat_Line);
+        assertEq(sumlines, vat.Line());
     }
 
     function testSpellIsCast() public {
