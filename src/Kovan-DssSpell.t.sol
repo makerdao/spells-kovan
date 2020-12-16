@@ -105,6 +105,14 @@ contract DssSpellTest is DSTest, DSMath {
 
     // Spell-specific addresses
 
+    // AAVE-A specific
+    DSTokenAbstract       aave = DSTokenAbstract(0x7B339a530Eed72683F56868deDa87BbC64fD9a12);
+    GemJoinAbstract  joinAAVEA = GemJoinAbstract(0x9f1Ed3219035e6bDb19E0D95d316c7c39ad302EC);
+    FlipAbstract     flipAAVEA = FlipAbstract(0x3c84d572749096b67e4899A95430201DF79b8403);
+    OsmAbstract        pipAAVE = OsmAbstract(0xd2d9B1355Ea96567E7D6C7A6945f5c7ec8150Cc9);
+    MedianAbstract    medAAVEA = MedianAbstract(0xad0421CE93652857fB0f75c8eB3e7DDB8C8AFAaa);
+
+
     DssSpell spell;
 
     // CHEAT_CODE = 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D
@@ -178,7 +186,7 @@ contract DssSpellTest is DSTest, DSMath {
         //
         afterSpell = SystemValues({
             pot_dsr:               0,                   // In basis points
-            vat_Line:              1244 * MILLION,      // In whole Dai units
+            vat_Line:              1254 * MILLION,      // In whole Dai units
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
             vow_dump:              2,                   // In whole Dai units
@@ -189,7 +197,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             20                   // Num expected in system
+            ilk_count:             21                   // Num expected in system
         });
 
         //
@@ -515,6 +523,22 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          1 hours,
             liquidations: 1
         });
+        afterSpell.collaterals["AAVE-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
+            line:         10 * MILLION,
+            dust:         100,
+            pct:          600,
+            chop:         1300,
+            dunk:         500,
+            mat:          17500,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
     }
 
     function vote() private {
@@ -774,7 +798,72 @@ contract DssSpellTest is DSTest, DSMath {
 
     // Test any Integrations
 
-    // TODO test Aave integration
+    // Aave integration
+    function testSpellIsCast_AAVE_INTEGRATION() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        pipAAVE.poke();
+        hevm.warp(now + 3601);
+        pipAAVE.poke();
+        spot.poke("AAVE-A");
+
+        // Check faucet amount
+        uint256 faucetAmount = faucet.amt(address(aave));
+        uint256 faucetAmountWad = faucetAmount * (10 ** (18 - aave.decimals()));
+        assertTrue(faucetAmount > 0);
+        faucet.gulp(address(aave));
+        assertEq(aave.balanceOf(address(this)), faucetAmount);
+
+        // Check median matches pip.src()
+        assertEq(pipAAVE.src(), address(medAAVEA));
+
+        // Authorization
+        assertEq(joinAAVEA.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(joinAAVEA)), 1);
+        assertEq(flipAAVEA.wards(address(end)), 1);
+        assertEq(flipAAVEA.wards(address(flipMom)), 1);
+        assertEq(pipAAVE.wards(address(osmMom)), 1);
+        assertEq(pipAAVE.bud(address(spot)), 1);
+        assertEq(pipAAVE.bud(address(end)), 1);
+        assertEq(MedianAbstract(pipAAVE.src()).bud(address(pipAAVE)), 1);
+
+        // Join to adapter
+        assertEq(vat.gem("AAVE-A", address(this)), 0);
+        aave.approve(address(joinAAVEA), faucetAmount);
+        joinAAVEA.join(address(this), faucetAmount);
+        assertEq(aave.balanceOf(address(this)), 0);
+        assertEq(vat.gem("AAVE-A", address(this)), faucetAmountWad);
+
+        // Deposit collateral, generate DAI
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob("AAVE-A", address(this), address(this), address(this), int(faucetAmountWad), int(100 * WAD));
+        assertEq(vat.gem("AAVE-A", address(this)), 0);
+        assertEq(vat.dai(address(this)), 100 * RAD);
+
+        // Payback DAI, withdraw collateral
+        vat.frob("AAVE-A", address(this), address(this), address(this), -int(faucetAmountWad), -int(100 * WAD));
+        assertEq(vat.gem("AAVE-A", address(this)), faucetAmountWad);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        joinAAVEA.exit(address(this), faucetAmount);
+        assertEq(aave.balanceOf(address(this)), faucetAmount);
+        assertEq(vat.gem("AAVE-A", address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        aave.approve(address(joinAAVEA), faucetAmount);
+        joinAAVEA.join(address(this), faucetAmount);
+        (,,uint256 spotV,,) = vat.ilks("AAVE-A");
+        // dart max amount of DAI
+        vat.frob("AAVE-A", address(this), address(this), address(this), int(faucetAmountWad), int(mul(faucetAmount, spotV) / RAY));
+        hevm.warp(now + 1);
+        jug.drip("AAVE-A");
+        assertEq(flipAAVEA.kicks(), 0);
+        cat.bite("AAVE-A", address(this));
+        assertEq(flipAAVEA.kicks(), 1);
+    }
 
     // TODO test Uni lp integration
 
@@ -794,5 +883,4 @@ contract DssSpellTest is DSTest, DSMath {
         // Fail if cast is too expensive
         assertTrue(totalGas <= 8 * MILLION);
     }
-
 }
