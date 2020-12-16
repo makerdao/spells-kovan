@@ -49,7 +49,11 @@ contract SpellAction {
     address constant PIP_AAVE = 0xd2d9B1355Ea96567E7D6C7A6945f5c7ec8150Cc9;
     bytes32 constant ILK_AAVE_A = "AAVE-A";
 
-    // TODO UNI-V2-DAI-WETH
+    address constant MCD_JOIN_UNIV2DAIETH_A = 0xd61b8EB7f4890F25BD6016bC3FFbB8f0e08A55FF;
+    address constant MCD_FLIP_UNIV2DAIETH_A = 0x0B6C3512C8D4300d566b286FC4a554dAC217AaA6;
+    address constant PIP_UNIV2DAIETH        = 0x1ae7d6891a5fdaafad2fe6d894bffea48f8b2454;
+    address constant UNIV2DAIETH            = 0xFD5608515A47C37afbA68960c1916b79af9491D0;
+    bytes32 constant ILK_UNIV2DAIETH_A      = "UNIV2DAIETH-A";
 
     // TODO MIP21
 
@@ -63,7 +67,7 @@ contract SpellAction {
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
     // To check this yourself, use the following rate calculation (example 8%):
-    //
+    //co
     // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
     //
     // A table of rates can be found at
@@ -71,6 +75,7 @@ contract SpellAction {
     //
     uint256 constant THREE_PERCENT_RATE = 1000000000937303470807876289;
     uint256 constant SIX_PERCENT_RATE   = 1000000001847694957439350562;
+    uint256 constant ONE_PERCENT_RATE   = 1000000000315522921573372069;
 
     function execute() external {
         address MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
@@ -176,8 +181,92 @@ contract SpellAction {
         CHANGELOG.setAddress("PIP_AAVE", PIP_AAVE);
 
         //
-        // Add UniswapV2 WETH/DAI
+        // Add UniswapV2 ETH/DAI
         //
+
+        // Sanity checks
+        require(GemJoinAbstract(MCD_JOIN_UNIV2DAIETH_A).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_UNIV2DAIETH_A).ilk() == ILK_UNIV2DAIETH_A, "join-ilk-not-match");
+        require(GemJoinAbstract(MCD_JOIN_UNIV2DAIETH_A).gem() == UNIV2DAIETH, "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_UNIV2DAIETH_A).dec() == DSTokenAbstract(UNIV2DAIETH).decimals(), "join-dec-not-match");
+        require(FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).vat() == MCD_VAT, "flip-vat-not-match");
+        require(FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).cat() == MCD_CAT, "flip-cat-not-match");
+        require(FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).ilk() == ILK_UNIV2DAIETH_A, "flip-ilk-not-match");
+
+        // Set the UNIV2DAIETH PIP in the Spotter
+        SpotAbstract(MCD_SPOT).file(ILK_UNIV2DAIETH_A, "pip", PIP_UNIV2DAIETH);
+
+        // Set the UNIV2DAIETH-A Flipper in the Cat
+        CatAbstract(MCD_CAT).file(ILK_UNIV2DAIETH_A, "flip", MCD_FLIP_UNIV2DAIETH_A);
+
+        // Init UNIV2DAIETH-A ilk in Vat & Jug
+        VatAbstract(MCD_VAT).init(ILK_UNIV2DAIETH_A);
+        JugAbstract(MCD_JUG).init(ILK_UNIV2DAIETH_A);
+
+        // Allow UNIV2DAIETH-A Join to modify Vat registry
+        VatAbstract(MCD_VAT).rely(MCD_JOIN_UNIV2DAIETH_A);
+        // Allow the UNIV2DAIETH-A Flipper to reduce the Cat litterbox on deal()
+        CatAbstract(MCD_CAT).rely(MCD_FLIP_UNIV2DAIETH_A);
+        // Allow Cat to kick auctions in UNIV2DAIETH-A Flipper
+        FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).rely(MCD_CAT);
+        // Allow End to yank auctions in UNIV2DAIETH-A Flipper
+        FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).rely(MCD_END);
+        // Allow FlipperMom to access to the UNIV2DAIETH-A Flipper
+        FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).rely(FLIPPER_MOM);
+        // Disallow Cat to kick auctions in UNIV2DAIETH-A Flipper
+        // !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
+        //FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_UNIV2DAIETH_A);
+
+        // Allow OsmMom to access to the UNIV2DAIETH Osm
+        // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm and hasn't been already relied due a previous deployed ilk
+        OsmAbstract(PIP_UNIV2DAIETH).rely(OSM_MOM);
+        // Whitelist Osm to read the Median data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm, its src is a Median and hasn't been already whitelisted due a previous deployed ilk
+        MedianAbstract(OsmAbstract(PIP_UNIV2DAIETH).orb0()).kiss(PIP_UNIV2DAIETH);
+        MedianAbstract(OsmAbstract(PIP_UNIV2DAIETH).orb1()).kiss(PIP_UNIV2DAIETH);
+        // Whitelist Spotter to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm or PIP_UNIV2DAIETH = Median and hasn't been already whitelisted due a previous deployed ilk
+        OsmAbstract(PIP_UNIV2DAIETH).kiss(MCD_SPOT);
+        // Whitelist End to read the Osm data (only necessary if it is the first time the token is being added to an ilk)
+        // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm or PIP_UNIV2DAIETH = Median and hasn't been already whitelisted due a previous deployed ilk
+        OsmAbstract(PIP_UNIV2DAIETH).kiss(MCD_END);
+        // Set UNIV2DAIETH Osm in the OsmMom for new ilk
+        // !!!!!!!! Only if PIP_UNIV2DAIETH = Osm
+        OsmMomAbstract(OSM_MOM).setOsm(ILK_UNIV2DAIETH_A, PIP_UNIV2DAIETH);
+
+        // Set the UNIV2DAIETH-A debt ceiling
+        VatAbstract(MCD_VAT).file(ILK_UNIV2DAIETH_A, "line", 3 * MILLION * RAD);
+        // Set the UNIV2DAIETH-A dust
+        VatAbstract(MCD_VAT).file(ILK_UNIV2DAIETH_A, "dust", 500 * RAD);
+        // Set the Lot size
+        CatAbstract(MCD_CAT).file(ILK_UNIV2DAIETH_A, "dunk", 500 * RAD);
+        // Set the UNIV2DAIETH-A liquidation penalty (e.g. 13% => X = 113)
+        CatAbstract(MCD_CAT).file(ILK_UNIV2DAIETH_A, "chop", 113 * WAD / 100);
+        // Set the UNIV2DAIETH-A stability fee (e.g. 1% = 1000000000315522921573372069)
+        JugAbstract(MCD_JUG).file(ILK_UNIV2DAIETH_A, "duty", ONE_PERCENT_RATE);
+        // Set the UNIV2DAIETH-A percentage between bids (e.g. 3% => X = 103)
+        FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).file("beg", 103 * WAD / 100);
+        // Set the UNIV2DAIETH-A time max time between bids
+        FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).file("ttl", 1 hours);
+        // Set the UNIV2DAIETH-A max auction duration to
+        FlipAbstract(MCD_FLIP_UNIV2DAIETH_A).file("tau", 1 hours);
+        // Set the UNIV2DAIETH-A min collateralization ratio (e.g. 150% => X = 150)
+        SpotAbstract(MCD_SPOT).file(ILK_UNIV2DAIETH_A, "mat", 125 * RAY / 100);
+
+        // Update UNIV2DAIETH-A spot value in Vat
+        SpotAbstract(MCD_SPOT).poke(ILK_UNIV2DAIETH_A);
+
+        // Add new ilk to the IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_UNIV2DAIETH_A);
+
+        // Set gulp amount in faucet on kovan (only use WAD for decimals = 18)
+        FaucetAbstract(FAUCET).setAmt(UNIV2DAIETH, 2500 * WAD);
+
+        // Update the changelog
+        CHANGELOG.setAddress("UNIV2DAIETH", UNIV2DAIETH);
+        CHANGELOG.setAddress("MCD_JOIN_UNIV2DAIETH_A", MCD_JOIN_UNIV2DAIETH_A);
+        CHANGELOG.setAddress("MCD_FLIP_UNIV2DAIETH_A", MCD_FLIP_UNIV2DAIETH_A);
+        CHANGELOG.setAddress("PIP_UNIV2DAIETH", PIP_UNIV2DAIETH);
 
 
         //
