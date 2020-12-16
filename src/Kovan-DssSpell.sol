@@ -137,7 +137,7 @@ contract SpellAction {
         OsmMomAbstract(OSM_MOM).setOsm(ILK_AAVE_A, PIP_AAVE);
 
         // Set the global debt ceiling
-        VatAbstract(MCD_VAT).file("Line", 1254 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 10 * MILLION * RAD);
         // Set the AAVE-A debt ceiling
         VatAbstract(MCD_VAT).file(ILK_AAVE_A, "line", 10 * MILLION * RAD);
         // Set the AAVE-A dust
