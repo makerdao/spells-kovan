@@ -105,10 +105,10 @@ contract DssSpellTest is DSTest, DSMath {
     // Spell-specific addresses
 
     // AAVE-A specific
-    DSTokenAbstract       aave = DSTokenAbstract(0x7B339a530Eed72683F56868deDa87BbC64fD9a12);
-    GemJoinAbstract  joinAAVEA = GemJoinAbstract(0x9f1Ed3219035e6bDb19E0D95d316c7c39ad302EC);
-    FlipAbstract     flipAAVEA = FlipAbstract(0x3c84d572749096b67e4899A95430201DF79b8403);
-    OsmAbstract        pipAAVE = OsmAbstract(0xd2d9B1355Ea96567E7D6C7A6945f5c7ec8150Cc9);
+    DSTokenAbstract       aave = DSTokenAbstract(      addr.addr("AAVE"));
+    GemJoinAbstract  joinAAVEA = GemJoinAbstract(      addr.addr("MCD_JOIN_AAVE_A"));
+    FlipAbstract     flipAAVEA = FlipAbstract(         addr.addr("MCD_FLIP_AAVE_A"));
+    OsmAbstract        pipAAVE = OsmAbstract(          addr.addr("PIP_AAVE"));
     MedianAbstract    medAAVEA = MedianAbstract(0xad0421CE93652857fB0f75c8eB3e7DDB8C8AFAaa);
 
 
