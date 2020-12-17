@@ -44,11 +44,11 @@ contract SpellAction {
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
     // AAVE-A
-    address constant AAVE = 0x7B339a530Eed72683F56868deDa87BbC64fD9a12;
-    address constant MCD_JOIN_AAVE_A = 0x9f1Ed3219035e6bDb19E0D95d316c7c39ad302EC;
-    address constant MCD_FLIP_AAVE_A = 0x3c84d572749096b67e4899A95430201DF79b8403;
-    address constant PIP_AAVE = 0xd2d9B1355Ea96567E7D6C7A6945f5c7ec8150Cc9;
-    bytes32 constant ILK_AAVE_A = "AAVE-A";
+    address constant AAVE                   = 0x7B339a530Eed72683F56868deDa87BbC64fD9a12;
+    address constant MCD_JOIN_AAVE_A        = 0x9f1Ed3219035e6bDb19E0D95d316c7c39ad302EC;
+    address constant MCD_FLIP_AAVE_A        = 0x3c84d572749096b67e4899A95430201DF79b8403;
+    address constant PIP_AAVE               = 0xd2d9B1355Ea96567E7D6C7A6945f5c7ec8150Cc9;
+    bytes32 constant ILK_AAVE_A             = "AAVE-A";
 
     address constant MCD_JOIN_UNIV2DAIETH_A = 0x03f18d97D25c13FecB15aBee143276D3bD2742De;
     address constant MCD_FLIP_UNIV2DAIETH_A = 0x0B6C3512C8D4300d566b286FC4a554dAC217AaA6;
@@ -266,8 +266,6 @@ contract SpellAction {
         CHANGELOG.setAddress("MCD_JOIN_UNIV2DAIETH_A", MCD_JOIN_UNIV2DAIETH_A);
         CHANGELOG.setAddress("MCD_FLIP_UNIV2DAIETH_A", MCD_FLIP_UNIV2DAIETH_A);
         CHANGELOG.setAddress("PIP_UNIV2DAIETH", PIP_UNIV2DAIETH);
-
-
 
         // Bump version
         CHANGELOG.setVersion("1.2.2");
