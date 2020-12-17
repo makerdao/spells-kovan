@@ -905,7 +905,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(lpPip.wards(address(osmMom)), 1);
         assertEq(lpPip.bud(address(spot)), 1);
         assertEq(lpPip.bud(address(end)), 1);
-        assertEq(MedianAbstract(lpPip.src()).bud(address(lpPip)), 1);
+        assertEq(MedianAbstract(lpPip.orb1()).bud(address(lpPip)), 1);
 
         // Join to adapter
         uint256 amount = 100 ether;
