@@ -56,8 +56,6 @@ contract SpellAction {
     address constant UNIV2DAIETH            = 0xB10cf58E08b94480fCb81d341A63295eBb2062C2;
     bytes32 constant ILK_UNIV2DAIETH_A      = "UNIV2DAIETH-A";
 
-    // TODO MIP21
-
 
     // decimals & precision
     uint256 constant MILLION  = 10 ** 6;
