@@ -53,7 +53,7 @@ contract SpellAction {
     address constant MCD_JOIN_UNIV2DAIETH_A = 0x03f18d97D25c13FecB15aBee143276D3bD2742De;
     address constant MCD_FLIP_UNIV2DAIETH_A = 0x0B6C3512C8D4300d566b286FC4a554dAC217AaA6;
     address constant PIP_UNIV2DAIETH        = 0x1AE7D6891a5fdAafAd2FE6D894bffEa48F8b2454;
-    address constant UNIV2DAIETH            = 0xb10cf58e08b94480fcb81d341a63295ebb2062c2;
+    address constant UNIV2DAIETH            = 0xB10cf58E08b94480fCb81d341A63295eBb2062C2;
     bytes32 constant ILK_UNIV2DAIETH_A      = "UNIV2DAIETH-A";
 
     // TODO MIP21
