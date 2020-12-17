@@ -80,27 +80,36 @@ contract DssSpellTest is DSTest, DSMath {
     Addresses addr  = new Addresses();
 
     // KOVAN ADDRESSES
-    ChainlogAbstract changelog   = ChainlogAbstract(   addr.addr("CHANGELOG"));
-    DSPauseAbstract      pause   = DSPauseAbstract(    addr.addr("MCD_PAUSE"));
-    address         pauseProxy   =                     addr.addr("MCD_PAUSE_PROXY");
-    DSChiefAbstract      chief   = DSChiefAbstract(    addr.addr("MCD_ADM"));
-    VatAbstract            vat   = VatAbstract(        addr.addr("MCD_VAT"));
-    CatAbstract            cat   = CatAbstract(        addr.addr("MCD_CAT"));
-    VowAbstract            vow   = VowAbstract(        addr.addr("MCD_VOW"));
-    PotAbstract            pot   = PotAbstract(        addr.addr("MCD_POT"));
-    JugAbstract            jug   = JugAbstract(        addr.addr("MCD_JUG"));
-    SpotAbstract          spot   = SpotAbstract(       addr.addr("MCD_SPOT"));
+    ChainlogAbstract changelog   = ChainlogAbstract(    addr.addr("CHANGELOG"));
+    DSPauseAbstract      pause   = DSPauseAbstract(     addr.addr("MCD_PAUSE"));
+    address         pauseProxy   =                      addr.addr("MCD_PAUSE_PROXY");
+    DSChiefAbstract      chief   = DSChiefAbstract(     addr.addr("MCD_ADM"));
+    VatAbstract            vat   = VatAbstract(         addr.addr("MCD_VAT"));
+    CatAbstract            cat   = CatAbstract(         addr.addr("MCD_CAT"));
+    VowAbstract            vow   = VowAbstract(         addr.addr("MCD_VOW"));
+    PotAbstract            pot   = PotAbstract(         addr.addr("MCD_POT"));
+    JugAbstract            jug   = JugAbstract(         addr.addr("MCD_JUG"));
+    SpotAbstract          spot   = SpotAbstract(        addr.addr("MCD_SPOT"));
 
-    DSTokenAbstract        gov   = DSTokenAbstract(    addr.addr("MCD_GOV"));
-    EndAbstract            end   = EndAbstract(        addr.addr("MCD_END"));
-    IlkRegistryAbstract    reg   = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
+    DSTokenAbstract        gov   = DSTokenAbstract(     addr.addr("MCD_GOV"));
+    EndAbstract            end   = EndAbstract(         addr.addr("MCD_END"));
+    IlkRegistryAbstract    reg   = IlkRegistryAbstract( addr.addr("ILK_REGISTRY"));
 
-    OsmMomAbstract      osmMom   = OsmMomAbstract(     addr.addr("OSM_MOM"));
-    FlipperMomAbstract flipMom   = FlipperMomAbstract( addr.addr("FLIPPER_MOM"));
-    DssAutoLineAbstract autoLine = DssAutoLineAbstract(addr.addr("MCD_IAM_AUTO_LINE"));
+    OsmMomAbstract      osmMom   = OsmMomAbstract(      addr.addr("OSM_MOM"));
+    FlipperMomAbstract flipMom   = FlipperMomAbstract(  addr.addr("FLIPPER_MOM"));
+    DssAutoLineAbstract autoLine = DssAutoLineAbstract( addr.addr("MCD_IAM_AUTO_LINE"));
 
     // Faucet
-    FaucetAbstract      faucet   = FaucetAbstract(     addr.addr("FAUCET"));
+    FaucetAbstract      faucet   = FaucetAbstract(      addr.addr("FAUCET"));
+
+    // UNIV2DAIETH-A specific
+    DSTokenAbstract     lp = DSTokenAbstract(addr.addr("UNIV2DAIETH"));
+    GemJoinAbstract lpJoin = GemJoinAbstract(addr.addr("MCD_JOIN_UNIV2DAIETH_A"));
+    FlipAbstract    lpFlip = FlipAbstract(   addr.addr("MCD_FLIP_UNIV2DAIETH_A"));
+    LPOsmAbstract    lpPip = LPOsmAbstract(  addr.addr("PIP_UNIV2DAIETH"));
+    MedianAbstract    orb0 = MedianAbstract( lpPip.orb0());
+    MedianAbstract    orb1 = MedianAbstract( lpPip.orb0());
+
 
     // Spell-specific addresses
 
@@ -195,7 +204,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             21                   // Num expected in system
+            ilk_count:             22                   // Num expected in system
         });
 
         //
@@ -537,6 +546,22 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          1 hours,
             liquidations: 1
         });
+        afterSpell.collaterals["UNIV2DAIETH-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
+            line:         3 * MILLION,
+            dust:         100,
+            pct:          100,
+            chop:         1300,
+            dunk:         500,
+            mat:          12500,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
     }
 
     function vote() private {
@@ -853,7 +878,77 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flipAAVEA.kicks(), 1);
     }
 
-    // TODO test Uni lp integration
+    // Test any Integrations
+
+    // TODO test Aave integration
+
+    function testSpellIsCast_UNIV2DAIETH_INTEGRATION() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
+
+        bytes32 ilk = "UNIV2DAIETH-A";
+
+        lpPip.poke();
+        hevm.warp(now + 3601);
+        lpPip.poke();
+        spot.poke(ilk);
+
+        // Check median matches pip.src()
+        assertEq(lpPip.src(), address(lp)); // TODO: Check orbs
+
+        // Authorization
+        assertEq(lpJoin.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(lpJoin)), 1);
+        assertEq(lpFlip.wards(address(end)), 1);
+        assertEq(lpFlip.wards(address(flipMom)), 1);
+        assertEq(lpPip.wards(address(osmMom)), 1);
+        assertEq(lpPip.bud(address(spot)), 1);
+        assertEq(lpPip.bud(address(end)), 1);
+        assertEq(MedianAbstract(lpPip.orb1()).bud(address(lpPip)), 1);
+
+        // Join to adapter
+        uint256 amount = 100 ether;
+        hevm.store(
+            address(lp),
+            keccak256(abi.encode(address(this), uint256(1))),
+            bytes32(amount)
+        );
+        assertEq(lp.balanceOf(address(this)), amount);
+        assertEq(vat.gem(ilk, address(this)), 0);
+        lp.approve(address(lpJoin), amount);
+        lpJoin.join(address(this), amount);
+        assertEq(lp.balanceOf(address(this)), 0);
+        assertEq(vat.gem(ilk, address(this)), amount);
+
+        // Deposit collateral, generate DAI
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob(ilk, address(this), address(this), address(this), int(amount), int(100 * WAD));
+        assertEq(vat.gem(ilk, address(this)), 0);
+        assertEq(vat.dai(address(this)), 100 * RAD);
+
+        // Payback DAI, withdraw collateral
+        vat.frob(ilk, address(this), address(this), address(this), -int(amount), -int(100 * WAD));
+        assertEq(vat.gem(ilk, address(this)), amount);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        lpJoin.exit(address(this), amount);
+        assertEq(lp.balanceOf(address(this)), amount);
+        assertEq(vat.gem(ilk, address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        lp.approve(address(lpJoin), amount);
+        lpJoin.join(address(this), amount);
+        (,,uint256 spotV,,) = vat.ilks(ilk);
+        // dart max amount of DAI
+        vat.frob(ilk, address(this), address(this), address(this), int(amount), int(mul(amount, spotV) / RAY));
+        hevm.warp(now + 1);
+        jug.drip(ilk);
+        assertEq(lpFlip.kicks(), 0);
+        cat.bite(ilk, address(this));
+        assertEq(lpFlip.kicks(), 1);
+    }
 
     function testCastCost() public {
         vote();
