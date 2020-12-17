@@ -90,9 +90,10 @@ contract SpellAction {
         address FAUCET       = CHANGELOG.getAddress("FAUCET");
 
         // Set the global debt ceiling
-        // + 20 M to fix an error introduced in previous spell not counting the previous 20M of ETH-B (before introducing IAM) 
+        // + 20 M to fix an error introduced in previous spell not counting the previous 20M of ETH-B (before introducing IAM)
         // + 10 M for AAVE-A
-        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 20 * MILLION * RAD + 10 * MILLION * RAD);
+        // +  3 M for UNIV2DAIETH-A
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 23 * MILLION * RAD + 10 * MILLION * RAD);
 
         //
         // Add Aave
