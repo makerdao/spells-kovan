@@ -90,9 +90,10 @@ contract SpellAction {
         address FAUCET       = CHANGELOG.getAddress("FAUCET");
 
         // Set the global debt ceiling
-        // + 20 M to fix an error introduced in previous spell not counting the previous 20M of ETH-B (before introducing IAM) 
+        // + 20 M to fix an error introduced in previous spell not counting the previous 20M of ETH-B (before introducing IAM)
         // + 10 M for AAVE-A
-        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 20 * MILLION * RAD + 10 * MILLION * RAD);
+        // +  3 M for UNIV2DAIETH-A
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 23 * MILLION * RAD + 10 * MILLION * RAD);
 
         //
         // Add Aave
@@ -259,8 +260,8 @@ contract SpellAction {
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_UNIV2DAIETH_A);
 
-        // Set gulp amount in faucet on kovan (only use WAD for decimals = 18)
-        FaucetAbstract(FAUCET).setAmt(UNIV2DAIETH, 2500 * WAD);
+        // Set gulp amount in faucet on kovan (only use WAD for decimals = 18) NO FAUCET FOR LP TOKENS
+        // FaucetAbstract(FAUCET).setAmt(UNIV2DAIETH, 2500 * WAD);
 
         // Update the changelog
         CHANGELOG.setAddress("UNIV2DAIETH", UNIV2DAIETH);

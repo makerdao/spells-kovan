@@ -204,7 +204,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             21                   // Num expected in system
+            ilk_count:             22                   // Num expected in system
         });
 
         //
@@ -882,72 +882,73 @@ contract DssSpellTest is DSTest, DSMath {
 
     // TODO test Aave integration
 
-    function testSpellIsCast_UNI_INTEGRATION() public {
-       vote();
-       scheduleWaitAndCast();
-       assertTrue(spell.done());
+    function testSpellIsCast_UNIV2DAIETH_INTEGRATION() public {
+        vote();
+        scheduleWaitAndCast();
+        assertTrue(spell.done());
 
-       bytes32 ilk = "UNIV2DAIETH-A";
+        bytes32 ilk = "UNIV2DAIETH-A";
 
-       lpPip.poke();
-       hevm.warp(now + 3601);
-       lpPip.poke();
-       spot.poke(ilk);
+        lpPip.poke();
+        hevm.warp(now + 3601);
+        lpPip.poke();
+        spot.poke(ilk);
 
-       // Check faucet amount
-       uint256 faucetAmount = faucet.amt(address(lp));
-       assertTrue(faucetAmount > 0);
-       faucet.gulp(address(lp));
-       assertEq(lp.balanceOf(address(this)), faucetAmount);
+        // Check median matches pip.src()
+        assertEq(lpPip.src(), address(lp)); // TODO: Check orbs
 
-       // Check median matches pip.src()
-       assertEq(lpPip.src(), address(lp)); // TODO: Check orbs
+        // Authorization
+        assertEq(lpJoin.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(lpJoin)), 1);
+        assertEq(lpFlip.wards(address(end)), 1);
+        assertEq(lpFlip.wards(address(flipMom)), 1);
+        assertEq(lpPip.wards(address(osmMom)), 1);
+        assertEq(lpPip.bud(address(spot)), 1);
+        assertEq(lpPip.bud(address(end)), 1);
+        assertEq(MedianAbstract(lpPip.src()).bud(address(lpPip)), 1);
 
-       // Authorization
-       assertEq(lpJoin.wards(pauseProxy), 1);
-       assertEq(vat.wards(address(lpJoin)), 1);
-       assertEq(lpFlip.wards(address(end)), 1);
-       assertEq(lpFlip.wards(address(flipMom)), 1);
-       assertEq(lpPip.wards(address(osmMom)), 1);
-       assertEq(lpPip.bud(address(spot)), 1);
-       assertEq(lpPip.bud(address(end)), 1);
-       assertEq(MedianAbstract(lpPip.src()).bud(address(lpPip)), 1);
+        // Join to adapter
+        uint256 amount = 100 ether;
+        hevm.store(
+            address(lp),
+            keccak256(abi.encode(address(this), uint256(1))),
+            bytes32(amount)
+        );
+        assertEq(lp.balanceOf(address(this)), amount);
+        assertEq(vat.gem(ilk, address(this)), 0);
+        lp.approve(address(lpJoin), amount);
+        lpJoin.join(address(this), amount);
+        assertEq(lp.balanceOf(address(this)), 0);
+        assertEq(vat.gem(ilk, address(this)), amount);
 
-       // Join to adapter
-       assertEq(vat.gem(ilk, address(this)), 0);
-       lp.approve(address(lpJoin), faucetAmount);
-       lpJoin.join(address(this), faucetAmount);
-       assertEq(lp.balanceOf(address(this)), 0);
-       assertEq(vat.gem(ilk, address(this)), faucetAmount);
+        // Deposit collateral, generate DAI
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob(ilk, address(this), address(this), address(this), int(amount), int(100 * WAD));
+        assertEq(vat.gem(ilk, address(this)), 0);
+        assertEq(vat.dai(address(this)), 100 * RAD);
 
-       // Deposit collateral, generate DAI
-       assertEq(vat.dai(address(this)), 0);
-       vat.frob(ilk, address(this), address(this), address(this), int(faucetAmount), int(100 * WAD));
-       assertEq(vat.gem(ilk, address(this)), 0);
-       assertEq(vat.dai(address(this)), 100 * RAD);
+        // Payback DAI, withdraw collateral
+        vat.frob(ilk, address(this), address(this), address(this), -int(amount), -int(100 * WAD));
+        assertEq(vat.gem(ilk, address(this)), amount);
+        assertEq(vat.dai(address(this)), 0);
 
-       // Payback DAI, withdraw collateral
-       vat.frob(ilk, address(this), address(this), address(this), -int(faucetAmount), -int(100 * WAD));
-       assertEq(vat.gem(ilk, address(this)), faucetAmount);
-       assertEq(vat.dai(address(this)), 0);
+        // Withdraw from adapter
+        lpJoin.exit(address(this), amount);
+        assertEq(lp.balanceOf(address(this)), amount);
+        assertEq(vat.gem(ilk, address(this)), 0);
 
-       // Withdraw from adapter
-       lpJoin.exit(address(this), faucetAmount);
-       assertEq(lp.balanceOf(address(this)), faucetAmount);
-       assertEq(vat.gem(ilk, address(this)), 0);
-
-       // Generate new DAI to force a liquidation
-       lp.approve(address(lpJoin), faucetAmount);
-       lpJoin.join(address(this), faucetAmount);
-       (,,uint256 spotV,,) = vat.ilks(ilk);
-       // dart max amount of DAI
-       vat.frob(ilk, address(this), address(this), address(this), int(faucetAmount), int(mul(faucetAmount, spotV) / RAY));
-       hevm.warp(now + 1);
-       jug.drip(ilk);
-       assertEq(lpFlip.kicks(), 0);
-       cat.bite(ilk, address(this));
-       assertEq(lpFlip.kicks(), 1);
-   }
+        // Generate new DAI to force a liquidation
+        lp.approve(address(lpJoin), amount);
+        lpJoin.join(address(this), amount);
+        (,,uint256 spotV,,) = vat.ilks(ilk);
+        // dart max amount of DAI
+        vat.frob(ilk, address(this), address(this), address(this), int(amount), int(mul(amount, spotV) / RAY));
+        hevm.warp(now + 1);
+        jug.drip(ilk);
+        assertEq(lpFlip.kicks(), 0);
+        cat.bite(ilk, address(this));
+        assertEq(lpFlip.kicks(), 1);
+    }
 
     function testCastCost() public {
         vote();
