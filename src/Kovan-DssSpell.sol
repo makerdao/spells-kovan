@@ -73,7 +73,6 @@ contract SpellAction {
     //    https://ipfs.io/ipfs/QmefQMseb3AiTapiAKKexdKHig8wroKuZbmLtPLv4u2YwW
     //
     uint256 constant ONE_PERCENT_RATE   = 1000000000315522921573372069;
-    uint256 constant THREE_PERCENT_RATE = 1000000000937303470807876289;
     uint256 constant SIX_PERCENT_RATE   = 1000000001847694957439350562;
 
     function execute() external {
@@ -91,7 +90,7 @@ contract SpellAction {
         // + 20 M to fix an error introduced in previous spell not counting the previous 20M of ETH-B (before introducing IAM)
         // + 10 M for AAVE-A
         // +  3 M for UNIV2DAIETH-A
-        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 23 * MILLION * RAD + 10 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 20 * MILLION * RAD + 10 * MILLION * RAD + 3 * MILLION * RAD);
 
         //
         // Add Aave
