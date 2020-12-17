@@ -14,6 +14,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 pragma solidity 0.6.11;
 
 import "ds-math/math.sol";
@@ -36,9 +37,9 @@ interface SpellLike {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0);
+    address constant KOVAN_SPELL = address(0xCd27Fe5De52fF7Fe31cFF0C975B9a5c72311C459);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 0;
+    uint256 constant SPELL_CREATED = 1608232308;
 
     struct CollateralValues {
         bool aL_enabled;
