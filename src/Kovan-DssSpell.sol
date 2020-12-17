@@ -50,10 +50,10 @@ contract SpellAction {
     address constant PIP_AAVE = 0xd2d9B1355Ea96567E7D6C7A6945f5c7ec8150Cc9;
     bytes32 constant ILK_AAVE_A = "AAVE-A";
 
-    address constant MCD_JOIN_UNIV2DAIETH_A = 0xd61b8EB7f4890F25BD6016bC3FFbB8f0e08A55FF;
+    address constant MCD_JOIN_UNIV2DAIETH_A = 0x7e48A923d25C3bA481BF688DF3423E52760140f7;
     address constant MCD_FLIP_UNIV2DAIETH_A = 0x0B6C3512C8D4300d566b286FC4a554dAC217AaA6;
     address constant PIP_UNIV2DAIETH        = 0x1AE7D6891a5fdAafAd2FE6D894bffEa48F8b2454;
-    address constant UNIV2DAIETH            = 0xFD5608515A47C37afbA68960c1916b79af9491D0;
+    address constant UNIV2DAIETH            = 0xB10cf58E08b94480fCb81d341A63295eBb2062C2;
     bytes32 constant ILK_UNIV2DAIETH_A      = "UNIV2DAIETH-A";
 
     // TODO MIP21
@@ -260,8 +260,8 @@ contract SpellAction {
         // Add new ilk to the IlkRegistry
         IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_UNIV2DAIETH_A);
 
-        // Set gulp amount in faucet on kovan (only use WAD for decimals = 18)
-        FaucetAbstract(FAUCET).setAmt(UNIV2DAIETH, 2500 * WAD);
+        // Set gulp amount in faucet on kovan (only use WAD for decimals = 18) NO FAUCET FOR LP TOKENS
+        // FaucetAbstract(FAUCET).setAmt(UNIV2DAIETH, 2500 * WAD);
 
         // Update the changelog
         CHANGELOG.setAddress("UNIV2DAIETH", UNIV2DAIETH);
