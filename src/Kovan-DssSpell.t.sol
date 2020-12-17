@@ -882,7 +882,7 @@ contract DssSpellTest is DSTest, DSMath {
 
     // TODO test Aave integration
 
-    function testSpellIsCast_UNI_INTEGRATION() public {
+    function testSpellIsCast_UNIV2DAIETH_INTEGRATION() public {
        vote();
        scheduleWaitAndCast();
        assertTrue(spell.done());
