@@ -72,15 +72,12 @@ contract SpellAction {
 
     /// PSM-USDC-A
     address constant USDC               = 0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5;
-    address constant MCD_JOIN_USDC_PSM  = 0x882916CC149eB669F9e9240C001C8C90Ab37974c;
-    address constant MCD_FLIP_USDC_PSM  = 0xA79F07275eA9080829e77F9f399F9f42bb79a58a;
-    address constant MCD_PSM_USDC_PSM   = 0x8D1B119fA7492C8c5b4125B53a44EA8b0e83d5e8;
-    address constant LERP               = 0x06b55F7DF03aC8B21cA472612419571cfCe854E5;
+    address constant MCD_JOIN_USDC_PSM  = 0x4BA159Ad37FD80D235b4a948A8682747c74fDc0E;
+    address constant MCD_FLIP_USDC_PSM  = 0xe9eef655494F63802e9C7A7F1006547c4De3e713;
+    address constant MCD_PSM_USDC_PSM   = 0xe4dC42e438879987e287A6d9519379936d7b065A;
+    address constant LERP               = 0x489f89E54a807BE8fe531C1663FA9A39Bbdde4F4;
     address constant PIP_USDC           = 0x4c51c2584309b7BF328F89609FDd03B3b95fC677;
     bytes32 constant ILK_PSM_USDC_A     = "PSM-USDC-A";
-
-    // DC IAM
-    address constant MCD_IAM_AUTO_LINE = 0xe7D7d61c0ed9306B6c93E7C65F6C9DDF38b9320b;
 
     // decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -166,8 +163,8 @@ contract SpellAction {
         VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 500 * MILLION * RAD);
         // Set the PSM-USDC-A debt ceiling
         VatAbstract(MCD_VAT).file(ILK_PSM_USDC_A, "line", 500 * MILLION * RAD);
-        // Set the PSM-USDC-A dust
-        VatAbstract(MCD_VAT).file(ILK_PSM_USDC_A, "dust", 10 * RAD);
+        // No dust limit for PSM
+        // VatAbstract(MCD_VAT).file(ILK_PSM_USDC_A, "dust", 10 * RAD);
         // Set the Lot size
         CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "dunk", 500 * RAD);
         // Set the PSM-USDC-A liquidation penalty (e.g. 13% => X = 113)
@@ -203,7 +200,7 @@ contract SpellAction {
         CHANGELOG.setAddress("MCD_PSM_USDC_PSM", MCD_PSM_USDC_PSM);
 
         // Bump version
-        CHANGELOG.setVersion("1.2.2");
+        CHANGELOG.setVersion("1.2.3");
     }
 }
 

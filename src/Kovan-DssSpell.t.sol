@@ -14,9 +14,9 @@ interface Hevm {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0xB44518419921CC1732E0EAfCBf82555BA3253bA8);
+    address constant KOVAN_SPELL = address(0xD9Ae416a9f8914B8b7B81afDaF18fa75b890c604);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1607710120;
+    uint256 constant SPELL_CREATED = 1608213940;
 
     struct CollateralValues {
         bool aL_enabled;
@@ -83,10 +83,10 @@ contract DssSpellTest is DSTest, DSMath {
 
     // PSM-USDC-A specific
     DSTokenAbstract         usdc = DSTokenAbstract(  0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5);
-    GemJoinAbstract  joinUSDCPSM = GemJoinAbstract(  0x882916CC149eB669F9e9240C001C8C90Ab37974c);
-    FlipAbstract     flipUSDCPSM = FlipAbstract(     0xA79F07275eA9080829e77F9f399F9f42bb79a58a);
-    PsmAbstract       psmUSDCPSM = PsmAbstract(      0x8D1B119fA7492C8c5b4125B53a44EA8b0e83d5e8);
-    LerpAbstract     lerpUSDCPSM = LerpAbstract(     0x06b55F7DF03aC8B21cA472612419571cfCe854E5);
+    GemJoinAbstract  joinUSDCPSM = GemJoinAbstract(  0x4BA159Ad37FD80D235b4a948A8682747c74fDc0E);
+    FlipAbstract     flipUSDCPSM = FlipAbstract(     0xe9eef655494F63802e9C7A7F1006547c4De3e713);
+    PsmAbstract       psmUSDCPSM = PsmAbstract(      0xe4dC42e438879987e287A6d9519379936d7b065A);
+    LerpAbstract     lerpUSDCPSM = LerpAbstract(     0x489f89E54a807BE8fe531C1663FA9A39Bbdde4F4);
 
     DssSpell spell;
 
@@ -502,7 +502,7 @@ contract DssSpellTest is DSTest, DSMath {
             aL_gap:       0 * MILLION,
             aL_ttl:       0,
             line:         500 * MILLION,
-            dust:         10,
+            dust:         0,
             pct:          0,
             chop:         0,
             dunk:         500,
@@ -812,6 +812,7 @@ contract DssSpellTest is DSTest, DSMath {
         hevm.warp(now + 4 days);
         lerpUSDCPSM.tick();
         assertTrue(lerpUSDCPSM.done());
+        assertEq(psmUSDCPSM.wards(address(lerpUSDCPSM)), 0);    // Lerp de-auths itself
         assertEq(psmUSDCPSM.tin(), WAD * 1 / 1000);
         assertEq(psmUSDCPSM.tout(), WAD * 1 / 1000);
         usdc.approve(address(joinUSDCPSM), faucetAmount);
