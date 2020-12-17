@@ -270,10 +270,6 @@ contract SpellAction {
         CHANGELOG.setAddress("PIP_UNIV2DAIETH", PIP_UNIV2DAIETH);
 
 
-        //
-        // MIP21
-        //
-
 
         // Bump version
         CHANGELOG.setVersion("1.2.2");
