@@ -895,7 +895,9 @@ contract DssSpellTest is DSTest, DSMath {
         spot.poke(ilk);
 
         // Check median matches pip.src()
-        assertEq(lpPip.src(), address(lp)); // TODO: Check orbs
+        assertEq(lpPip.src(), address(lp));
+        assertEq(lpPip.orb0(), address(0x91A8A02393cC21CeE04B482b0e4Aa26BfA1AA79c));
+        assertEq(lpPip.orb1(), address(0x0E30F0FC91FDbc4594b1e2E5d64E6F1f94cAB23D));
 
         // Authorization
         assertEq(lpJoin.wards(pauseProxy), 1);
