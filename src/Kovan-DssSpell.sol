@@ -68,15 +68,15 @@ contract SpellAction {
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
     // To check this yourself, use the following rate calculation (example 8%):
-    //co
+    //
     // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
     //
     // A table of rates can be found at
     //    https://ipfs.io/ipfs/QmefQMseb3AiTapiAKKexdKHig8wroKuZbmLtPLv4u2YwW
     //
+    uint256 constant ONE_PERCENT_RATE   = 1000000000315522921573372069;
     uint256 constant THREE_PERCENT_RATE = 1000000000937303470807876289;
     uint256 constant SIX_PERCENT_RATE   = 1000000001847694957439350562;
-    uint256 constant ONE_PERCENT_RATE   = 1000000000315522921573372069;
 
     function execute() external {
         address MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
@@ -237,7 +237,7 @@ contract SpellAction {
         // Set the UNIV2DAIETH-A debt ceiling
         VatAbstract(MCD_VAT).file(ILK_UNIV2DAIETH_A, "line", 3 * MILLION * RAD);
         // Set the UNIV2DAIETH-A dust
-        VatAbstract(MCD_VAT).file(ILK_UNIV2DAIETH_A, "dust", 500 * RAD);
+        VatAbstract(MCD_VAT).file(ILK_UNIV2DAIETH_A, "dust", 100 * RAD);
         // Set the Lot size
         CatAbstract(MCD_CAT).file(ILK_UNIV2DAIETH_A, "dunk", 500 * RAD);
         // Set the UNIV2DAIETH-A liquidation penalty (e.g. 13% => X = 113)

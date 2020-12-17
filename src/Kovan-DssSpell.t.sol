@@ -546,6 +546,22 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          1 hours,
             liquidations: 1
         });
+        afterSpell.collaterals["UNIV2DAIETH-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
+            line:         3 * MILLION,
+            dust:         100,
+            pct:          100,
+            chop:         1300,
+            dunk:         500,
+            mat:          12500,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
     }
 
     function vote() private {
