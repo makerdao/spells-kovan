@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-pragma solidity 0.5.12;
+pragma solidity 0.6.11;
 
 import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
 import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
@@ -70,7 +70,7 @@ contract SpellAction {
     ChainlogAbstract constant CHANGELOG =
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    /// PSM-USDC-A
+    // PSM-USDC-A
     address constant USDC               = 0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5;
     address constant MCD_JOIN_USDC_PSM  = 0x4BA159Ad37FD80D235b4a948A8682747c74fDc0E;
     address constant MCD_FLIP_USDC_PSM  = 0xe9eef655494F63802e9C7A7F1006547c4De3e713;
@@ -168,9 +168,8 @@ contract SpellAction {
         // Set the Lot size
         CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "dunk", 500 * RAD);
         // Set the PSM-USDC-A liquidation penalty (e.g. 13% => X = 113)
-        CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "chop", 100 * WAD / 100);
+        CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "chop", 113 * WAD / 100);
         // Set the PSM-USDC-A stability fee (e.g. 1% = 1000000000315522921573372069)
-        JugAbstract(MCD_JUG).drip(ILK_PSM_USDC_A);
         JugAbstract(MCD_JUG).file(ILK_PSM_USDC_A, "duty", ZERO_PERCENT_RATE);
         // Set the PSM-USDC-A percentage between bids (e.g. 3% => X = 103)
         FlipAbstract(MCD_FLIP_USDC_PSM).file("beg", 103 * WAD / 100);

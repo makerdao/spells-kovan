@@ -1,4 +1,4 @@
-pragma solidity 0.5.12;
+pragma solidity 0.6.11;
 
 import "ds-math/math.sol";
 import "ds-test/test.sol";
@@ -14,9 +14,9 @@ interface Hevm {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0xD9Ae416a9f8914B8b7B81afDaF18fa75b890c604);
+    address constant KOVAN_SPELL = address(0x141aE0745C903d586c4106Bf6fb3525B3c9BE60A);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1608213940;
+    uint256 constant SPELL_CREATED = 1608240960;
 
     struct CollateralValues {
         bool aL_enabled;
@@ -98,8 +98,6 @@ contract DssSpellTest is DSTest, DSMath {
     uint256 constant THOUSAND   = 10 ** 3;
     uint256 constant MILLION    = 10 ** 6;
     uint256 constant BILLION    = 10 ** 9;
-    uint256 constant WAD        = 10 ** 18;
-    uint256 constant RAY        = 10 ** 27;
     uint256 constant RAD        = 10 ** 45;
 
     // Many of the settings that change weekly rely on the rate accumulator
@@ -170,7 +168,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             21                   // Num expected in system
+            ilk_count:             23                   // Num expected in system
         });
 
         //
@@ -496,6 +494,38 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          1 hours,
             liquidations: 1
         });
+        afterSpell.collaterals["AAVE-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
+            line:         10 * MILLION,
+            dust:         100,
+            pct:          600,
+            chop:         1300,
+            dunk:         500,
+            mat:          17500,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
+        afterSpell.collaterals["UNIV2DAIETH-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
+            line:         3 * MILLION,
+            dust:         100,
+            pct:          100,
+            chop:         1300,
+            dunk:         500,
+            mat:          12500,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1
+        });
         afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
@@ -504,7 +534,7 @@ contract DssSpellTest is DSTest, DSMath {
             line:         500 * MILLION,
             dust:         0,
             pct:          0,
-            chop:         0,
+            chop:         1300,
             dunk:         500,
             mat:          10000,
             beg:          300,
