@@ -102,6 +102,8 @@ contract DssSpellTest is DSTest, DSMath {
     // Faucet
     FaucetAbstract      faucet   = FaucetAbstract(      addr.addr("FAUCET"));
 
+    // Spell-specific addresses
+
     // UNIV2DAIETH-A specific
     DSTokenAbstract     lp = DSTokenAbstract(addr.addr("UNIV2DAIETH"));
     GemJoinAbstract lpJoin = GemJoinAbstract(addr.addr("MCD_JOIN_UNIV2DAIETH_A"));
@@ -109,9 +111,6 @@ contract DssSpellTest is DSTest, DSMath {
     LPOsmAbstract    lpPip = LPOsmAbstract(  addr.addr("PIP_UNIV2DAIETH"));
     MedianAbstract    orb0 = MedianAbstract( lpPip.orb0());
     MedianAbstract    orb1 = MedianAbstract( lpPip.orb0());
-
-
-    // Spell-specific addresses
 
     // AAVE-A specific
     DSTokenAbstract       aave = DSTokenAbstract(      addr.addr("AAVE"));
