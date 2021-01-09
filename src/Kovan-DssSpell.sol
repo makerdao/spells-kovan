@@ -15,51 +15,19 @@
 
 pragma solidity 0.6.11;
 
-import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
-import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
 import "lib/dss-interfaces/src/dss/ChainlogAbstract.sol";
-import "lib/dss-interfaces/src/dss/VatAbstract.sol";
-import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
+import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
+import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
 import "lib/dss-interfaces/src/dss/FlipAbstract.sol";
-import "lib/dss-interfaces/src/dss/FlipperMomAbstract.sol";
+import "lib/dss-interfaces/src/dss/VatAbstract.sol";
 import "lib/dss-interfaces/src/dss/JugAbstract.sol";
+import "lib/dss-interfaces/src/dss/SpotAbstract.sol";
 import "lib/dss-interfaces/src/dss/CatAbstract.sol";
 import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
-import "lib/dss-interfaces/src/dss/FaucetAbstract.sol";
-import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
-import "lib/dss-interfaces/src/dss/OsmAbstract.sol";
-import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
+import "lib/dss-interfaces/src/dapp/DSPauseAbstract.sol";
+import "lib/dss-interfaces/src/dss/LPOsmAbstract.sol";
 import "lib/dss-interfaces/src/dss/MedianAbstract.sol";
-import "lib/dss-interfaces/src/dss/DssAutoLineAbstract.sol";
-
-interface PsmAbstract {
-    function wards(address) external returns (uint256);
-    function vat() external returns (address);
-    function gemJoin() external returns (address);
-    function dai() external returns (address);
-    function daiJoin() external returns (address);
-    function ilk() external returns (bytes32);
-    function vow() external returns (address);
-    function tin() external returns (uint256);
-    function tout() external returns (uint256);
-    function file(bytes32 what, uint256 data) external;
-    function sellGem(address usr, uint256 gemAmt) external;
-    function buyGem(address usr, uint256 gemAmt) external;
-}
-
-interface LerpAbstract {
-    function wards(address) external returns (uint256);
-    function target() external returns (address);
-    function what() external returns (bytes32);
-    function start() external returns (uint256);
-    function end() external returns (uint256);
-    function duration() external returns (uint256);
-    function started() external returns (bool);
-    function done() external returns (bool);
-    function startTime() external returns (uint256);
-    function init() external;
-    function tick() external;
-}
+import "lib/dss-interfaces/src/dss/OsmMomAbstract.sol";
 
 contract SpellAction {
     // KOVAN ADDRESSES
@@ -70,17 +38,13 @@ contract SpellAction {
     ChainlogAbstract constant CHANGELOG =
         ChainlogAbstract(0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
 
-    // PSM-USDC-A
-    address constant USDC               = 0xBD84be3C303f6821ab297b840a99Bd0d4c4da6b5;
-    address constant MCD_JOIN_USDC_PSM  = 0x4BA159Ad37FD80D235b4a948A8682747c74fDc0E;
-    address constant MCD_FLIP_USDC_PSM  = 0xe9eef655494F63802e9C7A7F1006547c4De3e713;
-    address constant MCD_PSM_USDC_PSM   = 0xe4dC42e438879987e287A6d9519379936d7b065A;
-    address constant LERP               = 0x489f89E54a807BE8fe531C1663FA9A39Bbdde4F4;
-    address constant PIP_USDC           = 0x4c51c2584309b7BF328F89609FDd03B3b95fC677;
-    bytes32 constant ILK_PSM_USDC_A     = "PSM-USDC-A";
+    bytes32 constant ILK  = "UNIV2USDCETH-A";
+    address constant GEM  = 0x44892ab8F7aFfB7e1AdA4Fb956CCE2a2f3049619;
+    address constant PIP  = 0x627969F6fe0651a703B2d0e3a5758F9fF9B7547A;
+    address constant JOIN = 0x642009AA5373F7eAFE4BC02CBdBb65a3621fB70e;
+    address constant FLIP = 0x7cFCc9CC7045C86aA0505808218451127dED9CCe;
 
     // decimals & precision
-    uint256 constant THOUSAND = 10 ** 3;
     uint256 constant MILLION  = 10 ** 6;
     uint256 constant WAD      = 10 ** 18;
     uint256 constant RAY      = 10 ** 27;
@@ -95,7 +59,7 @@ contract SpellAction {
     // A table of rates can be found at
     //    https://ipfs.io/ipfs/QmefQMseb3AiTapiAKKexdKHig8wroKuZbmLtPLv4u2YwW
     //
-    uint256 constant ZERO_PERCENT_RATE = 1000000000000000000000000000;
+    uint256 constant ONE_PERCENT_RATE = 1000000000315522921573372069;
 
     function execute() external {
         address MCD_VAT      = CHANGELOG.getAddress("MCD_VAT");
@@ -103,103 +67,69 @@ contract SpellAction {
         address MCD_JUG      = CHANGELOG.getAddress("MCD_JUG");
         address MCD_SPOT     = CHANGELOG.getAddress("MCD_SPOT");
         address MCD_END      = CHANGELOG.getAddress("MCD_END");
-        address MCD_VOW      = CHANGELOG.getAddress("MCD_VOW");
-        address MCD_DAI      = CHANGELOG.getAddress("MCD_DAI");
-        address MCD_JOIN_DAI = CHANGELOG.getAddress("MCD_JOIN_DAI");
         address FLIPPER_MOM  = CHANGELOG.getAddress("FLIPPER_MOM");
+        address OSM_MOM      = CHANGELOG.getAddress("OSM_MOM");
         address ILK_REGISTRY = CHANGELOG.getAddress("ILK_REGISTRY");
 
         //
-        // Add PSM-USDC-A
+        // Add UNI-V2-USDC-ETH
         //
 
         // Sanity checks
-        require(GemJoinAbstract(MCD_JOIN_USDC_PSM).vat() == MCD_VAT, "join-vat-not-match");
-        require(GemJoinAbstract(MCD_JOIN_USDC_PSM).ilk() == ILK_PSM_USDC_A, "join-ilk-not-match");
-        require(GemJoinAbstract(MCD_JOIN_USDC_PSM).gem() == USDC, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_USDC_PSM).dec() == DSTokenAbstract(USDC).decimals(), "join-dec-not-match");
-        require(FlipAbstract(MCD_FLIP_USDC_PSM).vat() == MCD_VAT, "flip-vat-not-match");
-        require(FlipAbstract(MCD_FLIP_USDC_PSM).cat() == MCD_CAT, "flip-cat-not-match");
-        require(FlipAbstract(MCD_FLIP_USDC_PSM).ilk() == ILK_PSM_USDC_A, "flip-ilk-not-match");
-        require(PsmAbstract(MCD_PSM_USDC_PSM).vat() == MCD_VAT, "psm-vat-not-match");
-        require(PsmAbstract(MCD_PSM_USDC_PSM).gemJoin() == MCD_JOIN_USDC_PSM, "psm-join-not-match");
-        require(PsmAbstract(MCD_PSM_USDC_PSM).dai() == MCD_DAI, "psm-dai-not-match");
-        require(PsmAbstract(MCD_PSM_USDC_PSM).daiJoin() == MCD_JOIN_DAI, "psm-dai-join-not-match");
-        require(PsmAbstract(MCD_PSM_USDC_PSM).ilk() == ILK_PSM_USDC_A, "psm-ilk-not-match");
-        require(PsmAbstract(MCD_PSM_USDC_PSM).vow() == MCD_VOW, "psm-vow-not-match");
-        require(LerpAbstract(LERP).target() == MCD_PSM_USDC_PSM, "lerp-target-not-match");
-        require(LerpAbstract(LERP).what() == "tin", "lerp-what-not-match");
-        require(LerpAbstract(LERP).start() == 1 * WAD / 100, "lerp-start-not-match");
-        require(LerpAbstract(LERP).end() == 1 * WAD / 1000, "lerp-end-not-match");
-        require(LerpAbstract(LERP).duration() ==  7 days, "lerp-duration-not-match");
-        require(!LerpAbstract(LERP).started(), "lerp-not-started");
-        require(!LerpAbstract(LERP).done(), "lerp-not-done");
+        require(GemJoinAbstract(JOIN).vat() == MCD_VAT, "join-vat-not-match");
+        require(GemJoinAbstract(JOIN).ilk() == ILK, "join-ilk-not-match");
+        require(GemJoinAbstract(JOIN).gem() == GEM, "join-gem-not-match");
+        require(GemJoinAbstract(JOIN).dec() == DSTokenAbstract(GEM).decimals(), "join-dec-not-match");
+        require(FlipAbstract(FLIP).vat() == MCD_VAT, "flip-vat-not-match");
+        require(FlipAbstract(FLIP).cat() == MCD_CAT, "flip-cat-not-match");
+        require(FlipAbstract(FLIP).ilk() == ILK, "flip-ilk-not-match");
 
-        // Set the USDC PIP in the Spotter
-        SpotAbstract(MCD_SPOT).file(ILK_PSM_USDC_A, "pip", PIP_USDC);
+        // Vat
+        VatAbstract(MCD_VAT).init(ILK);
+        VatAbstract(MCD_VAT).rely(JOIN);
+        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 10 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file(ILK, "line", 10 * MILLION * RAD);
+        VatAbstract(MCD_VAT).file(ILK, "dust", 5000 * RAD);
 
-        // Set the PSM-USDC-A Flipper in the Cat
-        CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "flip", MCD_FLIP_USDC_PSM);
+        // Jug
+        JugAbstract(MCD_JUG).init(ILK);
+        JugAbstract(MCD_JUG).file(ILK, "duty", ONE_PERCENT_RATE);
 
-        // Init PSM-USDC-A ilk in Vat & Jug
-        // VatAbstract(MCD_VAT).init(ilk);
-        JugAbstract(MCD_JUG).init(ILK_PSM_USDC_A);
+        // Spotter
+        SpotAbstract(MCD_SPOT).file(ILK, "pip", PIP);
+        SpotAbstract(MCD_SPOT).file(ILK, "mat", 125 * RAY / 100);
+        SpotAbstract(MCD_SPOT).poke(ILK);
 
-        // Allow PSM-USDC-A Join to modify Vat registry
-        VatAbstract(MCD_VAT).rely(MCD_JOIN_USDC_PSM);
-        // Allow the PSM-USDC-A Flipper to reduce the Cat litterbox on deal()
-        CatAbstract(MCD_CAT).rely(MCD_FLIP_USDC_PSM);
-        // Allow Cat to kick auctions in PSM-USDC-A Flipper
-        FlipAbstract(MCD_FLIP_USDC_PSM).rely(MCD_CAT);
-        // Allow End to yank auctions in PSM-USDC-A Flipper
-        FlipAbstract(MCD_FLIP_USDC_PSM).rely(MCD_END);
-        // Allow FlipperMom to access to the PSM-USDC-A Flipper
-        FlipAbstract(MCD_FLIP_USDC_PSM).rely(FLIPPER_MOM);
-        // Disallow Cat to kick auctions in PSM-USDC-A Flipper
-        // !!!!!!!! Only for certain collaterals that do not trigger liquidations like USDC-A)
-        FlipperMomAbstract(FLIPPER_MOM).deny(MCD_FLIP_USDC_PSM);
+        // Cat
+        CatAbstract(MCD_CAT).file(ILK, "flip", FLIP);
+        CatAbstract(MCD_CAT).rely(FLIP);
+        CatAbstract(MCD_CAT).file(ILK, "chop", 113 * WAD / 100);
+        CatAbstract(MCD_CAT).file(ILK, "dunk", 50000 * RAD);
 
-        // Set the global debt ceiling
-        VatAbstract(MCD_VAT).file("Line", VatAbstract(MCD_VAT).Line() + 500 * MILLION * RAD);
-        // Set the PSM-USDC-A debt ceiling
-        VatAbstract(MCD_VAT).file(ILK_PSM_USDC_A, "line", 500 * MILLION * RAD);
-        // No dust limit for PSM
-        // VatAbstract(MCD_VAT).file(ILK_PSM_USDC_A, "dust", 10 * RAD);
-        // Set the Lot size
-        CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "dunk", 500 * RAD);
-        // Set the PSM-USDC-A liquidation penalty (e.g. 13% => X = 113)
-        CatAbstract(MCD_CAT).file(ILK_PSM_USDC_A, "chop", 113 * WAD / 100);
-        // Set the PSM-USDC-A stability fee (e.g. 1% = 1000000000315522921573372069)
-        JugAbstract(MCD_JUG).file(ILK_PSM_USDC_A, "duty", ZERO_PERCENT_RATE);
-        // Set the PSM-USDC-A percentage between bids (e.g. 3% => X = 103)
-        FlipAbstract(MCD_FLIP_USDC_PSM).file("beg", 103 * WAD / 100);
-        // Set the PSM-USDC-A time max time between bids
-        FlipAbstract(MCD_FLIP_USDC_PSM).file("ttl", 1 hours);
-        // Set the PSM-USDC-A max auction duration to
-        FlipAbstract(MCD_FLIP_USDC_PSM).file("tau", 1 hours);
-        // Set the PSM-USDC-A min collateralization ratio (e.g. 150% => X = 150)
-        SpotAbstract(MCD_SPOT).file(ILK_PSM_USDC_A, "mat", 100 * RAY / 100);
-        // Set the PSM-USDC-A fee in (tin)
-        PsmAbstract(MCD_PSM_USDC_PSM).file("tin", 1 * WAD / 100);
-        // Set the PSM-USDC-A fee out (tout)
-        PsmAbstract(MCD_PSM_USDC_PSM).file("tout", 1 * WAD / 1000);
+        // Flipper
+        FlipAbstract(FLIP).rely(MCD_CAT);
+        FlipAbstract(FLIP).rely(MCD_END);
+        FlipAbstract(FLIP).rely(FLIPPER_MOM);
+        FlipAbstract(FLIP).file("beg", 103 * WAD / 100);
+        FlipAbstract(FLIP).file("ttl", 6 hours);
+        FlipAbstract(FLIP).file("tau", 6 hours);
 
-        // Update PSM-USDC-A spot value in Vat
-        SpotAbstract(MCD_SPOT).poke(ILK_PSM_USDC_A);
+        // PIP
+        LPOsmAbstract(PIP).rely(OSM_MOM);
+        LPOsmAbstract(PIP).kiss(MCD_SPOT);
+        LPOsmAbstract(PIP).kiss(MCD_END);
+        MedianAbstract(LPOsmAbstract(PIP).orb1()).kiss(PIP);
+        OsmMomAbstract(OSM_MOM).setOsm(ILK, PIP);
 
-        // Add new ilk to the IlkRegistry
-        IlkRegistryAbstract(ILK_REGISTRY).add(MCD_JOIN_USDC_PSM);
+        // IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).add(JOIN);
 
-        // Initialize the lerp module to start the clock
-        LerpAbstract(LERP).init();
-
-        // Update the changelog
-        CHANGELOG.setAddress("MCD_JOIN_USDC_PSM", MCD_JOIN_USDC_PSM);
-        CHANGELOG.setAddress("MCD_FLIP_USDC_PSM", MCD_FLIP_USDC_PSM);
-        CHANGELOG.setAddress("MCD_PSM_USDC_PSM", MCD_PSM_USDC_PSM);
-
-        // Bump version
-        CHANGELOG.setVersion("1.2.3");
+        // Changelog
+        CHANGELOG.setAddress("UNIV2USDCETH", GEM);
+        CHANGELOG.setAddress("PIP_UNIV2USDCETH", PIP);
+        CHANGELOG.setAddress("MCD_JOIN_UNIV2USDCETH_A", JOIN);
+        CHANGELOG.setAddress("MCD_FLIP_UNIV2USDCETH_A", FLIP);
+        CHANGELOG.setVersion("1.2.4");
     }
 }
 
