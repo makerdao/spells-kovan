@@ -134,9 +134,9 @@ contract SpellAction {
         // Set the UNIV2USDCETH-A debt ceiling
         VatAbstract(MCD_VAT).file(ILK_UNIV2USDCETH_A, "line", 10 * MILLION * RAD);
         // Set the UNIV2USDCETH-A dust
-        VatAbstract(MCD_VAT).file(ILK_UNIV2USDCETH_A, "dust", 500 * RAD);
+        VatAbstract(MCD_VAT).file(ILK_UNIV2USDCETH_A, "dust", 100 * RAD);
         // Set the Lot size
-        CatAbstract(MCD_CAT).file(ILK_UNIV2USDCETH_A, "dunk", 50 * THOUSAND * RAD);
+        CatAbstract(MCD_CAT).file(ILK_UNIV2USDCETH_A, "dunk", 500 * RAD);
         // Set the UNIV2USDCETH-A liquidation penalty (e.g. 13% => X = 113)
         CatAbstract(MCD_CAT).file(ILK_UNIV2USDCETH_A, "chop", 113 * WAD / 100);
         // Set the UNIV2USDCETH-A stability fee (e.g. 1% = 1000000000315522921573372069)
@@ -144,9 +144,9 @@ contract SpellAction {
         // Set the UNIV2USDCETH-A percentage between bids (e.g. 3% => X = 103)
         FlipAbstract(MCD_FLIP_UNIV2USDCETH_A).file("beg", 103 * WAD / 100);
         // Set the UNIV2USDCETH-A time max time between bids
-        FlipAbstract(MCD_FLIP_UNIV2USDCETH_A).file("ttl", 6 hours);
+        FlipAbstract(MCD_FLIP_UNIV2USDCETH_A).file("ttl", 1 hours);
         // Set the UNIV2USDCETH-A max auction duration to
-        FlipAbstract(MCD_FLIP_UNIV2USDCETH_A).file("tau", 6 hours);
+        FlipAbstract(MCD_FLIP_UNIV2USDCETH_A).file("tau", 1 hours);
         // Set the UNIV2USDCETH-A min collateralization ratio (e.g. 150% => X = 150)
         SpotAbstract(MCD_SPOT).file(ILK_UNIV2USDCETH_A, "mat", 125 * RAY / 100);
 
