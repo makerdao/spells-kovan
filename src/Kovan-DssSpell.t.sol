@@ -37,9 +37,9 @@ interface SpellLike {
 
 contract DssSpellTest is DSTest, DSMath {
     // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0x23C9C54D6816eeFD31D4ABD9992D1B9fa64c7106);
+    address constant KOVAN_SPELL = address(0xAF2470231022668cc583e7477285a30A495d9949);
     // this needs to be updated
-    uint256 constant SPELL_CREATED = 1610383120;
+    uint256 constant SPELL_CREATED = 1610397424;
 
     struct CollateralValues {
         bool aL_enabled;
@@ -576,14 +576,14 @@ contract DssSpellTest is DSTest, DSMath {
             aL_gap:       0 * MILLION,
             aL_ttl:       0,
             line:         10 * MILLION,
-            dust:         500,
+            dust:         100,
             pct:          100,
             chop:         1300,
-            dunk:         50000,
+            dunk:         500,
             mat:          12500,
             beg:          300,
-            ttl:          6 hours,
-            tau:          6 hours,
+            ttl:          1 hours,
+            tau:          1 hours,
             liquidations: 1
         });
     }
@@ -878,12 +878,12 @@ contract DssSpellTest is DSTest, DSMath {
 
         // Deposit collateral, generate DAI
         assertEq(vat.dai(address(this)), 0);
-        vat.frob(ilk, address(this), address(this), address(this), int(amount), int(500 * WAD));
+        vat.frob(ilk, address(this), address(this), address(this), int(amount), int(100 * WAD));
         assertEq(vat.gem(ilk, address(this)), 0);
-        assertEq(vat.dai(address(this)), 500 * RAD);
+        assertEq(vat.dai(address(this)), 100 * RAD);
 
         // Payback DAI, withdraw collateral
-        vat.frob(ilk, address(this), address(this), address(this), -int(amount), -int(500 * WAD));
+        vat.frob(ilk, address(this), address(this), address(this), -int(amount), -int(100 * WAD));
         assertEq(vat.gem(ilk, address(this)), amount);
         assertEq(vat.dai(address(this)), 0);
 
