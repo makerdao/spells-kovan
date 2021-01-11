@@ -134,7 +134,7 @@ contract SpellAction {
         // Set the UNIV2USDCETH-A debt ceiling
         VatAbstract(MCD_VAT).file(ILK_UNIV2USDCETH_A, "line", 10 * MILLION * RAD);
         // Set the UNIV2USDCETH-A dust
-        VatAbstract(MCD_VAT).file(ILK_UNIV2USDCETH_A, "dust", 5 * THOUSAND * RAD);
+        VatAbstract(MCD_VAT).file(ILK_UNIV2USDCETH_A, "dust", 500 * RAD);
         // Set the Lot size
         CatAbstract(MCD_CAT).file(ILK_UNIV2USDCETH_A, "dunk", 50 * THOUSAND * RAD);
         // Set the UNIV2USDCETH-A liquidation penalty (e.g. 13% => X = 113)
