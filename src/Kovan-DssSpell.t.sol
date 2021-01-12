@@ -863,7 +863,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(MedianAbstract(lpPip.orb1()).bud(address(lpPip)), 1);
 
         // Join to adapter
-        uint256 amount = 100 ether;
+        uint256 amount = 0.01 ether;
         hevm.store(
             address(lp),
             keccak256(abi.encode(address(this), uint256(1))),
