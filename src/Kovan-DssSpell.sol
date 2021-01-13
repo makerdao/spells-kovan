@@ -193,7 +193,7 @@ contract DssSpell {
     function schedule() external {
         require(block.timestamp <= expiration, "DSSSpell/spell-has-expired");
         require(eta == 0, "DSSSpell/spell-already-scheduled");
-        eta = block.timestamp + DSPauseAbstract(pause).delay();
+        eta = block.timestamp + pause.delay();
         pause.plot(action, tag, sig, eta);
     }
 
