@@ -658,6 +658,10 @@ contract DssSpellTest is DSTest, DSMath {
         {
             uint normalizedBox = values.cat_box * RAD;
             assertEq(cat.box(), normalizedBox);
+            assertTrue(
+                (cat.box() >= RAD && cat.box() < BILLION * RAD) ||
+                cat.box() == 0
+            );
         }
 
         // check Pause authority
