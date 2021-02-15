@@ -61,15 +61,15 @@ interface AbacusAbstract {
 
 contract SpellAction {
 
-    // Testnet addresses
+    // Testnet addresses from v1.1.27
     //
     // The contracts in this list should correspond to MCD on testchain, which can be verified at
-    // https://github.com/makerdao/testchain/blob/a293003c3a68474b12e303f54de6e455cefee82c/out/addresses-mcd.json
+    // v1.1.27 of https://github.com/makerdao/testchain/blob/dai.js/out/addresses-mcd.json
 
-    address constant MCD_VAT             = 0x2125C30dA5DcA0819aEC5e4cdbF58Bfe91918e43;
-    address constant MCD_VOW             = 0x9F3CEceFEb8bCCEd859A983cB3A9b4DA65D79bD1;
-    address constant MCD_FLIP_ETH_A      = 0x970b3b28EBD466f2eC181630D4c3C93DfE280448;
-    address constant MCD_JUG             = 0x32fE44E2061A19419C0F112596B6f6ea77EC6511;
+    address constant MCD_VAT             = 0x2d7f58ABB321ee1c63e8aBFF89A7CC100E7EEd01;
+    address constant MCD_VOW             = 0xd6D7C74729bB83c35138E54b8d5530ea96920c92;
+    address constant MCD_FLIP_ETH_A      = 0xBfd57220780aB21112008C2296C09B3a10d7E2ad;
+    address constant MCD_JUG             = 0x6D6e3B9B602a0a37c820F2383A1DD0EC02B5196d;
 
     // Decimals & precision
     uint256 constant THOUSAND = 10 ** 3;
@@ -94,11 +94,11 @@ contract SpellAction {
         VatAbstract(MCD_VAT).rely(address(dog));
         VowAbstract(MCD_VOW).rely(address(dog));
 
-        dog.file("Hole", 1000 * RAD);
+        dog.file("Hole", 10 * 1000 * RAD);
 
         /// ABACUS
         abacus.file("cut",  1 * RAY / 100);   // 1% decrease
-        abacus.file("step", 1);            // Decrease every 1 second
+        abacus.file("step", 1);               // Decrease every 1 second
 
         // CLIP
         VatAbstract(MCD_VAT).rely(address(clipper));                // Is this needed?
@@ -121,9 +121,7 @@ contract SpellAction {
 
         dog.file(ilk, "clip", address(newClip));
         dog.file(ilk, "chop", 1.1 ether); // 10% chop
-        dog.file(ilk, "hole", 1000 * RAD); // 1000 DAI
-        dog.file(ilk, "chip", 2 * WAD / 100); // linear increase of 2% of tab
-        dog.file(ilk, "tip", 2 * RAD); // flat fee of two DAI
+        dog.file(ilk, "hole", 10 * 1000 * RAD); // 1000 DAI
 
         dog.rely(address(newClip));
 
@@ -133,12 +131,14 @@ contract SpellAction {
         newClip.file("calc", address(abacus));  // File price contract
         newClip.file("cusp", 1 * RAY / 3);      // 67.77% drop before reset
         newClip.file("tail", 3600);             // 1 hour before reset
+        newClip.file("tip", 100 * RAD);         // Flat fee of 100 DAI
+        newClip.file("chip", 0);                // No linear increase
     }
 }
 
 contract DssSpellTestchain {
     DSPauseAbstract public pause =
-        DSPauseAbstract(0xA7fD71f86a79B9595Bc74dB12226E7298097581B);
+        DSPauseAbstract(0x3F35940dD9f42F7560fa08F506c81d99fed870a7);
     address         public action;
     bytes32         public tag;
     uint256         public eta;
