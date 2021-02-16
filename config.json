@@ -1,0 +1,56 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "src/Kovan-DssSpell.t.sol": {
+      "urls": [
+        "src/Kovan-DssSpell.t.sol"
+      ]
+    },
+    "src/Kovan-DssSpell.sol": {
+      "urls": [
+        "src/Kovan-DssSpell.sol"
+      ]
+    },
+    "src/test/addresses_kovan.sol": {
+      "urls": [
+        "src/test/addresses_kovan.sol"
+      ]
+    },
+    "src/test/rates.sol": {
+      "urls": [
+        "src/test/rates.sol"
+      ]
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 1
+    },
+    "libraries": {
+      "lib/dss-exec-lib/src/DssAction.sol": {
+        "DssExecLib": "0xd2406b8A710517fBe1A2218A72271D4Dc43A9D08"
+      }
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "metadata",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "abi",
+          "storageLayout",
+          "evm.bytecode.sourceMap",
+          "evm.bytecode.linkReferences",
+          "evm.bytecode.generatedSources",
+          "evm.deployedBytecode.sourceMap",
+          "evm.deployedBytecode.linkReferences",
+          "evm.deployedBytecode.generatedSources"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    }
+  }
+}
