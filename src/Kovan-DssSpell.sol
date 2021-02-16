@@ -20,6 +20,8 @@ import "dss-exec-lib/DssAction.sol";
 
 contract DssSpellAction is DssAction {
 
+    string public constant description = "";
+
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
     // To check this yourself, use the following rate calculation (example 8%):
@@ -36,6 +38,9 @@ contract DssSpellAction is DssAction {
     */
     constructor(bool officeHours) public DssAction(officeHours) {}
 
+    function actions() public override {
+
+    }
 
 }
 
