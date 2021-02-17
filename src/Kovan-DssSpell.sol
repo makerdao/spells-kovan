@@ -20,7 +20,7 @@ import "dss-exec-lib/DssAction.sol";
 
 contract DssSpellAction is DssAction {
 
-    string public constant description = "";
+    string public constant description = "TODO";
 
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
