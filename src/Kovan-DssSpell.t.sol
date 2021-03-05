@@ -10,6 +10,7 @@ import {DssSpell} from "./Kovan-DssSpell.sol";
 interface Hevm {
     function warp(uint) external;
     function store(address,bytes32,bytes32) external;
+    function load(address,bytes32) external view returns (bytes32);
 }
 
 contract DssSpellTest is DSTest, DSMath {
