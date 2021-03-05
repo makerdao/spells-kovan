@@ -14,6 +14,11 @@ interface Hevm {
     function load(address,bytes32) external view returns (bytes32);
 }
 
+interface SpellLike {
+    function done() external view returns (bool);
+    function cast() external;
+}
+
 contract DssSpellTest is DSTest, DSMath {
 
     struct SpellValues {
@@ -158,6 +163,15 @@ contract DssSpellTest is DSTest, DSMath {
 
     function diffCalc(uint256 expectedRate_, uint256 yearlyYield_) public pure returns (uint256) {
         return (expectedRate_ > yearlyYield_) ? expectedRate_ - yearlyYield_ : yearlyYield_ - expectedRate_;
+    }
+
+    function castPreviousSpell() internal {
+        SpellLike prevSpell = SpellLike(spellValues.previous_spell);
+        // warp and cast previous spell so values are up-to-date to test against
+        if (prevSpell != SpellLike(0) && !prevSpell.done()) {
+            hevm.warp(spellValues.previous_spell_execution_time);
+            prevSpell.cast();
+        }
     }
 
     function setUp() public {
@@ -594,6 +608,45 @@ contract DssSpellTest is DSTest, DSMath {
         });
     }
 
+    function scheduleWaitAndCastFailDay() public {
+        spell.schedule();
+
+        uint256 castTime = now + pause.delay();
+        uint256 day = (castTime / 1 days + 3) % 7;
+        if (day < 5) {
+            castTime += 5 days - day * 86400;
+        }
+
+        hevm.warp(castTime);
+        spell.cast();
+    }
+
+    function scheduleWaitAndCastFailEarly() public {
+        spell.schedule();
+
+        uint256 castTime = now + pause.delay() + 24 hours;
+        uint256 hour = castTime / 1 hours % 24;
+        if (hour >= 14) {
+            castTime -= hour * 3600 - 13 hours;
+        }
+
+        hevm.warp(castTime);
+        spell.cast();
+    }
+
+    function scheduleWaitAndCastFailLate() public {
+        spell.schedule();
+
+        uint256 castTime = now + pause.delay();
+        uint256 hour = castTime / 1 hours % 24;
+        if (hour < 21) {
+            castTime += 21 hours - hour * 3600;
+        }
+
+        hevm.warp(castTime);
+        spell.cast();
+    }
+
     function vote(address spell_) private {
         if (chief.hat() != spell_) {
             hevm.store(
@@ -619,21 +672,8 @@ contract DssSpellTest is DSTest, DSMath {
     function scheduleWaitAndCast(address spell_) public {
         DssSpell(spell_).schedule();
 
-        uint256 castTime = now + pause.delay();
+        hevm.warp(DssSpell(spell_).nextCastTime());
 
-        uint256 day = (castTime / 1 days + 3) % 7;
-        if(day >= 5) {
-            castTime += 7 days - day * 86400;
-        }
-
-        uint256 hour = castTime / 1 hours % 24;
-        if (hour >= 21) {
-            castTime += 24 hours - hour * 3600 + 14 hours;
-        } else if (hour < 14) {
-            castTime += 14 hours - hour * 3600;
-        }
-
-        hevm.warp(castTime);
         DssSpell(spell_).cast();
     }
 
