@@ -107,6 +107,11 @@ contract DssSpellTest is DSTest, DSMath {
     uint256 constant monthly_expiration = 4 days;
     uint256 constant weekly_expiration = 30 days;
 
+    event Debug(uint256 index, uint256 val);
+    event Debug(uint256 index, address addr);
+    event Debug(uint256 index, bytes32 what);
+    event Log(string message, address deployer, string contractName);
+
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
     // To check this yourself, use the following rate calculation (example 8%):
