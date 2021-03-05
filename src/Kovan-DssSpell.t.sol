@@ -792,6 +792,8 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(uint256(flip.tau()), values.collaterals[ilk].tau);
             assertTrue(flip.tau() >= 600 && flip.tau() <= 3 days);          // gt eq 10 minutes and lt eq 3 days
 
+            assertEq(flip.wards(address(flipMom)), values.collaterals[ilk].flipper_mom);
+
             assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
             // assertEq(flip.wards(address(makerDeployer06)), 0); // Check deployer denied
             assertEq(flip.wards(address(pauseProxy)), 1); // Check pause_proxy ward
