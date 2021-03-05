@@ -1,5 +1,6 @@
 pragma solidity 0.6.11;
 
+import "ds-math/math.sol";
 import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
