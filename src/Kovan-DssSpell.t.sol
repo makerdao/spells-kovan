@@ -5,7 +5,7 @@ import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
 
-import {DssSpell, DssSpellAction} from "./Kovan-DssSpell.sol";
+import {DssSpell} from "./Kovan-DssSpell.sol";
 
 interface Hevm {
     function warp(uint) external;
