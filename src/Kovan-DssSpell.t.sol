@@ -14,10 +14,15 @@ interface Hevm {
 }
 
 contract DssSpellTest is DSTest, DSMath {
-    // populate with kovan spell if needed
-    address constant KOVAN_SPELL = address(0x0);
-    // this needs to be updated
-    uint256 constant SPELL_CREATED = 1608240960;
+
+    struct SpellValues {
+        address deployed_spell;
+        uint256 deployed_spell_created;
+        address previous_spell;
+        uint256 previous_spell_execution_time;
+        bool    office_hours_enabled;
+        uint256 expiration_threshold;
+    }
 
     struct CollateralValues {
         bool aL_enabled;
@@ -31,9 +36,10 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 pct;
         uint256 mat;
         uint256 beg;
-        uint48 ttl;
-        uint48 tau;
+        uint48  ttl;
+        uint48  tau;
         uint256 liquidations;
+        uint256 flipper_mom;
     }
 
     struct SystemValues {
@@ -44,6 +50,9 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 vow_sump;
         uint256 vow_bump;
         uint256 vow_hump;
+        uint256 flap_beg;
+        uint256 flap_ttl;
+        uint256 flap_tau;
         uint256 cat_box;
         address pause_authority;
         address osm_mom_authority;
@@ -53,6 +62,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     SystemValues afterSpell;
+    SpellValues  spellValues;
 
     Hevm hevm;
     Rates rates;
@@ -93,6 +103,9 @@ contract DssSpellTest is DSTest, DSMath {
     uint256 constant MILLION    = 10 ** 6;
     uint256 constant BILLION    = 10 ** 9;
     uint256 constant RAD        = 10 ** 45;
+
+    uint256 constant monthly_expiration = 4 days;
+    uint256 constant weekly_expiration = 30 days;
 
     // Many of the settings that change weekly rely on the rate accumulator
     // described at https://docs.makerdao.com/smart-contract-modules/rates-module
@@ -145,7 +158,19 @@ contract DssSpellTest is DSTest, DSMath {
        hevm = Hevm(address(CHEAT_CODE));
         rates = new Rates();
 
-        spell = KOVAN_SPELL != address(0) ? DssSpell(KOVAN_SPELL) : new DssSpell();
+        //
+        // Test for spell-specific parameters
+        //
+        spellValues = SpellValues({
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
+            deployed_spell_created:         1614963412,                 // use get-created-timestamp.sh if deployed
+            previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
+            previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
+            office_hours_enabled:           false,              // true if officehours is expected to be enabled in the spell
+            expiration_threshold:           weekly_expiration  // (weekly_expiration,monthly_expiration) if weekly or monthly spell
+        });
+        spell = spellValues.deployed_spell != address(0) ?
+            DssSpell(spellValues.deployed_spell) : new DssSpell();
 
         //
         // Test for all system configuration changes
@@ -158,6 +183,9 @@ contract DssSpellTest is DSTest, DSMath {
             vow_sump:              50,                  // In whole Dai units
             vow_bump:              10,                  // In whole Dai units
             vow_hump:              500,                 // In whole Dai units
+            flap_beg:              0,                   // In Basis Points
+            flap_ttl:              0,                   // In seconds
+            flap_tau:              0,                   // In seconds
             cat_box:               10 * THOUSAND,       // In whole Dai units
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
@@ -182,7 +210,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,             // In basis points
             ttl:          1 hours,         // In seconds
             tau:          1 hours,         // In seconds
-            liquidations: 1                // 1 if enabled
+            liquidations: 1,               // 1 if enabled
+            flipper_mom:  1                // 1 if circuit breaker enabled
         });
         afterSpell.collaterals["ETH-B"] = CollateralValues({
             aL_enabled:   true,
@@ -198,7 +227,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["BAT-A"] = CollateralValues({
             aL_enabled:   false,
@@ -214,7 +244,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -230,7 +261,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  1
         });
         afterSpell.collaterals["USDC-B"] = CollateralValues({
             aL_enabled:   false,
@@ -246,7 +278,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  1
         });
         afterSpell.collaterals["WBTC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -262,7 +295,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["TUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -278,7 +312,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  1
         });
         afterSpell.collaterals["KNC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -294,7 +329,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["ZRX-A"] = CollateralValues({
             aL_enabled:   false,
@@ -310,7 +346,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["MANA-A"] = CollateralValues({
             aL_enabled:   false,
@@ -326,7 +363,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             aL_enabled:   false,
@@ -342,7 +380,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -358,7 +397,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  1
         });
         afterSpell.collaterals["COMP-A"] = CollateralValues({
             aL_enabled:   false,
@@ -374,7 +414,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["LRC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -390,7 +431,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["LINK-A"] = CollateralValues({
             aL_enabled:   false,
@@ -406,7 +448,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["BAL-A"] = CollateralValues({
             aL_enabled:   false,
@@ -422,7 +465,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["YFI-A"] = CollateralValues({
             aL_enabled:   false,
@@ -438,7 +482,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["GUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -454,7 +499,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  1
         });
         afterSpell.collaterals["UNI-A"] = CollateralValues({
             aL_enabled:   false,
@@ -470,7 +516,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["RENBTC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -486,7 +533,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["AAVE-A"] = CollateralValues({
             aL_enabled:   false,
@@ -502,7 +550,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["UNIV2DAIETH-A"] = CollateralValues({
             aL_enabled:   false,
@@ -518,7 +567,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  1
         });
         afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -534,7 +584,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  1
         });
     }
 
@@ -749,17 +800,29 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(sumlines <= vat.Line());
     }
 
-    function testSpellIsCast() public {
+    function getExtcodesize(address target) public view returns (uint256 exsize) {
+        assembly {
+            exsize := extcodesize(target)
+        }
+    }
+
+    function testSpellIsCast_GENERAL() public {
         string memory description = new DssSpell().description();
         assertTrue(bytes(description).length > 0);
         // DS-Test can't handle strings directly, so cast to a bytes32.
         assertEq(stringToBytes32(spell.description()),
                 stringToBytes32(description));
 
-        if(address(spell) != address(KOVAN_SPELL)) {
-            assertEq(spell.expiration(), (now + 30 days));
+        if(address(spell) != address(spellValues.deployed_spell)) {
+            assertEq(spell.expiration(), (now + spellValues.expiration_threshold));
         } else {
-            assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
+            assertEq(spell.expiration(), (spellValues.deployed_spell_created + spellValues.expiration_threshold));
+
+            // If the spell is deployed compare the on-chain bytecode size with the generated bytecode size.
+            //   extcodehash doesn't match, potentially because it's address-specific, avenue for further research.
+            address depl_spell = spellValues.deployed_spell;
+            address code_spell = address(new DssSpell());
+            assertEq(getExtcodesize(depl_spell), getExtcodesize(code_spell));
         }
 
         vote(address(spell));
