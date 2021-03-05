@@ -19,6 +19,10 @@ import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
 
 contract DssSpellAction is DssAction {
+
+    // Provides a descriptive tag for bot consumption
+    string public constant description = "KOVAN SPELL";
+
     // KOVAN ADDRESSES
     //
     // The contracts in this list should correspond to MCD core contracts, verify
