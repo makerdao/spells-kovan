@@ -4,6 +4,7 @@ import "ds-math/math.sol";
 import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
+import "./test/addresses_kovan.sol";
 
 import {DssSpell} from "./Kovan-DssSpell.sol";
 
@@ -65,7 +66,8 @@ contract DssSpellTest is DSTest, DSMath {
     SpellValues  spellValues;
 
     Hevm hevm;
-    Rates rates;
+    Rates     rates = new Rates();
+    Addresses addr  = new Addresses();
 
     // KOVAN ADDRESSES
     ChainlogAbstract changelog   = ChainlogAbstract(   0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F);
@@ -84,6 +86,7 @@ contract DssSpellTest is DSTest, DSMath {
     DSTokenAbstract        gov   = DSTokenAbstract(    0xAaF64BFCC32d0F15873a02163e7E500671a4ffcD);
     EndAbstract            end   = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     IlkRegistryAbstract    reg   = IlkRegistryAbstract(0xedE45A0522CA19e979e217064629778d6Cc2d9Ea);
+    FlapAbstract          flap   = FlapAbstract(       addr.addr("MCD_FLAP"));
 
     OsmMomAbstract      osmMom   = OsmMomAbstract(     0x5dA9D1C3d4f1197E5c52Ff963916Fe84D2F5d8f3);
     FlipperMomAbstract flipMom   = FlipperMomAbstract( 0x50dC6120c67E456AdA2059cfADFF0601499cf681);
@@ -160,8 +163,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function setUp() public {
-       hevm = Hevm(address(CHEAT_CODE));
-        rates = new Rates();
+        hevm = Hevm(address(CHEAT_CODE));
 
         //
         // Test for spell-specific parameters
@@ -188,9 +190,9 @@ contract DssSpellTest is DSTest, DSMath {
             vow_sump:              50,                  // In whole Dai units
             vow_bump:              10,                  // In whole Dai units
             vow_hump:              500,                 // In whole Dai units
-            flap_beg:              0,                   // In Basis Points
-            flap_ttl:              0,                   // In seconds
-            flap_tau:              0,                   // In seconds
+            flap_beg:              200,                 // In Basis Points
+            flap_ttl:              1 hours,             // In seconds
+            flap_tau:              1 hours,             // In seconds
             cat_box:               10 * THOUSAND,       // In whole Dai units
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
@@ -723,6 +725,19 @@ contract DssSpellTest is DSTest, DSMath {
 
         // check number of ilks
         assertEq(reg.count(), values.ilk_count);
+
+        // flap
+        // check beg value
+        uint256 normalizedTestBeg = (values.flap_beg + 10000)  * 10**14;
+        assertEq(flap.beg(), normalizedTestBeg);
+        assertTrue(flap.beg() >= WAD && flap.beg() <= 110 * WAD / 100); // gte 0% and lte 10%
+        // Check flap ttl and sanity checks
+        assertEq(flap.ttl(), values.flap_ttl);
+        assertTrue(flap.ttl() > 0 && flap.ttl() < 86400); // gt 0 && lt 1 day
+        // Check flap tau and sanity checks
+        assertEq(flap.tau(), values.flap_tau);
+        assertTrue(flap.tau() > 0 && flap.tau() < 2678400); // gt 0 && lt 1 month
+        assertTrue(flap.tau() >= flap.ttl());
     }
 
     function checkCollateralValues(SystemValues storage values) internal {
