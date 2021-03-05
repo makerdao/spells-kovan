@@ -537,8 +537,8 @@ contract DssSpellTest is DSTest, DSMath {
         });
     }
 
-    function vote() private {
-        if (chief.hat() != address(spell)) {
+    function vote(address spell_) private {
+        if (chief.hat() != spell_) {
             hevm.store(
                 address(gov),
                 keccak256(abi.encode(address(this), uint256(1))),
@@ -549,18 +549,18 @@ contract DssSpellTest is DSTest, DSMath {
 
             address[] memory slate = new address[](1);
 
-            assertTrue(!spell.done());
+            assertTrue(!DssSpell(spell_).done());
 
-            slate[0] = address(spell);
+            slate[0] = spell_;
 
             chief.vote(slate);
-            chief.lift(address(spell));
+            chief.lift(spell_);
         }
-        assertEq(chief.hat(), address(spell));
+        assertEq(chief.hat(), spell_);
     }
 
-    function scheduleWaitAndCast() public {
-        spell.schedule();
+    function scheduleWaitAndCast(address spell_) public {
+        DssSpell(spell_).schedule();
 
         uint256 castTime = now + pause.delay();
 
@@ -577,7 +577,7 @@ contract DssSpellTest is DSTest, DSMath {
         }
 
         hevm.warp(castTime);
-        spell.cast();
+        DssSpell(spell_).cast();
     }
 
     function stringToBytes32(string memory source) public pure returns (bytes32 result) {
@@ -761,8 +761,8 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(spell.expiration(), (SPELL_CREATED + 30 days));
         }
 
-        vote();
-        scheduleWaitAndCast();
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
 
         checkSystemValues(afterSpell);

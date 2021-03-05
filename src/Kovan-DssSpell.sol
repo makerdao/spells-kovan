@@ -20,31 +20,21 @@ import "dss-exec-lib/DssAction.sol";
 
 contract DssSpellAction is DssAction {
 
-    string public constant description = "TODO";
+    string public constant description = "Kovan Spell";
 
-    // Many of the settings that change weekly rely on the rate accumulator
-    // described at https://docs.makerdao.com/smart-contract-modules/rates-module
-    // To check this yourself, use the following rate calculation (example 8%):
-    //
-    // $ bc -l <<< 'scale=27; e( l(1.08)/(60 * 60 * 24 * 365) )'
-    //
-    // A table of rates can be found at
-    //    https://ipfs.io/ipfs/QmefQMseb3AiTapiAKKexdKHig8wroKuZbmLtPLv4u2YwW
-    //
-
-    /**
-        @dev constructor (required)
-        @param officeHours true if officehours enabled
-    */
-    constructor(bool officeHours) public DssAction(officeHours) {}
+    // Turn off office hours
+    function officeHours() public override returns (bool) {
+        return false;
+    }
 
     function actions() public override {
-
+        DssExecLib.setChangelogAddress("RWA001_A_INPUT_CONDUIT", address(123));
+        DssExecLib.setChangelogVersion("1.2.9");
     }
 
 }
 
 contract DssSpell is DssExec {
-    DssSpellAction public spell = new DssSpellAction(true);
-    constructor() DssExec(spell.description(), now + 30 days, address(spell)) public {}
+    DssSpellAction internal action_ = new DssSpellAction();
+    constructor() DssExec(action_.description(), block.timestamp + 30 days, address(action_)) public {}
 }
