@@ -30,9 +30,10 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 pct;
         uint256 mat;
         uint256 beg;
-        uint48 ttl;
-        uint48 tau;
+        uint48  ttl;
+        uint48  tau;
         uint256 liquidations;
+        uint256 flipper_mom;
     }
 
     struct SystemValues {
@@ -43,6 +44,9 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 vow_sump;
         uint256 vow_bump;
         uint256 vow_hump;
+        uint256 flap_beg;
+        uint256 flap_ttl;
+        uint256 flap_tau;
         uint256 cat_box;
         address pause_authority;
         address osm_mom_authority;
@@ -158,6 +162,9 @@ contract DssSpellTest is DSTest, DSMath {
             vow_sump:              50,                  // In whole Dai units
             vow_bump:              10,                  // In whole Dai units
             vow_hump:              500,                 // In whole Dai units
+            flap_beg:              1,
+            flap_ttl:              2,
+            flap_tau:              3,
             cat_box:               10 * THOUSAND,       // In whole Dai units
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
@@ -182,7 +189,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,             // In basis points
             ttl:          1 hours,         // In seconds
             tau:          1 hours,         // In seconds
-            liquidations: 1                // 1 if enabled
+            liquidations: 1,               // 1 if enabled
+            flipper_mom:  0
         });
         afterSpell.collaterals["ETH-B"] = CollateralValues({
             aL_enabled:   true,
@@ -198,7 +206,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["BAT-A"] = CollateralValues({
             aL_enabled:   false,
@@ -214,7 +223,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -230,7 +240,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  0
         });
         afterSpell.collaterals["USDC-B"] = CollateralValues({
             aL_enabled:   false,
@@ -246,7 +257,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  0
         });
         afterSpell.collaterals["WBTC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -262,7 +274,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["TUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -278,7 +291,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  0
         });
         afterSpell.collaterals["KNC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -294,7 +308,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["ZRX-A"] = CollateralValues({
             aL_enabled:   false,
@@ -310,7 +325,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["MANA-A"] = CollateralValues({
             aL_enabled:   false,
@@ -326,7 +342,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             aL_enabled:   false,
@@ -342,7 +359,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -358,7 +376,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  0
         });
         afterSpell.collaterals["COMP-A"] = CollateralValues({
             aL_enabled:   false,
@@ -374,7 +393,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["LRC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -390,7 +410,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["LINK-A"] = CollateralValues({
             aL_enabled:   false,
@@ -406,7 +427,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["BAL-A"] = CollateralValues({
             aL_enabled:   false,
@@ -422,7 +444,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["YFI-A"] = CollateralValues({
             aL_enabled:   false,
@@ -438,7 +461,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["GUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -454,7 +478,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  0
         });
         afterSpell.collaterals["UNI-A"] = CollateralValues({
             aL_enabled:   false,
@@ -470,7 +495,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["RENBTC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -486,7 +512,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["AAVE-A"] = CollateralValues({
             aL_enabled:   false,
@@ -502,7 +529,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["UNIV2DAIETH-A"] = CollateralValues({
             aL_enabled:   false,
@@ -518,7 +546,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 1
+            liquidations: 1,
+            flipper_mom:  0
         });
         afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -534,7 +563,8 @@ contract DssSpellTest is DSTest, DSMath {
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
-            liquidations: 0
+            liquidations: 0,
+            flipper_mom:  0
         });
     }
 
