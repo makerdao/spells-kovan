@@ -918,4 +918,123 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues(afterSpell);
     }
 
+    function testFailWrongDay() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailDay();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
+
+    function testFailTooEarly() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailEarly();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
+
+    function testFailTooLate() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailLate();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
+
+    function testOnTime() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+    }
+
+    function testCastCost() public {
+        vote(address(spell));
+        spell.schedule();
+
+        castPreviousSpell();
+
+        hevm.warp(spell.nextCastTime());
+        uint256 startGas = gasleft();
+        spell.cast();
+        uint256 endGas = gasleft();
+        uint256 totalGas = startGas - endGas;
+
+        assertTrue(spell.done());
+        // Fail if cast is too expensive
+        assertTrue(totalGas <= 8 * MILLION);
+    }
+
+    function test_nextCastTime() public {
+        hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
+
+        vote(address(spell));
+        spell.schedule();
+
+        uint256 monday_1400_UTC = 1606744800; // Nov 30, 2020
+        uint256 monday_2100_UTC = 1606770000; // Nov 30, 2020
+
+        // Day tests
+        hevm.warp(monday_1400_UTC);                                    // Monday,   14:00 UTC
+        assertEq(spell.nextCastTime(), monday_1400_UTC);               // Monday,   14:00 UTC
+
+        if (spell.officeHours()) {
+            hevm.warp(monday_1400_UTC - 1 days);                       // Sunday,   14:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+            hevm.warp(monday_1400_UTC - 2 days);                       // Saturday, 14:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+            hevm.warp(monday_1400_UTC - 3 days);                       // Friday,   14:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC - 3 days);  // Able to cast
+
+            hevm.warp(monday_2100_UTC);                                // Monday,   21:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC + 1 days);  // Tuesday,  14:00 UTC
+
+            hevm.warp(monday_2100_UTC - 1 days);                       // Sunday,   21:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+            hevm.warp(monday_2100_UTC - 2 days);                       // Saturday, 21:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+            hevm.warp(monday_2100_UTC - 3 days);                       // Friday,   21:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+            // Time tests
+            uint256 castTime;
+
+            for(uint256 i = 0; i < 5; i++) {
+                castTime = monday_1400_UTC + i * 1 days; // Next day at 14:00 UTC
+                hevm.warp(castTime - 1 seconds); // 13:59:59 UTC
+                assertEq(spell.nextCastTime(), castTime);
+
+                hevm.warp(castTime + 7 hours + 1 seconds); // 21:00:01 UTC
+                if (i < 4) {
+                    assertEq(spell.nextCastTime(), monday_1400_UTC + (i + 1) * 1 days); // Next day at 14:00 UTC
+                } else {
+                    assertEq(spell.nextCastTime(), monday_1400_UTC + 7 days); // Next monday at 14:00 UTC (friday case)
+                }
+            }
+        }
+    }
+
+    function testFail_notScheduled() public view {
+        spell.nextCastTime();
+    }
+
+    function test_use_eta() public {
+        hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
+
+        vote(address(spell));
+        spell.schedule();
+
+        uint256 castTime = spell.nextCastTime();
+        assertEq(castTime, spell.eta());
+    }
+
 }
