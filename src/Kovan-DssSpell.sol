@@ -28,7 +28,7 @@ contract DssSpellAction is DssAction {
     }
 
     function actions() public override {
-        DssExecLib.setChangelogAddress("RWA001_A_INPUT_CONDUIT", address(123));
+        DssExecLib.setChangelogAddress("RWA001_A_INPUT_CONDUIT", 0xB944B07EC3B680b2cEA753125667F7663d424DC3);
         DssExecLib.setChangelogVersion("1.2.9");
     }
 

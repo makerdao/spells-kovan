@@ -918,6 +918,16 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues(afterSpell);
     }
 
+    function testChainlogValues() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
+
+        assertEq(chainLog.getAddress("RWA001_A_INPUT_CONDUIT"), addr.addr("RWA001_A_INPUT_CONDUIT"));
+    }
+
     function testFailWrongDay() public {
         require(spell.officeHours() == spellValues.office_hours_enabled);
         if (spell.officeHours()) {
