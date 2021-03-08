@@ -3,6 +3,8 @@ set -e
 
 [[ "$ETH_RPC_URL" && "$(seth chain)" == "kovan" ]] || { echo "Please set a kovan ETH_RPC_URL"; exit 1; }
 
+export DAPP_BUILD_OPTIMIZE=1
+export DAPP_BUILD_OPTIMIZE_RUNS=1
 export DAPP_LIBRARIES=' lib/dss-exec-lib/src/DssExecLib.sol:DssExecLib:0x40E718b252c65a4abF2C9897d63b086eb0e139b1'
 export DAPP_LINK_TEST_LIBRARIES=0
 
