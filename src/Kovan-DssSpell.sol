@@ -15,20 +15,31 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 pragma solidity 0.6.11;
 
+import {Fileable, ChainlogLike} from "dss-exec-lib/DssExecLib.sol";
 import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
-import "dss-interfaces/dss/ChainlogAbstract.sol";
 import "dss-interfaces/dss/IlkRegistryAbstract.sol";
+
+interface ClipperMomLike {
+    function setAuthority(address) external;
+}
 
 contract DssSpellAction is DssAction {
 
     string public constant description = "Kovan Spell";
 
-    address constant MCD_DOG         = address(0);
-    address constant MCD_END         = address(0);
-    address constant MCD_ESM         = address(0);
-    // address constant ILK_REGISTRY    = address(0);
-    address constant MCD_CLIP_LINK_A = address(0);
+    uint256 constant MILLION    = 10**6;
+    uint256 constant WAD        = 10**18;
+    uint256 constant RAY        = 10**27;
+    uint256 constant RAD        = 10**45;
+
+    address constant MCD_DOG              = address(0);
+    address constant MCD_END              = address(0);
+    address constant MCD_ESM              = address(0);
+    // address constant ILK_REGISTRY         = address(0);
+    address constant CLIPPER_MOM          = address(0);
+    address constant MCD_CLIP_LINK_A      = address(0);
+    address constant MCD_CLIP_CALC_LINK_A = address(0);
 
     // Turn off office hours
     function officeHours() public override returns (bool) {
@@ -80,8 +91,19 @@ contract DssSpellAction is DssAction {
 
         // ------------------  AUCTION  ------------------
 
+        ClipperMomLike(CLIPPER_MOM).setAuthority(DssExecLib.getChangelogAddress("MCD_ADM"));
+
+        // Set VOW in the DOG
+        DssExecLib.setContract(MCD_DOG, "vow", MCD_VOW);
+
         // Set CLIP for LINK-A in the DOG
         DssExecLib.setContract(MCD_DOG, "LINK-A", "clip", MCD_CLIP_LINK_A);
+
+        // Set VOW in the LINK-A CLIP
+        DssExecLib.setContract(MCD_CLIP_LINK_A, "vow", MCD_VOW);
+
+        // Set CALC in the LINK-A CLIP
+        DssExecLib.setContract(MCD_CLIP_LINK_A, "calc", MCD_CLIP_CALC_LINK_A);
 
         // Authorize CLIP can access to VAT
         DssExecLib.authorize(MCD_VAT, MCD_CLIP_LINK_A);
@@ -91,6 +113,9 @@ contract DssSpellAction is DssAction {
 
         // Authorize DOG can kick auctions on CLIP
         DssExecLib.authorize(MCD_CLIP_LINK_A, MCD_DOG);
+
+        // Authorize CLIPPERMOM can set the stopped flag in CLIP
+        DssExecLib.authorize(MCD_CLIP_LINK_A, CLIPPER_MOM);
 
         // We can't deauthorize the FLIP yet as there might be running auctions:
         // DssExecLib.deauthorize(MCD_CAT, MCD_FLIP_LINK_A); TODO in a future spell
@@ -116,14 +141,31 @@ contract DssSpellAction is DssAction {
         }
         // DssExecLib.deauthorize(MCD_FLIP_LINK_A, MCD_END); TODO in a future spell
 
-         // ------------------  CHAINLOG  -----------------
+        // Set DOG values
+        Fileable(MCD_DOG).file("Hole", 10 * MILLION * RAD);
+        Fileable(MCD_DOG).file("LINK-A", "hole", 10 * MILLION * RAD);
+        Fileable(MCD_DOG).file("LINK-A", "chop", 113 * WAD / 100);
+
+        // Set LINK-A CLIP values
+        Fileable(MCD_CLIP_LINK_A).file("buf", 120 * RAY / 100);
+        Fileable(MCD_CLIP_LINK_A).file("tail", 1 hours);
+        Fileable(MCD_CLIP_LINK_A).file("cusp", 60 * RAY / 100);
+        Fileable(MCD_CLIP_LINK_A).file("chip", 2 * WAD / 100);
+        Fileable(MCD_CLIP_LINK_A).file("tip", 50 * RAD);
+
+        // TODO: Set CALC PARAMS
+        // Fileable(MCD_CLIP_CALC_LINK_A).file("", );
+
+        // ------------------  CHAINLOG  -----------------
 
         DssExecLib.setChangelogAddress("MCD_DOG", MCD_DOG);
         DssExecLib.setChangelogAddress("MCD_END", MCD_END);
         DssExecLib.setChangelogAddress("MCD_ESM", MCD_ESM);
+        DssExecLib.setChangelogAddress("CLIPPER_MOM", CLIPPER_MOM);
         DssExecLib.setChangelogAddress("MCD_CLIP_LINK_A", MCD_CLIP_LINK_A);
+        DssExecLib.setChangelogAddress("MCD_CLIP_CALC_LINK_A", MCD_CLIP_CALC_LINK_A);
         // DssExecLib.setChangelogAddress("ILK_REGISTRY", ILK_REGISTRY); TODO in the following spell
-        ChainlogAbstract(DssExecLib.LOG).removeAddress("MCD_FLIP_LINK_A");
+        ChainlogLike(DssExecLib.LOG).removeAddress("MCD_FLIP_LINK_A");
 
         // DssExecLib.setChangelogVersion("1.3.0");
     }
