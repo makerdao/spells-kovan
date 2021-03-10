@@ -254,7 +254,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             23                   // Num expected in system
+            ilk_count:             24                   // Num expected in system
         });
 
         //
@@ -285,6 +285,23 @@ contract DssSpellTest is DSTest, DSMath {
             line:         0 * MILLION,     // Not being checked as there is auto line
             dust:         100,
             pct:          600,
+            chop:         1300,
+            dunk:         500,
+            mat:          13000,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1,
+            flipper_mom:  1
+        });
+        afterSpell.collaterals["ETH-C"] = CollateralValues({
+            aL_enabled:   true,
+            aL_line:      2000 * MILLION,
+            aL_gap:       100 * MILLION,
+            aL_ttl:       12 hours,
+            line:         0 * MILLION,
+            dust:         100,
+            pct:          350,
             chop:         1300,
             dunk:         500,
             mat:          13000,

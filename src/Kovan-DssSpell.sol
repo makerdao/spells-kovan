@@ -33,6 +33,14 @@ contract DssSpellAction is DssAction {
     uint256 constant RAY        = 10**27;
     uint256 constant RAD        = 10**45;
 
+    // Many of the settings that change weekly rely on the rate accumulator
+    // described at https://docs.makerdao.com/smart-contract-modules/rates-module
+    // To check this yourself, use the following rate calculation (example 8%):
+    //
+    // $ bc -l <<< 'scale=27; e( l(1.01)/(60 * 60 * 24 * 365) )'
+    //
+    uint256 constant THREE_PT_FIVE_PCT = 1000000001090862085746321732;
+
     address constant MCD_DOG              = address(0);
     address constant MCD_END              = address(0);
     address constant MCD_ESM              = address(0);
@@ -40,6 +48,10 @@ contract DssSpellAction is DssAction {
     address constant CLIPPER_MOM          = address(0);
     address constant MCD_CLIP_LINK_A      = address(0);
     address constant MCD_CLIP_CALC_LINK_A = address(0);
+
+    // ETH-C
+    address constant MCD_JOIN_ETH_C = 0xD166b57355BaCE25e5dEa5995009E68584f60767;
+    address constant MCD_FLIP_ETH_C = 0x6EB1922EbfC357bAe88B4aa5aB377A8C4DFfB4e9;
 
     // Turn off office hours
     function officeHours() public override returns (bool) {
@@ -166,6 +178,29 @@ contract DssSpellAction is DssAction {
         DssExecLib.setChangelogAddress("MCD_CLIP_CALC_LINK_A", MCD_CLIP_CALC_LINK_A);
         // DssExecLib.setChangelogAddress("ILK_REGISTRY", ILK_REGISTRY); TODO in the following spell
         ChainlogLike(DssExecLib.LOG).removeAddress("MCD_FLIP_LINK_A");
+
+        // Onboarding ETH-C
+        CollateralOpts memory ETH_C = CollateralOpts({
+            ilk: "ETH-C",
+            gem: DssExecLib.getChangelogAddress("ETH"),
+            join: MCD_JOIN_ETH_C,
+            flip: MCD_FLIP_ETH_C,
+            pip: DssExecLib.getChangelogAddress("PIP_ETH"),
+            isLiquidatable: true,
+            isOSM: true,
+            whitelistOSM: false,
+            ilkDebtCeiling: 100 * MILLION,
+            minVaultAmount: 100,
+            maxLiquidationAmount: 500,
+            liquidationPenalty: 1300,
+            ilkStabilityFee: THREE_PT_FIVE_PCT,
+            bidIncrease: 300,
+            bidDuration: 1 hours,
+            auctionDuration: 1 hours,
+            liquidationRatio: 17500
+        });
+        addNewCollateral(ETH_C);
+        DssExecLib.setIlkAutoLineParameters("ETH-C", 2000 * MILLION, 100 * MILLION, 12 hours);
 
         // DssExecLib.setChangelogVersion("1.3.0");
     }
