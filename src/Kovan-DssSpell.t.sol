@@ -19,6 +19,10 @@ interface SpellLike {
     function cast() external;
 }
 
+interface DSValueLike {
+    function read() external view returns (bytes32);
+}
+
 contract DssSpellTest is DSTest, DSMath {
 
     struct SpellValues {
@@ -150,6 +154,9 @@ contract DssSpellTest is DSTest, DSMath {
         }
       }
     }
+    function divup(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        z = add(x, sub(y, 1)) / y;
+    }
     // 10^-5 (tenth of a basis point) as a RAY
     uint256 TOLERANCE = 10 ** 22;
 
@@ -181,7 +188,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0x2521d5Df98caE2919C7e6412a59e7e58ad28ee58),        // populate with deployed spell if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
             deployed_spell_created:         1615208240,                 // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
@@ -209,7 +216,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             23                   // Num expected in system
+            ilk_count:             24                   // Num expected in system
         });
 
         //
@@ -243,6 +250,23 @@ contract DssSpellTest is DSTest, DSMath {
             chop:         1300,
             dunk:         500,
             mat:          13000,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1,
+            flipper_mom:  1
+        });
+        afterSpell.collaterals["ETH-C"] = CollateralValues({
+            aL_enabled:   true,
+            aL_line:      2000 * MILLION,
+            aL_gap:       100 * MILLION,
+            aL_ttl:       12 hours,
+            line:         0 * MILLION,
+            dust:         100,
+            pct:          350,
+            chop:         1300,
+            dunk:         500,
+            mat:          17500,
             beg:          300,
             ttl:          1 hours,
             tau:          1 hours,
@@ -882,6 +906,249 @@ contract DssSpellTest is DSTest, DSMath {
             }
         }
         assertEq(sumlines, vat.Line());
+    }
+    
+    function getOSMPrice(address pip) internal returns (uint256) {
+        // hevm.load is to pull the price from the LP Oracle storage bypassing the whitelist
+        uint256 price = uint256(hevm.load(
+            pip,
+            bytes32(uint256(3))
+        )) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+
+        // Price is bounded in the spot by around 10^23
+        // Give a 10^9 buffer for price appreciation over time
+        // Note: This currently can't be hit due to the uint112, but we want to backstop
+        //       once the PIP uint size is increased
+        assertTrue(price <= (10 ** 14) * WAD);
+
+        return price;
+    }
+    
+    function getUNIV2LPPrice(address pip) internal returns (uint256) {
+        // hevm.load is to pull the price from the LP Oracle storage bypassing the whitelist
+        uint256 price = uint256(hevm.load(
+            pip,
+            bytes32(uint256(6))
+        )) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+
+        // Price is bounded in the spot by around 10^23
+        // Give a 10^9 buffer for price appreciation over time
+        // Note: This currently can't be hit due to the uint112, but we want to backstop
+        //       once the PIP uint size is increased
+        assertTrue(price <= (10 ** 14) * WAD);
+
+        return price;
+    }
+    
+    function giveTokens(DSTokenAbstract token, uint256 amount) internal {
+        // Edge case - balance is already set for some reason
+        if (token.balanceOf(address(this)) == amount) return;
+
+        for (int i = 0; i < 40; i++) {
+            // Scan the storage for the balance storage slot
+            bytes32 prevValue = hevm.load(
+                address(token),
+                keccak256(abi.encode(address(this), uint256(i)))
+            );
+            hevm.store(
+                address(token),
+                keccak256(abi.encode(address(this), uint256(i))),
+                bytes32(amount)
+            );
+            if (token.balanceOf(address(this)) == amount) {
+                // Found it
+                return;
+            } else {
+                // Keep going after restoring the original value
+                hevm.store(
+                    address(token),
+                    keccak256(abi.encode(address(this), uint256(i))),
+                    prevValue
+                );
+            }
+        }
+
+        // We have failed if we reach here
+        assertTrue(false);
+    }
+
+	function checkIlkIntegration(
+        bytes32 _ilk,
+        GemJoinAbstract join,
+        FlipAbstract flip,
+        address pip,
+        bool _isOSM,
+        bool _checkLiquidations
+    ) public {
+        DSTokenAbstract token = DSTokenAbstract(join.gem());
+
+        if (_isOSM) OsmAbstract(pip).poke();
+        hevm.warp(now + 3601);
+        if (_isOSM) OsmAbstract(pip).poke();
+        spot.poke(_ilk);
+
+        // Authorization
+        assertEq(join.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(join)), 1);
+        assertEq(flip.wards(address(end)), 1);
+        assertEq(flip.wards(address(flipMom)), 1);
+        if (_isOSM) {
+            assertEq(OsmAbstract(pip).wards(address(osmMom)), 1);
+            assertEq(OsmAbstract(pip).bud(address(spot)), 1);
+            assertEq(OsmAbstract(pip).bud(address(end)), 1);
+            assertEq(MedianAbstract(OsmAbstract(pip).src()).bud(pip), 1);
+        }
+
+        (,,,, uint256 dust) = vat.ilks(_ilk);
+        dust /= RAY;
+        uint256 amount = 2 * dust * WAD / (_isOSM ? getOSMPrice(pip) : uint256(DSValueLike(pip).read()));
+        giveTokens(token, amount);
+
+        assertEq(token.balanceOf(address(this)), amount);
+        assertEq(vat.gem(_ilk, address(this)), 0);
+        token.approve(address(join), amount);
+        join.join(address(this), amount);
+        assertEq(token.balanceOf(address(this)), 0);
+        assertEq(vat.gem(_ilk, address(this)), amount);
+
+        // Tick the fees forward so that art != dai in wad units
+        hevm.warp(now + 1);
+        jug.drip(_ilk);
+
+        // Deposit collateral, generate DAI
+        (,uint256 rate,,,) = vat.ilks(_ilk);
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob(_ilk, address(this), address(this), address(this), int(amount), int(divup(mul(RAY, dust), rate)));
+        assertEq(vat.gem(_ilk, address(this)), 0);
+        assertTrue(vat.dai(address(this)) >= dust * RAY && vat.dai(address(this)) <= (dust + 1) * RAY);
+
+        // Payback DAI, withdraw collateral
+        vat.frob(_ilk, address(this), address(this), address(this), -int(amount), -int(divup(mul(RAY, dust), rate)));
+        assertEq(vat.gem(_ilk, address(this)), amount);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        join.exit(address(this), amount);
+        assertEq(token.balanceOf(address(this)), amount);
+        assertEq(vat.gem(_ilk, address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        token.approve(address(join), amount);
+        join.join(address(this), amount);
+        // dart max amount of DAI
+        (,,uint256 spotV,,) = vat.ilks(_ilk);
+        vat.frob(_ilk, address(this), address(this), address(this), int(amount), int(mul(amount, spotV) / rate));
+        hevm.warp(now + 1);
+        jug.drip(_ilk);
+        assertEq(flip.kicks(), 0);
+        if (_checkLiquidations) {
+            cat.bite(_ilk, address(this));
+            assertEq(flip.kicks(), 1);
+        }
+
+        // Dump all dai for next run
+        vat.move(address(this), address(0x0), vat.dai(address(this)));
+    }
+
+	function checkUNIV2LPIntegration(
+        bytes32 _ilk,
+        GemJoinAbstract join,
+        FlipAbstract flip,
+        LPOsmAbstract pip,
+        address _medianizer1,
+        address _medianizer2,
+        bool _isMedian1,
+        bool _isMedian2,
+        bool _checkLiquidations
+    ) public {
+        DSTokenAbstract token = DSTokenAbstract(join.gem());
+
+        pip.poke();
+        hevm.warp(now + 3601);
+        pip.poke();
+        spot.poke(_ilk);
+
+        // Check medianizer sources
+        assertEq(pip.src(), address(token));
+        assertEq(pip.orb0(), _medianizer1);
+        assertEq(pip.orb1(), _medianizer2);
+
+        // Authorization
+        assertEq(join.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(join)), 1);
+        assertEq(flip.wards(address(end)), 1);
+        assertEq(flip.wards(address(flipMom)), 1);
+        assertEq(pip.wards(address(osmMom)), 1);
+        assertEq(pip.bud(address(spot)), 1);
+        assertEq(pip.bud(address(end)), 1);
+        if (_isMedian1) assertEq(MedianAbstract(_medianizer1).bud(address(pip)), 1);
+        if (_isMedian2) assertEq(MedianAbstract(_medianizer2).bud(address(pip)), 1);
+
+        (,,,, uint256 dust) = vat.ilks(_ilk);
+        dust /= RAY;
+        uint256 amount = 2 * dust * WAD / getUNIV2LPPrice(address(pip));
+        giveTokens(token, amount);
+
+        assertEq(token.balanceOf(address(this)), amount);
+        assertEq(vat.gem(_ilk, address(this)), 0);
+        token.approve(address(join), amount);
+        join.join(address(this), amount);
+        assertEq(token.balanceOf(address(this)), 0);
+        assertEq(vat.gem(_ilk, address(this)), amount);
+
+        // Tick the fees forward so that art != dai in wad units
+        hevm.warp(now + 1);
+        jug.drip(_ilk);
+
+        // Deposit collateral, generate DAI
+        (,uint256 rate,,,) = vat.ilks(_ilk);
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob(_ilk, address(this), address(this), address(this), int(amount), int(divup(mul(RAY, dust), rate)));
+        assertEq(vat.gem(_ilk, address(this)), 0);
+        assertTrue(vat.dai(address(this)) >= dust * RAY && vat.dai(address(this)) <= (dust + 1) * RAY);
+
+        // Payback DAI, withdraw collateral
+        vat.frob(_ilk, address(this), address(this), address(this), -int(amount), -int(divup(mul(RAY, dust), rate)));
+        assertEq(vat.gem(_ilk, address(this)), amount);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        join.exit(address(this), amount);
+        assertEq(token.balanceOf(address(this)), amount);
+        assertEq(vat.gem(_ilk, address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        token.approve(address(join), amount);
+        join.join(address(this), amount);
+        // dart max amount of DAI
+        (,,uint256 spotV,,) = vat.ilks(_ilk);
+        vat.frob(_ilk, address(this), address(this), address(this), int(amount), int(mul(amount, spotV) / rate));
+        hevm.warp(now + 1);
+        jug.drip(_ilk);
+        assertEq(flip.kicks(), 0);
+        if (_checkLiquidations) {
+            cat.bite(_ilk, address(this));
+            assertEq(flip.kicks(), 1);
+        }
+
+        // Dump all dai for next run
+        vat.move(address(this), address(0x0), vat.dai(address(this)));
+    }
+
+    function testCollateralIntegrations() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        // Insert new collateral tests here
+        checkIlkIntegration(
+            "ETH-C",
+            GemJoinAbstract(addr.addr("MCD_JOIN_ETH_C")),
+            FlipAbstract(addr.addr("MCD_FLIP_ETH_C")),
+            addr.addr("PIP_ETH"),
+            true,
+            true
+        );
     }
 
     function getExtcodesize(address target) public view returns (uint256 exsize) {
