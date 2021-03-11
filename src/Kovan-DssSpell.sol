@@ -34,7 +34,7 @@ contract DssSpellAction is DssAction {
     // $ bc -l <<< 'scale=27; e( l(1.01)/(60 * 60 * 24 * 365) )'
     //
     uint256 constant THREE_PT_FIVE_PCT = 1000000001090862085746321732;
-    
+
     uint256 constant WAD        = 10**18;
     uint256 constant RAD        = 10**45;
     uint256 constant MILLION    = 10**6;
@@ -66,6 +66,12 @@ contract DssSpellAction is DssAction {
         });
         addNewCollateral(ETH_C);
         DssExecLib.setIlkAutoLineParameters("ETH-C", 2000 * MILLION, 100 * MILLION, 12 hours);
+
+        DssExecLib.setChangelogAddress("MCD_JOIN_ETH_C", MCD_JOIN_ETH_C);
+        DssExecLib.setChangelogAddress("MCD_FLIP_ETH_C", MCD_FLIP_ETH_C);
+
+        // bump changelog version
+        DssExecLib.setChangelogVersion("1.2.10");
     }
 
 }
