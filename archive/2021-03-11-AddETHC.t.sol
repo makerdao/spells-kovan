@@ -19,42 +19,6 @@ interface SpellLike {
     function cast() external;
 }
 
-// To be removed when dss-interfaces get updated
-interface DogAbstract {
-    // TODO: Add all existing methods to dss-interfaces (not only these ones)
-    function ilks(bytes32) external view returns (address, uint256, uint256, uint256);
-    function vat() external view returns (address);
-    function vow() external view returns (address);
-    function wards(address) external view returns (uint256);
-    function bark(bytes32, address, address) external;
-}
-
-interface ClipperMomAbstract {
-    // TODO: Add all existing methods to dss-interfaces (not only these ones)
-    function authority() external view returns (address);
-    function owner() external view returns (address);
-}
-
-interface ClipAbstract {
-    // TODO: Add all existing methods to dss-interfaces (not only these ones)
-    function calc() external view returns (address);
-    function dog() external view returns (address);
-    function ilk() external view returns (bytes32);
-    function kicks() external view returns (uint256);
-    function spotter() external view returns (address);
-    function vat() external view returns (address);
-    function vow() external view returns (address);
-    function wards(address) external view returns (uint256);
-}
-
-interface EndAbstractNew {
-    // TODO: In this case add these two functions to the EndAbstract
-    // and remove the EndAbstractNew cast when used in the tests
-    function dog() external view returns (address);
-    function snip(bytes32, uint256) external;
-}
-//
-
 contract DssSpellTest is DSTest, DSMath {
 
     struct SpellValues {
@@ -117,31 +81,22 @@ contract DssSpellTest is DSTest, DSMath {
     VatAbstract              vat = VatAbstract(        addr.addr("MCD_VAT"));
     VowAbstract              vow = VowAbstract(        addr.addr("MCD_VOW"));
     CatAbstract              cat = CatAbstract(        addr.addr("MCD_CAT"));
-    DogAbstract              dog = DogAbstract(        addr.addr("MCD_DOG"));
     PotAbstract              pot = PotAbstract(        addr.addr("MCD_POT"));
     JugAbstract              jug = JugAbstract(        addr.addr("MCD_JUG"));
-    SpotAbstract         spotter = SpotAbstract(       addr.addr("MCD_SPOT"));
+    SpotAbstract            spot = SpotAbstract(       addr.addr("MCD_SPOT"));
     DaiAbstract              dai = DaiAbstract(        addr.addr("MCD_DAI"));
     DaiJoinAbstract      daiJoin = DaiJoinAbstract(    addr.addr("MCD_DAI_JOIN"));
     DSTokenAbstract          gov = DSTokenAbstract(    addr.addr("MCD_GOV"));
     EndAbstract              end = EndAbstract(        addr.addr("MCD_END"));
-    ESMAbstract              esm = ESMAbstract(        addr.addr("MCD_ESM"));
     IlkRegistryAbstract      reg = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
     FlapAbstract            flap = FlapAbstract(       addr.addr("MCD_FLAP"));
 
     OsmMomAbstract        osmMom = OsmMomAbstract(     addr.addr("OSM_MOM"));
     FlipperMomAbstract   flipMom = FlipperMomAbstract( addr.addr("FLIPPER_MOM"));
-    ClipperMomAbstract   clipMom = ClipperMomAbstract( addr.addr("CLIPPER_MOM"));
     DssAutoLineAbstract autoLine = DssAutoLineAbstract(addr.addr("MCD_IAM_AUTO_LINE"));
 
     // Faucet
-    FaucetAbstract        faucet = FaucetAbstract(     addr.addr("FAUCET"));
-
-    // Specific for this spell
-    ClipAbstract       clipLINKA = ClipAbstract(       addr.addr("MCD_CLIP_LINK_A"));
-    EndAbstract          end_old = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
-    ESMAbstract          esm_old = ESMAbstract(        0x0C376764F585828ffB52471c1c35f855e312a06c);
-    //
+    FaucetAbstract      faucet   = FaucetAbstract(     addr.addr("FAUCET"));
 
     DssSpell spell;
 
@@ -229,8 +184,8 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0),        // populate with deployed spell if deployed
-            deployed_spell_created:         1615208240,                 // use get-created-timestamp.sh if deployed
+            deployed_spell:                 address(0xD928c9070A40ac3d2EcfeE1b0106f14161a0dAF6),        // populate with deployed spell if deployed
+            deployed_spell_created:         1615476292,                 // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
             office_hours_enabled:           false,              // true if officehours is expected to be enabled in the spell
@@ -902,7 +857,7 @@ contract DssSpellTest is DSTest, DSMath {
             }
 
             {
-            (,uint256 mat) = spotter.ilks(ilk);
+            (,uint256 mat) = spot.ilks(ilk);
             // Convert BP to system expected value
             uint256 normalizedTestMat = (values.collaterals[ilk].mat * 10**23);
             assertEq(mat, normalizedTestMat);
@@ -1177,21 +1132,21 @@ contract DssSpellTest is DSTest, DSMath {
         vat.move(address(this), address(0x0), vat.dai(address(this)));
     }
 
-    // function testCollateralIntegrations() public {
-    //     vote(address(spell));
-    //     scheduleWaitAndCast(address(spell));
-    //     assertTrue(spell.done());
+    function testCollateralIntegrations() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
 
-    //     // Insert new collateral tests here
-    //     checkIlkIntegration(
-    //         "ETH-C",
-    //         GemJoinAbstract(addr.addr("MCD_JOIN_ETH_C")),
-    //         FlipAbstract(addr.addr("MCD_FLIP_ETH_C")),
-    //         addr.addr("PIP_ETH"),
-    //         true,
-    //         true
-    //     );
-    // }
+        // Insert new collateral tests here
+        checkIlkIntegration(
+            "ETH-C",
+            GemJoinAbstract(addr.addr("MCD_JOIN_ETH_C")),
+            FlipAbstract(addr.addr("MCD_FLIP_ETH_C")),
+            addr.addr("PIP_ETH"),
+            true,
+            true
+        );
+    }
 
     function getExtcodesize(address target) public view returns (uint256 exsize) {
         assembly {
@@ -1227,20 +1182,49 @@ contract DssSpellTest is DSTest, DSMath {
         checkCollateralValues(afterSpell);
     }
 
-    function testNewChainlogValues() public {
+    function testChainlogValues() public {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
 
         ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
 
-        assertEq(chainLog.getAddress("MCD_DOG"), addr.addr("MCD_DOG"));
-        assertEq(chainLog.getAddress("MCD_END"), addr.addr("MCD_END"));
-        assertEq(chainLog.getAddress("MCD_ESM"), addr.addr("MCD_ESM"));
-        assertEq(chainLog.getAddress("CLIPPER_MOM"), addr.addr("CLIPPER_MOM"));
-        assertEq(chainLog.getAddress("MCD_CLIP_LINK_A"), addr.addr("MCD_CLIP_LINK_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_LINK_A"), addr.addr("MCD_CLIP_CALC_LINK_A"));
-        assertEq(chainLog.getAddress("MCD_FLIP_LINK_A"), address(0));
+        assertEq(chainLog.getAddress("RWA001_A_INPUT_CONDUIT"), addr.addr("RWA001_A_INPUT_CONDUIT"));
+    }
+
+    function testFailWrongDay() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailDay();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
+
+    function testFailTooEarly() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailEarly();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
+
+    function testFailTooLate() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailLate();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
+
+    function testOnTime() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
     }
 
     function testCastCost() public {
@@ -1260,116 +1244,71 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 8 * MILLION);
     }
 
-    function testSpellIsCast_new_End() public {
+    function test_nextCastTime() public {
+        hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
+
         vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
+        spell.schedule();
 
-        // Contracts set
-        assertEq(end.vat(), address(vat));
-        assertEq(end.cat(), address(cat));
-        assertEq(EndAbstractNew(address(end)).dog(), address(dog));
-        assertEq(end.vow(), address(vow));
-        assertEq(end.pot(), address(pot));
-        assertEq(end.spot(), address(spotter));
+        uint256 monday_1400_UTC = 1606744800; // Nov 30, 2020
+        uint256 monday_2100_UTC = 1606770000; // Nov 30, 2020
 
-        assertEq(esm.end(), address(end));
+        // Day tests
+        hevm.warp(monday_1400_UTC);                                    // Monday,   14:00 UTC
+        assertEq(spell.nextCastTime(), monday_1400_UTC);               // Monday,   14:00 UTC
 
+        if (spell.officeHours()) {
+            hevm.warp(monday_1400_UTC - 1 days);                       // Sunday,   14:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
 
-        // Authorization
-        bytes32[] memory ilks = IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).list();
-        for (uint256 i = 0; i < ilks.length; i++) {
-            FlipAbstract flip = FlipAbstract(IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).flip(ilks[i]));
+            hevm.warp(monday_1400_UTC - 2 days);                       // Saturday, 14:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
 
-            assertEq(flip.wards(address(end)), 1);
-            assertEq(flip.wards(address(end_old)), 0);
+            hevm.warp(monday_1400_UTC - 3 days);                       // Friday,   14:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC - 3 days);  // Able to cast
+
+            hevm.warp(monday_2100_UTC);                                // Monday,   21:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC + 1 days);  // Tuesday,  14:00 UTC
+
+            hevm.warp(monday_2100_UTC - 1 days);                       // Sunday,   21:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+            hevm.warp(monday_2100_UTC - 2 days);                       // Saturday, 21:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+            hevm.warp(monday_2100_UTC - 3 days);                       // Friday,   21:00 UTC
+            assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+            // Time tests
+            uint256 castTime;
+
+            for(uint256 i = 0; i < 5; i++) {
+                castTime = monday_1400_UTC + i * 1 days; // Next day at 14:00 UTC
+                hevm.warp(castTime - 1 seconds); // 13:59:59 UTC
+                assertEq(spell.nextCastTime(), castTime);
+
+                hevm.warp(castTime + 7 hours + 1 seconds); // 21:00:01 UTC
+                if (i < 4) {
+                    assertEq(spell.nextCastTime(), monday_1400_UTC + (i + 1) * 1 days); // Next day at 14:00 UTC
+                } else {
+                    assertEq(spell.nextCastTime(), monday_1400_UTC + 7 days); // Next monday at 14:00 UTC (friday case)
+                }
+            }
         }
-
-        assertEq(vat.wards(address(end)), 1);
-        assertEq(vat.wards(address(end_old)), 0);
-        assertEq(cat.wards(address(end)), 1);
-        assertEq(cat.wards(address(end_old)), 0);
-        assertEq(dog.wards(address(end)), 1);
-        assertEq(vow.wards(address(end)), 1);
-        assertEq(vow.wards(address(end_old)), 0);
-        assertEq(pot.wards(address(end)), 1);
-        assertEq(pot.wards(address(end_old)), 0);
-        assertEq(spotter.wards(address(end)), 1);
-        assertEq(spotter.wards(address(end_old)), 0);
-
-        assertEq(end.wards(address(esm)), 1);
-        assertEq(end_old.wards(address(esm_old)), 1);
     }
 
-    function testSpellIsCast_new_ClipperMom() public {
+    function testFail_notScheduled() public view {
+        spell.nextCastTime();
+    }
+
+    function test_use_eta() public {
+        hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
+
         vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
+        spell.schedule();
 
-        assertEq(clipMom.owner(), address(pauseProxy));
-        assertEq(clipMom.authority(), address(chief));
+        uint256 castTime = spell.nextCastTime();
+        assertEq(castTime, spell.eta());
     }
 
-    function testSpellIsCast_LINK_A_CLIP() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        DSTokenAbstract LINK = DSTokenAbstract(addr.addr("LINK"));
-        GemJoinAbstract joinLINK = GemJoinAbstract(addr.addr("MCD_JOIN_LINK_A"));
-        FlipAbstract flipLINK = FlipAbstract(addr.addr("MCD_FLIP_LINK_A"));
-        ClipAbstract clipLINK = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
-
-        // Add balance to the test address
-        uint256 ilkAmt = 1 * THOUSAND * WAD;
-
-        hevm.store(
-            address(LINK),
-            keccak256(abi.encode(address(this), uint256(0))),
-            bytes32(ilkAmt)
-        );
-
-        assertEq(LINK.balanceOf(address(this)), ilkAmt);
-
-        // Contracts set
-        assertEq(dog.vat(), address(vat));
-        assertEq(dog.vow(), address(vow));
-        (address clip,,,) = dog.ilks("LINK-A");
-        assertEq(clip, address(clipLINK));
-        assertEq(clipLINK.ilk(), "LINK-A");
-        assertEq(clipLINK.vat(), address(vat));
-        assertEq(clipLINK.vow(), address(vow));
-        assertEq(clipLINK.dog(), address(dog));
-        assertEq(clipLINK.spotter(), address(spotter));
-        assertEq(clipLINK.calc(), addr.addr("MCD_CLIP_CALC_LINK_A"));
-
-        // Authorization
-        assertEq(flipLINK.wards(address(cat))    , 0);
-        assertEq(flipLINK.wards(address(flipMom)), 0);
-
-        assertEq(vat.wards(address(clipLINK))    , 1);
-        assertEq(dog.wards(address(clipLINK))    , 1);
-        assertEq(clipLINK.wards(address(dog))    , 1);
-        assertEq(clipLINK.wards(address(end))    , 1);
-        assertEq(clipLINK.wards(address(clipMom)), 1);
-
-        // Join to adapter
-        assertEq(vat.gem("LINK-A", address(this)), 0);
-        LINK.approve(address(joinLINK), ilkAmt);
-        joinLINK.join(address(this), ilkAmt);
-        assertEq(LINK.balanceOf(address(this)), 0);
-        assertEq(vat.gem("LINK-A", address(this)), ilkAmt);
-
-        // Generate new DAI to force a liquidation
-        LINK.approve(address(joinLINK), ilkAmt);
-        joinLINK.join(address(this), ilkAmt);
-        (,,uint256 spot,,) = vat.ilks("LINK-A");
-        // dart max amount of DAI
-        vat.frob("LINK-A", address(this), address(this), address(this), int(ilkAmt), int(mul(ilkAmt, spot) / RAY));
-        hevm.warp(now + 1);
-        jug.drip("LINK-A");
-        assertEq(clipLINKA.kicks(), 0);
-        dog.bark("LINK-A", address(this), address(this));
-        assertEq(clipLINKA.kicks(), 1);
-    }
 }

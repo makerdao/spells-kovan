@@ -46,6 +46,10 @@ contract DssSpellAction is DssAction {
         return false;
     }
 
+    uint256 constant WAD        = 10**18;
+    uint256 constant RAD        = 10**45;
+    uint256 constant MILLION    = 10**6;
+
     function actions() public override {
         address MCD_VAT          = DssExecLib.vat();
         address MCD_CAT          = DssExecLib.cat();
