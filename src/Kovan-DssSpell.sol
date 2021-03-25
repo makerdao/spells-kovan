@@ -28,11 +28,6 @@ contract DssSpellAction is DssAction {
 
     string public constant description = "Kovan Spell";
 
-    uint256 constant MILLION    = 10**6;
-    uint256 constant WAD        = 10**18;
-    uint256 constant RAY        = 10**27;
-    uint256 constant RAD        = 10**45;
-
     address constant MCD_DOG              = address(0);
     address constant MCD_END              = address(0);
     address constant MCD_ESM              = address(0);
@@ -41,14 +36,16 @@ contract DssSpellAction is DssAction {
     address constant MCD_CLIP_LINK_A      = address(0);
     address constant MCD_CLIP_CALC_LINK_A = address(0);
 
+    uint256 constant THOUSAND   = 10**3;
+    uint256 constant MILLION    = 10**6;
+    uint256 constant WAD        = 10**18;
+    uint256 constant RAY        = 10**27;
+    uint256 constant RAD        = 10**45;
+
     // Turn off office hours
     function officeHours() public override returns (bool) {
         return false;
     }
-
-    uint256 constant WAD        = 10**18;
-    uint256 constant RAD        = 10**45;
-    uint256 constant MILLION    = 10**6;
 
     function actions() public override {
         address MCD_VAT          = DssExecLib.vat();
@@ -146,8 +143,8 @@ contract DssSpellAction is DssAction {
         // DssExecLib.deauthorize(MCD_FLIP_LINK_A, MCD_END); TODO in a future spell
 
         // Set DOG values
-        Fileable(MCD_DOG).file("Hole", 10 * MILLION * RAD);
-        Fileable(MCD_DOG).file("LINK-A", "hole", 10 * MILLION * RAD);
+        Fileable(MCD_DOG).file("Hole", 10 * THOUSAND * RAD);
+        Fileable(MCD_DOG).file("LINK-A", "hole", 10 * THOUSAND * RAD);
         Fileable(MCD_DOG).file("LINK-A", "chop", 113 * WAD / 100);
 
         // Set LINK-A CLIP values

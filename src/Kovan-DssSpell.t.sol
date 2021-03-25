@@ -37,11 +37,16 @@ interface ClipperMomAbstract {
 
 interface ClipAbstract {
     // TODO: Add all existing methods to dss-interfaces (not only these ones)
+    function buf() external view returns (uint256);
     function calc() external view returns (address);
+    function chip() external view returns (uint256);
+    function cusp() external view returns (uint256);
     function dog() external view returns (address);
     function ilk() external view returns (bytes32);
     function kicks() external view returns (uint256);
     function spotter() external view returns (address);
+    function tail() external view returns (uint256);
+    function tip() external view returns (uint256);
     function vat() external view returns (address);
     function vow() external view returns (address);
     function wards(address) external view returns (uint256);
@@ -73,15 +78,22 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 aL_ttl;
         uint256 line;
         uint256 dust;
-        uint256 chop;
-        uint256 dunk;
         uint256 pct;
         uint256 mat;
-        uint256 beg;
-        uint48  ttl;
-        uint48  tau;
-        uint256 liquidations;
+        bytes32 liqType;
+        bool    liqOn;
+        uint256 chop;
+        uint256 cat_dunk;
+        uint256 flip_beg;
+        uint48  flip_ttl;
+        uint48  flip_tau;
         uint256 flipper_mom;
+        uint256 dog_hole;
+        uint256 clip_buf;
+        uint256 clip_tail;
+        uint256 clip_cusp;
+        uint256 clip_chip;
+        uint256 clip_tip;
     }
 
     struct SystemValues {
@@ -96,6 +108,7 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 flap_ttl;
         uint256 flap_tau;
         uint256 cat_box;
+        uint256 dog_Hole;
         address pause_authority;
         address osm_mom_authority;
         address flipper_mom_authority;
@@ -254,6 +267,7 @@ contract DssSpellTest is DSTest, DSMath {
             flap_ttl:              1 hours,             // In seconds
             flap_tau:              1 hours,             // In seconds
             cat_box:               10 * THOUSAND,       // In whole Dai units
+            dog_Hole:              10 * THOUSAND,       // In whole Dai units
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
@@ -271,14 +285,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         540 * MILLION,   // In whole Dai units
             dust:         100,             // In whole Dai units
             pct:          0,               // In basis points
-            chop:         1300,            // In basis points
-            dunk:         500,             // In whole Dai units
             mat:          15000,           // In basis points
-            beg:          300,             // In basis points
-            ttl:          1 hours,         // In seconds
-            tau:          1 hours,         // In seconds
-            liquidations: 1,               // 1 if enabled
-            flipper_mom:  1                // 1 if circuit breaker enabled
+            liqType:      "flip",          // "" or "flip" or "clip"
+            liqOn:        true,            // If liquidations are enabled
+            chop:         1300,            // In basis points
+            cat_dunk:     500,             // In whole Dai units
+            flip_beg:     300,             // In basis points
+            flip_ttl:     1 hours,         // In seconds
+            flip_tau:     1 hours,         // In seconds
+            flipper_mom:  1,               // 1 if circuit breaker enabled
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["ETH-B"] = CollateralValues({
             aL_enabled:   true,
@@ -288,14 +309,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         0 * MILLION,     // Not being checked as there is auto line
             dust:         100,
             pct:          600,
-            chop:         1300,
-            dunk:         500,
             mat:          13000,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["ETH-C"] = CollateralValues({
             aL_enabled:   true,
@@ -305,14 +333,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         0 * MILLION,
             dust:         100,
             pct:          350,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["BAT-A"] = CollateralValues({
             aL_enabled:   false,
@@ -322,14 +357,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         5 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          15000,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -339,14 +381,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         400 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          10100,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 0,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        false,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["USDC-B"] = CollateralValues({
             aL_enabled:   false,
@@ -356,14 +405,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         30 * MILLION,
             dust:         100,
             pct:          5000,
-            chop:         1300,
-            dunk:         500,
             mat:          12000,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 0,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        false,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["WBTC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -373,14 +429,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         120 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          15000,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["TUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -390,14 +453,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         50 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          10100,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 0,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        false,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["KNC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -407,14 +477,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         5 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["ZRX-A"] = CollateralValues({
             aL_enabled:   false,
@@ -424,14 +501,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         5 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["MANA-A"] = CollateralValues({
             aL_enabled:   false,
@@ -441,14 +525,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         1 * MILLION,
             dust:         100,
             pct:          1200,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             aL_enabled:   false,
@@ -458,14 +549,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         10 * MILLION,
             dust:         100,
             pct:          800,
-            chop:         1300,
-            dunk:         500,
             mat:          15000,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -475,14 +573,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         30 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          10100,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 0,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        false,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["COMP-A"] = CollateralValues({
             aL_enabled:   false,
@@ -492,14 +597,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         7 * MILLION,
             dust:         100,
             pct:          100,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["LRC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -509,14 +621,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         3 * MILLION,
             dust:         100,
             pct:          300,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["LINK-A"] = CollateralValues({
             aL_enabled:   false,
@@ -526,14 +645,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         5 * MILLION,
             dust:         100,
             pct:          200,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "clip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     0,
+            flip_beg:     0,
+            flip_ttl:     0,
+            flip_tau:     0,
+            flipper_mom:  0,
+            dog_hole:     10 * THOUSAND * RAD,
+            clip_buf:     2000,
+            clip_tail:    1 hours,
+            clip_cusp:    6000,
+            clip_chip:    200,
+            clip_tip:     50 * RAD
         });
         afterSpell.collaterals["BAL-A"] = CollateralValues({
             aL_enabled:   false,
@@ -543,14 +669,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         4 * MILLION,
             dust:         100,
             pct:          500,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["YFI-A"] = CollateralValues({
             aL_enabled:   false,
@@ -560,14 +693,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         7 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["GUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -577,14 +717,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         5 * MILLION,
             dust:         100,
             pct:          400,
-            chop:         1300,
-            dunk:         500,
             mat:          10100,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 0,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        false,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["UNI-A"] = CollateralValues({
             aL_enabled:   false,
@@ -594,14 +741,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         15 * MILLION,
             dust:         100,
             pct:          300,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["RENBTC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -611,14 +765,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         2 * MILLION,
             dust:         100,
             pct:          600,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["AAVE-A"] = CollateralValues({
             aL_enabled:   false,
@@ -628,14 +789,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         10 * MILLION,
             dust:         100,
             pct:          600,
-            chop:         1300,
-            dunk:         500,
             mat:          17500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["UNIV2DAIETH-A"] = CollateralValues({
             aL_enabled:   false,
@@ -645,14 +813,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         3 * MILLION,
             dust:         100,
             pct:          100,
-            chop:         1300,
-            dunk:         500,
             mat:          12500,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 1,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -662,14 +837,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         500 * MILLION,
             dust:         0,
             pct:          0,
-            chop:         1300,
-            dunk:         500,
             mat:          10000,
-            beg:          300,
-            ttl:          1 hours,
-            tau:          1 hours,
-            liquidations: 0,
-            flipper_mom:  1
+            liqType:      "flip",
+            liqOn:        false,
+            chop:         1300,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
         afterSpell.collaterals["RWA001-A"] = CollateralValues({
             aL_enabled:   false,
@@ -679,14 +861,21 @@ contract DssSpellTest is DSTest, DSMath {
             line:         1 * THOUSAND,
             dust:         0,
             pct:          300,
-            chop:         0,
-            dunk:         0,
             mat:          10000,
-            beg:          0,
-            ttl:          0,
-            tau:          0,
-            liquidations: 0,
-            flipper_mom:  0
+            liqType:      "",
+            liqOn:        false,
+            chop:         0,
+            cat_dunk:     0,
+            flip_beg:     0,
+            flip_ttl:     0,
+            flip_tau:     0,
+            flipper_mom:  0,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0
         });
     }
 
@@ -826,12 +1015,20 @@ contract DssSpellTest is DSTest, DSMath {
         );
         }
 
-        // box values in RAD
+        // box value in RAD
         {
             uint normalizedBox = values.cat_box * RAD;
             assertEq(cat.box(), normalizedBox);
             assertTrue(cat.box() >= THOUSAND * RAD);
             assertTrue(cat.box() < 50 * MILLION * RAD);
+        }
+
+        // Hole value in RAD
+        {
+            uint normalizedHole = values.dog_Hole * RAD;
+            assertEq(dog.Hole(), normalizedHole);
+            assertTrue(dog.Hole() >= THOUSAND * RAD);
+            assertTrue(dog.Hole() < 50 * MILLION * RAD);
         }
 
         // check Pause authority
@@ -909,7 +1106,7 @@ contract DssSpellTest is DSTest, DSMath {
             assertTrue(mat >= RAY && mat < 10 * RAY);    // cr eq 100% and lt 1000%
             }
 
-            if (ilk != "RWA001-A") {
+            if (values.collaterals[ilk].liqType == "flip") {
                 {
                 (, uint256 chop, uint256 dunk) = cat.ilks(ilk);
                 // Convert BP to system expected value
@@ -919,27 +1116,66 @@ contract DssSpellTest is DSTest, DSMath {
                 assertTrue(chop >= WAD && chop < 2 * WAD);   // penalty gt eq 0% and lt 100%
 
                 // Convert whole Dai units to expected RAD
-                uint256 normalizedTestDunk = values.collaterals[ilk].dunk * RAD;
+                uint256 normalizedTestDunk = values.collaterals[ilk].cat_dunk * RAD;
                 assertEq(dunk, normalizedTestDunk);
-                // put back in after LIQ-1.2
                 assertTrue(dunk >= RAD && dunk < MILLION * RAD);
 
                 (address flipper,,) = cat.ilks(ilk);
                 FlipAbstract flip = FlipAbstract(flipper);
                 // Convert BP to system expected value
-                uint256 normalizedTestBeg = (values.collaterals[ilk].beg + 10000)  * 10**14;
+                uint256 normalizedTestBeg = (values.collaterals[ilk].flip_beg + 10000)  * 10**14;
                 assertEq(uint256(flip.beg()), normalizedTestBeg);
                 assertTrue(flip.beg() >= WAD && flip.beg() <= 110 * WAD / 100); // gte 0% and lte 10%
-                assertEq(uint256(flip.ttl()), values.collaterals[ilk].ttl);
+                assertEq(uint256(flip.ttl()), values.collaterals[ilk].flip_ttl);
                 assertTrue(flip.ttl() >= 600 && flip.ttl() < 10 hours);         // gt eq 10 minutes and lt 10 hours
-                assertEq(uint256(flip.tau()), values.collaterals[ilk].tau);
+                assertEq(uint256(flip.tau()), values.collaterals[ilk].flip_tau);
                 assertTrue(flip.tau() >= 600 && flip.tau() <= 3 days);          // gt eq 10 minutes and lt eq 3 days
 
                 assertEq(flip.wards(address(flipMom)), values.collaterals[ilk].flipper_mom);
 
-                assertEq(flip.wards(address(cat)), values.collaterals[ilk].liquidations);  // liquidations == 1 => on
+                assertEq(flip.wards(address(cat)), values.collaterals[ilk].liqOn ? 1 : 0);
                 assertEq(flip.wards(address(pauseProxy)), 1); // Check pause_proxy ward
                 }
+            }
+            if (values.collaterals[ilk].liqType == "clip") {
+                {
+                (, uint256 chop, uint256 hole,) = dog.ilks(ilk);
+                // Convert BP to system expected value
+                uint256 normalizedTestChop = (values.collaterals[ilk].chop * 10**14) + WAD;
+                assertEq(chop, normalizedTestChop);
+                // make sure chop is less than 100%
+                assertTrue(chop >= WAD && chop < 2 * WAD);   // penalty gt eq 0% and lt 100%
+
+                // Convert whole Dai units to expected RAD
+                uint256 normalizedTesthole = values.collaterals[ilk].dog_hole * RAD;
+                assertEq(hole, normalizedTesthole);
+                assertTrue(hole >= RAD && hole < MILLION * RAD);
+                }
+                {
+                (address clipper,,,) = dog.ilks(ilk);
+                ClipAbstract clip = ClipAbstract(clipper);
+                // Convert BP to system expected value
+                uint256 normalizedTestBuf = (values.collaterals[ilk].clip_buf + 10000)  * 10**23;
+                assertEq(uint256(clip.buf()), normalizedTestBuf);
+                assertTrue(clip.buf() >= RAY && clip.buf() <= 2 * RAY); // gte 0% and lte 100%
+                assertEq(uint256(clip.tail()), values.collaterals[ilk].clip_tail);
+                assertTrue(clip.tail() >= 600 && clip.tail() < 10 hours); // gt eq 10 minutes and lt 10 hours
+                uint256 normalizedTestCusp = (values.collaterals[ilk].clip_cusp)  * 10**23;
+                assertEq(uint256(clip.cusp()), normalizedTestCusp);
+                assertTrue(clip.cusp() >= RAY / 10 && clip.cusp() < RAY); // gte 10% and lt 100%
+                uint256 normalizedTestChip = (values.collaterals[ilk].clip_chip)  * 10**14;
+                assertEq(uint256(clip.chip()), normalizedTestChip);
+                assertTrue(clip.chip() < 13 * RAY / 100); // lt 13% (typical liquidation penalty)
+                assertEq(uint256(clip.tip()), values.collaterals[ilk].clip_tip);
+                assertTrue(clip.tip() == 0 || clip.tip() >= RAD && clip.tip() <= 100 * RAD);
+
+                // assertEq(clip.wards(address(clipMom)), values.collaterals[ilk].clipper_mom);
+
+                // assertEq(clip.wards(address(dog)), values.collaterals[ilk].liqOn ? 1 : 0);
+                assertEq(clip.wards(address(pauseProxy)), 1); // Check pause_proxy ward
+                }
+            }
+            if (ilk != "RWA001-A") {
                 {
                 GemJoinAbstract join = GemJoinAbstract(reg.join(ilk));
                 assertEq(join.wards(address(pauseProxy)), 1); // Check pause_proxy ward
@@ -1026,7 +1262,7 @@ contract DssSpellTest is DSTest, DSMath {
         if (_isOSM) OsmAbstract(pip).poke();
         hevm.warp(now + 3601);
         if (_isOSM) OsmAbstract(pip).poke();
-        spot.poke(_ilk);
+        spotter.poke(_ilk);
 
         // Authorization
         assertEq(join.wards(pauseProxy), 1);
@@ -1035,7 +1271,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flip.wards(address(flipMom)), 1);
         if (_isOSM) {
             assertEq(OsmAbstract(pip).wards(address(osmMom)), 1);
-            assertEq(OsmAbstract(pip).bud(address(spot)), 1);
+            assertEq(OsmAbstract(pip).bud(address(spotter)), 1);
             assertEq(OsmAbstract(pip).bud(address(end)), 1);
             assertEq(MedianAbstract(OsmAbstract(pip).src()).bud(pip), 1);
         }
@@ -1108,7 +1344,7 @@ contract DssSpellTest is DSTest, DSMath {
         pip.poke();
         hevm.warp(now + 3601);
         pip.poke();
-        spot.poke(_ilk);
+        spotter.poke(_ilk);
 
         // Check medianizer sources
         assertEq(pip.src(), address(token));
@@ -1121,7 +1357,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flip.wards(address(end)), 1);
         assertEq(flip.wards(address(flipMom)), 1);
         assertEq(pip.wards(address(osmMom)), 1);
-        assertEq(pip.bud(address(spot)), 1);
+        assertEq(pip.bud(address(spotter)), 1);
         assertEq(pip.bud(address(end)), 1);
         if (_isMedian1) assertEq(MedianAbstract(_medianizer1).bud(address(pip)), 1);
         if (_isMedian2) assertEq(MedianAbstract(_medianizer2).bud(address(pip)), 1);
