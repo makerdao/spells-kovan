@@ -23,6 +23,7 @@ interface SpellLike {
 interface DogAbstract {
     // TODO: Add all existing methods to dss-interfaces (not only these ones)
     function ilks(bytes32) external view returns (address, uint256, uint256, uint256);
+    function Hole() external view returns (uint256);
     function vat() external view returns (address);
     function vow() external view returns (address);
     function wards(address) external view returns (uint256);
@@ -94,6 +95,9 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 clip_cusp;
         uint256 clip_chip;
         uint256 clip_tip;
+        uint256 calc_tau;
+        uint256 calc_step;
+        uint256 calc_cut;
     }
 
     struct SystemValues {
@@ -299,7 +303,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["ETH-B"] = CollateralValues({
             aL_enabled:   true,
@@ -323,7 +330,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["ETH-C"] = CollateralValues({
             aL_enabled:   true,
@@ -347,7 +357,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["BAT-A"] = CollateralValues({
             aL_enabled:   false,
@@ -371,7 +384,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -395,7 +411,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["USDC-B"] = CollateralValues({
             aL_enabled:   false,
@@ -419,7 +438,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["WBTC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -443,7 +465,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["TUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -467,7 +492,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["KNC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -491,7 +519,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["ZRX-A"] = CollateralValues({
             aL_enabled:   false,
@@ -515,7 +546,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["MANA-A"] = CollateralValues({
             aL_enabled:   false,
@@ -539,7 +573,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["USDT-A"] = CollateralValues({
             aL_enabled:   false,
@@ -563,7 +600,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -587,7 +627,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["COMP-A"] = CollateralValues({
             aL_enabled:   false,
@@ -611,7 +654,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["LRC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -635,7 +681,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["LINK-A"] = CollateralValues({
             aL_enabled:   false,
@@ -659,7 +708,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    1 hours,
             clip_cusp:    6000,
             clip_chip:    200,
-            clip_tip:     50 * RAD
+            clip_tip:     50 * RAD,
+            calc_tau:     0,
+            calc_step:    90,
+            calc_cut:     100
         });
         afterSpell.collaterals["BAL-A"] = CollateralValues({
             aL_enabled:   false,
@@ -683,7 +735,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["YFI-A"] = CollateralValues({
             aL_enabled:   false,
@@ -707,7 +762,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["GUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -731,7 +789,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["UNI-A"] = CollateralValues({
             aL_enabled:   false,
@@ -755,7 +816,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["RENBTC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -779,7 +843,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["AAVE-A"] = CollateralValues({
             aL_enabled:   false,
@@ -803,7 +870,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["UNIV2DAIETH-A"] = CollateralValues({
             aL_enabled:   false,
@@ -827,7 +897,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -851,7 +924,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["RWA001-A"] = CollateralValues({
             aL_enabled:   false,
@@ -875,7 +951,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_tail:    0,
             clip_cusp:    0,
             clip_chip:    0,
-            clip_tip:     0
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
     }
 
@@ -1151,9 +1230,9 @@ contract DssSpellTest is DSTest, DSMath {
                 assertEq(hole, normalizedTesthole);
                 assertTrue(hole >= RAD && hole < MILLION * RAD);
                 }
-                {
                 (address clipper,,,) = dog.ilks(ilk);
                 ClipAbstract clip = ClipAbstract(clipper);
+                {
                 // Convert BP to system expected value
                 uint256 normalizedTestBuf = (values.collaterals[ilk].clip_buf + 10000)  * 10**23;
                 assertEq(uint256(clip.buf()), normalizedTestBuf);
@@ -1173,6 +1252,21 @@ contract DssSpellTest is DSTest, DSMath {
 
                 // assertEq(clip.wards(address(dog)), values.collaterals[ilk].liqOn ? 1 : 0);
                 assertEq(clip.wards(address(pauseProxy)), 1); // Check pause_proxy ward
+                }
+                {
+                    (bool exists, bytes memory value) = clip.calc().call("tau()");
+                    if (exists) {
+                        assertEq(abi.decode(value, (uint256)), values.collaterals[ilk].calc_tau);
+                    }
+                    (exists, value) = clip.calc().call("step()");
+                    if (exists) {
+                        assertEq(abi.decode(value, (uint256)), values.collaterals[ilk].calc_step);
+                    }
+                    (exists, value) = clip.calc().call("cut()");
+                    if (exists) {
+                        uint256 normalizedTestCut = (1000 - values.collaterals[ilk].calc_cut) * 10**23;
+                        assertEq(abi.decode(value, (uint256)), normalizedTestCut);
+                    }
                 }
             }
             if (ilk != "RWA001-A") {

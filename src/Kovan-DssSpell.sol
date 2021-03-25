@@ -154,8 +154,9 @@ contract DssSpellAction is DssAction {
         Fileable(MCD_CLIP_LINK_A).file("chip", 2 * WAD / 100);
         Fileable(MCD_CLIP_LINK_A).file("tip", 50 * RAD);
 
-        // TODO: Set CALC PARAMS
-        // Fileable(MCD_CLIP_CALC_LINK_A).file("", );
+        // Set CALC PARAMS
+        Fileable(MCD_CLIP_CALC_LINK_A).file("cut", 99 * RAY / 100); // 1% cut
+        Fileable(MCD_CLIP_CALC_LINK_A).file("step", 90 seconds);
 
         // ------------------  CHAINLOG  -----------------
 
