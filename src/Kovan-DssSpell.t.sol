@@ -1254,15 +1254,15 @@ contract DssSpellTest is DSTest, DSMath {
                 assertEq(clip.wards(address(pauseProxy)), 1); // Check pause_proxy ward
                 }
                 {
-                    (bool exists, bytes memory value) = clip.calc().call("tau()");
+                    (bool exists, bytes memory value) = clip.calc().call(abi.encodeWithSignature("tau()"));
                     if (exists) {
                         assertEq(abi.decode(value, (uint256)), values.collaterals[ilk].calc_tau);
                     }
-                    (exists, value) = clip.calc().call("step()");
+                    (exists, value) = clip.calc().call(abi.encodeWithSignature("step()"));
                     if (exists) {
                         assertEq(abi.decode(value, (uint256)), values.collaterals[ilk].calc_step);
                     }
-                    (exists, value) = clip.calc().call("cut()");
+                    (exists, value) = clip.calc().call(abi.encodeWithSignature("cut()"));
                     if (exists) {
                         uint256 normalizedTestCut = (1000 - values.collaterals[ilk].calc_cut) * 10**23;
                         assertEq(abi.decode(value, (uint256)), normalizedTestCut);
