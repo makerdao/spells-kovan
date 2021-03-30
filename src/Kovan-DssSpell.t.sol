@@ -184,7 +184,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0xD928c9070A40ac3d2EcfeE1b0106f14161a0dAF6),        // populate with deployed spell if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
             deployed_spell_created:         1615476292,                 // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
@@ -212,7 +212,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             24                   // Num expected in system
+            ilk_count:             25                   // Num expected in system
         });
 
         //
@@ -642,6 +642,23 @@ contract DssSpellTest is DSTest, DSMath {
             tau:          0,
             liquidations: 0,
             flipper_mom:  0
+        });
+        afterSpell.collaterals["PAXG-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
+            line:         5 * MILLION,
+            dust:         100,
+            pct:          400,
+            chop:         1300,
+            dunk:         500,
+            mat:          12500,
+            beg:          300,
+            ttl:          1 hours,
+            tau:          1 hours,
+            liquidations: 1,
+            flipper_mom:  1
         });
     }
 
@@ -1139,10 +1156,10 @@ contract DssSpellTest is DSTest, DSMath {
 
         // Insert new collateral tests here
         checkIlkIntegration(
-            "ETH-C",
-            GemJoinAbstract(addr.addr("MCD_JOIN_ETH_C")),
-            FlipAbstract(addr.addr("MCD_FLIP_ETH_C")),
-            addr.addr("PIP_ETH"),
+            "PAXG-A",
+            GemJoinAbstract(addr.addr("MCD_JOIN_PAXG_A")),
+            FlipAbstract(addr.addr("MCD_FLIP_PAXG_A")),
+            addr.addr("PIP_PAXG"),
             true,
             true
         );
@@ -1188,8 +1205,11 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
 
         ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
-
-        assertEq(chainLog.getAddress("RWA001_A_INPUT_CONDUIT"), addr.addr("RWA001_A_INPUT_CONDUIT"));
+        
+        assertEq(chainLog.getAddress("PAXG"), addr.addr("PAXG"));
+        assertEq(chainLog.getAddress("MCD_JOIN_PAXG_A"), addr.addr("MCD_JOIN_PAXG_A"));
+        assertEq(chainLog.getAddress("MCD_FLIP_PAXG_A"), addr.addr("MCD_FLIP_PAXG_A"));
+        assertEq(chainLog.getAddress("PIP_PAXG"), addr.addr("PIP_PAXG"));
     }
 
     function testFailWrongDay() public {

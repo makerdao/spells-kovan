@@ -33,45 +33,49 @@ contract DssSpellAction is DssAction {
     //
     // $ bc -l <<< 'scale=27; e( l(1.01)/(60 * 60 * 24 * 365) )'
     //
-    uint256 constant THREE_PT_FIVE_PCT = 1000000001090862085746321732;
+    uint256 constant FOUR_PCT = 1000000001243680656318820312;
 
     uint256 constant WAD        = 10**18;
     uint256 constant RAD        = 10**45;
     uint256 constant MILLION    = 10**6;
 
-    // ETH-C
-    address constant MCD_JOIN_ETH_C = 0xD166b57355BaCE25e5dEa5995009E68584f60767;
-    address constant MCD_FLIP_ETH_C = 0x6EB1922EbfC357bAe88B4aa5aB377A8C4DFfB4e9;
+    // PAXG-A
+    address constant PAXG = 0x3FAe07a1f8d3b92E7bEaED69A231040A98f2C112;
+    address constant MCD_JOIN_PAXG_A = 0x9457B21B991aD0e4AE226e5E18c4f7080E91f350;
+    address constant MCD_FLIP_PAXG_A = 0x29362182c7D1EEE16A960dF4b6cDE908Df64F88B;
+    address constant PIP_PAXG = 0x31CceDBc45179f17CfD34967680C6560b6509C1A;
 
     function actions() public override {
         // Onboarding ETH-C
-        CollateralOpts memory ETH_C = CollateralOpts({
-            ilk: "ETH-C",
-            gem: DssExecLib.getChangelogAddress("ETH"),
-            join: MCD_JOIN_ETH_C,
-            flip: MCD_FLIP_ETH_C,
-            pip: DssExecLib.getChangelogAddress("PIP_ETH"),
+        CollateralOpts memory PAXG_A = CollateralOpts({
+            ilk: "PAXG-A",
+            gem: PAXG,
+            join: MCD_JOIN_PAXG_A,
+            flip: MCD_FLIP_PAXG_A,
+            pip: PIP_PAXG,
             isLiquidatable: true,
             isOSM: true,
-            whitelistOSM: false,
-            ilkDebtCeiling: 100 * MILLION,
+            whitelistOSM: true,
+            ilkDebtCeiling: 5 * MILLION,
             minVaultAmount: 100,
             maxLiquidationAmount: 500,
             liquidationPenalty: 1300,
-            ilkStabilityFee: THREE_PT_FIVE_PCT,
+            ilkStabilityFee: FOUR_PCT,
             bidIncrease: 300,
             bidDuration: 1 hours,
             auctionDuration: 1 hours,
-            liquidationRatio: 17500
+            liquidationRatio: 12500
         });
-        addNewCollateral(ETH_C);
-        DssExecLib.setIlkAutoLineParameters("ETH-C", 2000 * MILLION, 100 * MILLION, 12 hours);
+        addNewCollateral(PAXG_A);
+        DssExecLib.setIlkAutoLineParameters("PAXG-A", 2000 * MILLION, 100 * MILLION, 12 hours);
 
-        DssExecLib.setChangelogAddress("MCD_JOIN_ETH_C", MCD_JOIN_ETH_C);
-        DssExecLib.setChangelogAddress("MCD_FLIP_ETH_C", MCD_FLIP_ETH_C);
+        DssExecLib.setChangelogAddress("PAXG", PAXG);
+        DssExecLib.setChangelogAddress("MCD_JOIN_PAXG_A", MCD_JOIN_PAXG_A);
+        DssExecLib.setChangelogAddress("MCD_FLIP_PAXG_A", MCD_FLIP_PAXG_A);
+        DssExecLib.setChangelogAddress("PIP_PAXG", PIP_PAXG);
 
         // bump changelog version
-        DssExecLib.setChangelogVersion("1.2.10");
+        DssExecLib.setChangelogVersion("1.2.11");
     }
 
 }
