@@ -991,7 +991,8 @@ contract DssSpellTest is DSTest, DSMath {
         FlipAbstract flip,
         address pip,
         bool _isOSM,
-        bool _checkLiquidations
+        bool _checkLiquidations,
+        bool _transferFee
     ) public {
         DSTokenAbstract token = DSTokenAbstract(join.gem());
 
@@ -1022,6 +1023,10 @@ contract DssSpellTest is DSTest, DSMath {
         token.approve(address(join), amount);
         join.join(address(this), amount);
         assertEq(token.balanceOf(address(this)), 0);
+        if (_transferFee) {
+            amount = vat.gem(_ilk, address(this));
+            assertTrue(amount > 0);
+        }
         assertEq(vat.gem(_ilk, address(this)), amount);
 
         // Tick the fees forward so that art != dai in wad units
@@ -1043,12 +1048,18 @@ contract DssSpellTest is DSTest, DSMath {
 
         // Withdraw from adapter
         join.exit(address(this), amount);
+        if (_transferFee) {
+            amount = token.balanceOf(address(this));
+        }
         assertEq(token.balanceOf(address(this)), amount);
         assertEq(vat.gem(_ilk, address(this)), 0);
 
         // Generate new DAI to force a liquidation
         token.approve(address(join), amount);
         join.join(address(this), amount);
+        if (_transferFee) {
+            amount = vat.gem(_ilk, address(this));
+        }
         // dart max amount of DAI
         (,,uint256 spotV,,) = vat.ilks(_ilk);
         vat.frob(_ilk, address(this), address(this), address(this), int(amount), int(mul(amount, spotV) / rate));
@@ -1160,6 +1171,7 @@ contract DssSpellTest is DSTest, DSMath {
             GemJoinAbstract(addr.addr("MCD_JOIN_PAXG_A")),
             FlipAbstract(addr.addr("MCD_FLIP_PAXG_A")),
             addr.addr("PIP_PAXG"),
+            true,
             true,
             true
         );

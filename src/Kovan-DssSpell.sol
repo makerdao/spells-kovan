@@ -40,9 +40,9 @@ contract DssSpellAction is DssAction {
     uint256 constant MILLION    = 10**6;
 
     // PAXG-A
-    address constant PAXG = 0x3FAe07a1f8d3b92E7bEaED69A231040A98f2C112;
-    address constant MCD_JOIN_PAXG_A = 0x9457B21B991aD0e4AE226e5E18c4f7080E91f350;
-    address constant MCD_FLIP_PAXG_A = 0x29362182c7D1EEE16A960dF4b6cDE908Df64F88B;
+    address constant PAXG = 0x016e5fD2dDc4156Eb560E479b3F19b563B2e96B9;
+    address constant MCD_JOIN_PAXG_A = 0xBaBc2d08BA653d394ed36AE7a7720ac3FC43C954;
+    address constant MCD_FLIP_PAXG_A = 0xf0AC5f16535ed2f9c537420321E063C8d677a336;
     address constant PIP_PAXG = 0x31CceDBc45179f17CfD34967680C6560b6509C1A;
 
     function actions() public override {
@@ -67,15 +67,11 @@ contract DssSpellAction is DssAction {
             liquidationRatio: 12500
         });
         addNewCollateral(PAXG_A);
-        DssExecLib.setIlkAutoLineParameters("PAXG-A", 2000 * MILLION, 100 * MILLION, 12 hours);
 
         DssExecLib.setChangelogAddress("PAXG", PAXG);
         DssExecLib.setChangelogAddress("MCD_JOIN_PAXG_A", MCD_JOIN_PAXG_A);
         DssExecLib.setChangelogAddress("MCD_FLIP_PAXG_A", MCD_FLIP_PAXG_A);
         DssExecLib.setChangelogAddress("PIP_PAXG", PIP_PAXG);
-
-        // bump changelog version
-        DssExecLib.setChangelogVersion("1.2.11");
     }
 
 }
