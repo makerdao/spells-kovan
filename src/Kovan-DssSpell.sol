@@ -50,7 +50,6 @@ contract DssSpellAction is DssAction {
     address constant PROXY_ACTIONS = 0xD8b9702755E91Aa792656966aE6bAF32F4C394Ba;
 
     function actions() public override {
-        // Onboarding ETH-C
         CollateralOpts memory PAXG_A = CollateralOpts({
             ilk: "PAXG-A",
             gem: PAXG,
