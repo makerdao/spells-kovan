@@ -18,6 +18,8 @@ pragma solidity 0.6.11;
 import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
 
+import "dss-interfaces/dss/FaucetAbstract.sol";
+
 contract DssSpellAction is DssAction {
 
     string public constant description = "Kovan Spell";
@@ -72,6 +74,9 @@ contract DssSpellAction is DssAction {
         DssExecLib.setChangelogAddress("MCD_JOIN_PAXG_A", MCD_JOIN_PAXG_A);
         DssExecLib.setChangelogAddress("MCD_FLIP_PAXG_A", MCD_FLIP_PAXG_A);
         DssExecLib.setChangelogAddress("PIP_PAXG", PIP_PAXG);
+
+        // Turn on Faucet
+        FaucetAbstract(DssExecLib.getChangelogAddress("FAUCET")).setAmt(PAXG, WAD / 10);
     }
 
 }
