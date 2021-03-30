@@ -1222,6 +1222,8 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(chainLog.getAddress("MCD_JOIN_PAXG_A"), addr.addr("MCD_JOIN_PAXG_A"));
         assertEq(chainLog.getAddress("MCD_FLIP_PAXG_A"), addr.addr("MCD_FLIP_PAXG_A"));
         assertEq(chainLog.getAddress("PIP_PAXG"), addr.addr("PIP_PAXG"));
+
+        assertEq(chainLog.getAddress("PROXY_ACTIONS"), addr.addr("PROXY_ACTIONS"));
     }
 
     function testFailWrongDay() public {

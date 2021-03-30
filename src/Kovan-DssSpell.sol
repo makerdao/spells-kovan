@@ -47,6 +47,8 @@ contract DssSpellAction is DssAction {
     address constant MCD_FLIP_PAXG_A = 0xf0AC5f16535ed2f9c537420321E063C8d677a336;
     address constant PIP_PAXG = 0x31CceDBc45179f17CfD34967680C6560b6509C1A;
 
+    address constant PROXY_ACTIONS = 0xD8b9702755E91Aa792656966aE6bAF32F4C394Ba;
+
     function actions() public override {
         // Onboarding ETH-C
         CollateralOpts memory PAXG_A = CollateralOpts({
@@ -74,6 +76,8 @@ contract DssSpellAction is DssAction {
         DssExecLib.setChangelogAddress("MCD_JOIN_PAXG_A", MCD_JOIN_PAXG_A);
         DssExecLib.setChangelogAddress("MCD_FLIP_PAXG_A", MCD_FLIP_PAXG_A);
         DssExecLib.setChangelogAddress("PIP_PAXG", PIP_PAXG);
+
+        DssExecLib.setChangelogAddress("PROXY_ACTIONS", PROXY_ACTIONS);
 
         // Turn on Faucet
         FaucetAbstract(DssExecLib.getChangelogAddress("FAUCET")).setAmt(PAXG, WAD / 10);
