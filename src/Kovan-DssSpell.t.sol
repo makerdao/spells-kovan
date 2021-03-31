@@ -184,8 +184,8 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0x8a8913472aB57D339b53aB89b9aC8161f78ddCd3),        // populate with deployed spell if deployed
-            deployed_spell_created:         1617125100,                 // use get-created-timestamp.sh if deployed
+            deployed_spell:                 address(0xAE2D954629a561342109a14E93a7BB7278fe1031),        // populate with deployed spell if deployed
+            deployed_spell_created:         1617191036,                 // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
             office_hours_enabled:           false,              // true if officehours is expected to be enabled in the spell

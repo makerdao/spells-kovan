@@ -42,9 +42,9 @@ contract DssSpellAction is DssAction {
     uint256 constant MILLION    = 10**6;
 
     // PAXG-A
-    address constant PAXG = 0x016e5fD2dDc4156Eb560E479b3F19b563B2e96B9;
-    address constant MCD_JOIN_PAXG_A = 0xBaBc2d08BA653d394ed36AE7a7720ac3FC43C954;
-    address constant MCD_FLIP_PAXG_A = 0xf0AC5f16535ed2f9c537420321E063C8d677a336;
+    address constant PAXG = 0x52403FCEfcf3A810e58868fF19c34725B426473A;
+    address constant MCD_JOIN_PAXG_A = 0x822248F31bd899DE327A760a78B6C84889aF180D;
+    address constant MCD_FLIP_PAXG_A = 0x0b2e32151041641Fa37a1F54D7eD526989eF9B73;
     address constant PIP_PAXG = 0x31CceDBc45179f17CfD34967680C6560b6509C1A;
 
     address constant PROXY_ACTIONS = 0xD8b9702755E91Aa792656966aE6bAF32F4C394Ba;
@@ -79,7 +79,7 @@ contract DssSpellAction is DssAction {
         DssExecLib.setChangelogAddress("PROXY_ACTIONS", PROXY_ACTIONS);
 
         // Turn on Faucet
-        FaucetAbstract(DssExecLib.getChangelogAddress("FAUCET")).setAmt(PAXG, WAD / 10);
+        FaucetAbstract(DssExecLib.getChangelogAddress("FAUCET")).setAmt(PAXG, WAD);
     }
 
 }
