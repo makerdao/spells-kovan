@@ -24,6 +24,8 @@ interface ClipperMomLike {
     function setAuthority(address) external;
 }
 
+import "dss-interfaces/dss/FaucetAbstract.sol";
+
 contract DssSpellAction is DssAction {
 
     string public constant description = "Kovan Spell";
@@ -57,8 +59,6 @@ contract DssSpellAction is DssAction {
         address MCD_ESM_OLD      = DssExecLib.getChangelogAddress("MCD_ESM");
         address MCD_FLIP_LINK_A  = DssExecLib.flip("LINK-A");
         address ILK_REGISTRY_OLD = DssExecLib.reg();
-
-        // --------------------  END  --------------------
 
         // Set contracts in END
         DssExecLib.setContract(MCD_END,  "vat", MCD_VAT);
