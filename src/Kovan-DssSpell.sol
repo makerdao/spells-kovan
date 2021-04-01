@@ -79,7 +79,6 @@ contract DssSpellAction is DssAction {
         // Deauthorize the old END in contracts
         DssExecLib.deauthorize(MCD_VAT, MCD_END_OLD);
         DssExecLib.deauthorize(MCD_CAT, MCD_END_OLD);
-        DssExecLib.deauthorize(MCD_DOG, MCD_END_OLD);
         DssExecLib.deauthorize(MCD_VOW, MCD_END_OLD);
         DssExecLib.deauthorize(MCD_POT, MCD_END_OLD);
         DssExecLib.deauthorize(MCD_SPOT, MCD_END_OLD);
