@@ -703,12 +703,12 @@ contract DssSpellTest is DSTest, DSMath {
             flip_ttl:     0,
             flip_tau:     0,
             flipper_mom:  0,
-            dog_hole:     10 * THOUSAND * RAD,
+            dog_hole:     10 * THOUSAND,
             clip_buf:     2000,
             clip_tail:    1 hours,
             clip_cusp:    6000,
             clip_chip:    200,
-            clip_tip:     50 * RAD,
+            clip_tip:     50,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     100
@@ -1272,7 +1272,8 @@ contract DssSpellTest is DSTest, DSMath {
                 uint256 normalizedTestChip = (values.collaterals[ilk].clip_chip)  * 10**14;
                 assertEq(uint256(clip.chip()), normalizedTestChip);
                 assertTrue(clip.chip() < 13 * RAY / 100); // lt 13% (typical liquidation penalty)
-                assertEq(uint256(clip.tip()), values.collaterals[ilk].clip_tip);
+                uint256 normalizedTestTip = values.collaterals[ilk].clip_tip * RAD;
+                assertEq(uint256(clip.tip()), normalizedTestTip);
                 assertTrue(clip.tip() == 0 || clip.tip() >= RAD && clip.tip() <= 100 * RAD);
 
                 // assertEq(clip.wards(address(clipMom)), values.collaterals[ilk].clipper_mom);
