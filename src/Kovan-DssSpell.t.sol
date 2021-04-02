@@ -1605,11 +1605,14 @@ contract DssSpellTest is DSTest, DSMath {
         
         assertEq(chainLog.getAddress("MCD_DOG"), addr.addr("MCD_DOG"));
         assertEq(chainLog.getAddress("MCD_END"), addr.addr("MCD_END"));
-        assertEq(chainLog.getAddress("MCD_ESM"), addr.addr("MCD_ESM"));
+        assertEq(chainLog.getAddress("MCD_ESM_BUG"), addr.addr("MCD_ESM_BUG"));
+        assertEq(chainLog.getAddress("MCD_ESM_ATTACK"), addr.addr("MCD_ESM_ATTACK"));
+        assertEq(chainLog.getAddress("MCD_ESM"), address(0));
         assertEq(chainLog.getAddress("CLIPPER_MOM"), addr.addr("CLIPPER_MOM"));
         assertEq(chainLog.getAddress("MCD_CLIP_LINK_A"), addr.addr("MCD_CLIP_LINK_A"));
         assertEq(chainLog.getAddress("MCD_CLIP_CALC_LINK_A"), addr.addr("MCD_CLIP_CALC_LINK_A"));
         assertEq(chainLog.getAddress("MCD_FLIP_LINK_A"), address(0));
+        assertEq(chainLog.getAddress("ILK_REGISTRY"), addr.addr("ILK_REGISTRY"));
     }
 
     function testFailWrongDay() public {

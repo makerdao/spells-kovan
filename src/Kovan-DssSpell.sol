@@ -26,17 +26,22 @@ interface ClipperMomLike {
 
 import "dss-interfaces/dss/FaucetAbstract.sol";
 
+interface EndLike {
+    function wait() external view returns (uint256);
+}
+
 contract DssSpellAction is DssAction {
 
     string public constant description = "Kovan Spell";
 
-    address constant MCD_DOG              = address(0);
-    address constant MCD_END              = address(0);
-    address constant MCD_ESM              = address(0);
-    // address constant ILK_REGISTRY         = address(0);
-    address constant CLIPPER_MOM          = address(0);
-    address constant MCD_CLIP_LINK_A      = address(0);
-    address constant MCD_CLIP_CALC_LINK_A = address(0);
+    address constant MCD_DOG              = 0x121D0953683F74e9a338D40d9b4659C0EBb539a0;
+    address constant MCD_END              = 0x0D1a98E93d9cE32E44bC035e8C6E4209fdB70C27;
+    address constant MCD_ESM_BUG          = 0x0798603b8AE1f76D2823aDbc2E15d047Eac1Efd7;
+    address constant MCD_ESM_ATTACK       = 0x23Aa7cbeb266413f968D284acce3a3f9EEFFC2Ec;
+    address constant ILK_REGISTRY         = 0xB3fBb13b831F254DbBB9a1abdb81d8D91589B3B4;
+    address constant CLIPPER_MOM          = 0x96E9a19Be6EA91d1C0908e5E207f944dc2E7B878;
+    address constant MCD_CLIP_LINK_A      = 0x1eB71cC879960606F8ab0E02b3668EEf92CE6D98;
+    address constant MCD_CLIP_CALC_LINK_A = 0xbd586d6352Fcf0C45f77FC9348F4Ee7539F6e2bD;
 
     uint256 constant THOUSAND   = 10**3;
     uint256 constant MILLION    = 10**6;
@@ -56,7 +61,6 @@ contract DssSpellAction is DssAction {
         address MCD_POT          = DssExecLib.pot();
         address MCD_SPOT         = DssExecLib.spotter();
         address MCD_END_OLD      = DssExecLib.end();
-        address MCD_ESM_OLD      = DssExecLib.getChangelogAddress("MCD_ESM");
         address MCD_FLIP_LINK_A  = DssExecLib.flip("LINK-A");
         address ILK_REGISTRY_OLD = DssExecLib.reg();
 
@@ -67,6 +71,9 @@ contract DssSpellAction is DssAction {
         DssExecLib.setContract(MCD_END,  "vow", MCD_VOW);
         DssExecLib.setContract(MCD_END,  "pot", MCD_POT);
         DssExecLib.setContract(MCD_END, "spot", MCD_SPOT);
+
+        // Set wait time in END
+        DssExecLib.setEmergencyShutdownProcessingTime(EndLike(MCD_END_OLD).wait());
 
         // Authorize the new END in contracts
         DssExecLib.authorize(MCD_VAT, MCD_END);
@@ -84,10 +91,14 @@ contract DssSpellAction is DssAction {
         DssExecLib.deauthorize(MCD_SPOT, MCD_END_OLD);
 
         // Authorize new ESM to execute in new END
-        DssExecLib.authorize(MCD_END, MCD_ESM);
+        DssExecLib.authorize(MCD_END, MCD_ESM_BUG);
+        DssExecLib.authorize(MCD_END, MCD_ESM_ATTACK);
 
-        // Deuthorize old ESM to execute in old END
-        DssExecLib.deauthorize(MCD_END_OLD, MCD_ESM_OLD);
+        // Authorize new ESM to execute in new VAT
+        DssExecLib.authorize(MCD_VAT, MCD_ESM_ATTACK);
+
+        // Authorize new ESM to execute in LINK-A Clipper
+        DssExecLib.authorize(MCD_CLIP_LINK_A, MCD_ESM_ATTACK);
 
         // ------------------  AUCTION  ------------------
 
@@ -161,14 +172,16 @@ contract DssSpellAction is DssAction {
 
         DssExecLib.setChangelogAddress("MCD_DOG", MCD_DOG);
         DssExecLib.setChangelogAddress("MCD_END", MCD_END);
-        DssExecLib.setChangelogAddress("MCD_ESM", MCD_ESM);
+        DssExecLib.setChangelogAddress("MCD_ESM_BUG", MCD_ESM_BUG);
+        DssExecLib.setChangelogAddress("MCD_ESM_ATTACK", MCD_ESM_ATTACK);
         DssExecLib.setChangelogAddress("CLIPPER_MOM", CLIPPER_MOM);
         DssExecLib.setChangelogAddress("MCD_CLIP_LINK_A", MCD_CLIP_LINK_A);
         DssExecLib.setChangelogAddress("MCD_CLIP_CALC_LINK_A", MCD_CLIP_CALC_LINK_A);
-        // DssExecLib.setChangelogAddress("ILK_REGISTRY", ILK_REGISTRY); TODO in the following spell
+        DssExecLib.setChangelogAddress("ILK_REGISTRY", ILK_REGISTRY);
+        ChainlogLike(DssExecLib.LOG).removeAddress("MCD_ESM");
         ChainlogLike(DssExecLib.LOG).removeAddress("MCD_FLIP_LINK_A");
 
-        // DssExecLib.setChangelogVersion("1.3.0");
+        DssExecLib.setChangelogVersion("1.3.0");
     }
 
 }
