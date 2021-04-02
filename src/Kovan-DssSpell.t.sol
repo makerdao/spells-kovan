@@ -1,4 +1,4 @@
-pragma solidity 0.6.11;
+pragma solidity 0.6.12;
 
 import "ds-math/math.sol";
 import "ds-test/test.sol";
@@ -275,7 +275,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             25                   // Num expected in system
+            ilk_count:             26                   // Num expected in system
         });
 
         //
@@ -956,6 +956,33 @@ contract DssSpellTest is DSTest, DSMath {
             calc_step:    0,
             calc_cut:     0
         });
+        afterSpell.collaterals["NS2DRP-A"] = CollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
+            line:         5 * MILLION,
+            dust:         0,
+            pct:          360,
+            mat:          10000,
+            liqType:      "",
+            liqOn:        false,
+            chop:         0,
+            cat_dunk:     0,
+            flip_beg:     0,
+            flip_ttl:     0,
+            flip_tau:     0,
+            flipper_mom:  0,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
+        });
         afterSpell.collaterals["PAXG-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
@@ -1165,12 +1192,12 @@ contract DssSpellTest is DSTest, DSMath {
 
     function checkCollateralValues(SystemValues storage values) internal {
         uint256 sumlines;
-        bytes32[] memory _ilks = reg.list();
-        bytes32[] memory ilks = new bytes32[](_ilks.length + 1);
-        for (uint256 i; i < _ilks.length; i++) {
-            ilks[i] = _ilks[i];
-        }
-        ilks[ilks.length -1] = "RWA001-A";
+        bytes32[] memory ilks = reg.list();
+        //bytes32[] memory ilks = new bytes32[](_ilks.length + 1);
+        //for (uint256 i; i < _ilks.length; i++) {
+        //    ilks[i] = _ilks[i];
+        //}
+        //ilks[ilks.length - 1] = "RWA001-A";
         for(uint256 i = 0; i < ilks.length; i++) {
             bytes32 ilk = ilks[i];
             (uint256 duty,)  = jug.ilks(ilk);
@@ -1306,7 +1333,7 @@ contract DssSpellTest is DSTest, DSMath {
         }
         assertEq(sumlines, vat.Line());
     }
-    
+
     function getOSMPrice(address pip) internal returns (uint256) {
         // hevm.load is to pull the price from the LP Oracle storage bypassing the whitelist
         uint256 price = uint256(hevm.load(
@@ -1322,7 +1349,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         return price;
     }
-    
+
     function getUNIV2LPPrice(address pip) internal returns (uint256) {
         // hevm.load is to pull the price from the LP Oracle storage bypassing the whitelist
         uint256 price = uint256(hevm.load(
@@ -1338,7 +1365,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         return price;
     }
-    
+
     function giveTokens(DSTokenAbstract token, uint256 amount) internal {
         // Edge case - balance is already set for some reason
         if (token.balanceOf(address(this)) == amount) return;
@@ -1603,7 +1630,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
 
         ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
-        
+
         assertEq(chainLog.getAddress("MCD_DOG"), addr.addr("MCD_DOG"));
         assertEq(chainLog.getAddress("MCD_END"), addr.addr("MCD_END"));
         assertEq(chainLog.getAddress("MCD_ESM_BUG"), addr.addr("MCD_ESM_BUG"));
