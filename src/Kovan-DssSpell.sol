@@ -30,6 +30,10 @@ interface EndLike {
     function wait() external view returns (uint256);
 }
 
+interface OldRegistryLike {
+    function flip(bytes32) external view returns (address);
+}
+
 contract DssSpellAction is DssAction {
 
     string public constant description = "Kovan Spell";
@@ -146,7 +150,7 @@ contract DssSpellAction is DssAction {
         // running auctions and shutdown could happen)
         bytes32[] memory ilks = IlkRegistryAbstract(ILK_REGISTRY_OLD).list();
         for (uint256 i = 0; i < ilks.length; i++) {
-            address flip = IlkRegistryAbstract(ILK_REGISTRY_OLD).flip(ilks[i]);
+            address flip = OldRegistryLike(ILK_REGISTRY_OLD).flip(ilks[i]);
             DssExecLib.deauthorize(flip, MCD_END_OLD);
             DssExecLib.authorize(flip, MCD_END);
         }

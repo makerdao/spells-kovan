@@ -19,38 +19,10 @@ interface SpellLike {
     function cast() external;
 }
 
-// To be removed when dss-interfaces get updated
-interface DogAbstract {
-    // TODO: Add all existing methods to dss-interfaces (not only these ones)
-    function ilks(bytes32) external view returns (address, uint256, uint256, uint256);
-    function Hole() external view returns (uint256);
-    function vat() external view returns (address);
-    function vow() external view returns (address);
-    function wards(address) external view returns (uint256);
-    function bark(bytes32, address, address) external;
-}
-
 interface ClipperMomAbstract {
     // TODO: Add all existing methods to dss-interfaces (not only these ones)
     function authority() external view returns (address);
     function owner() external view returns (address);
-}
-
-interface ClipAbstract {
-    // TODO: Add all existing methods to dss-interfaces (not only these ones)
-    function buf() external view returns (uint256);
-    function calc() external view returns (address);
-    function chip() external view returns (uint256);
-    function cusp() external view returns (uint256);
-    function dog() external view returns (address);
-    function ilk() external view returns (bytes32);
-    function kicks() external view returns (uint256);
-    function spotter() external view returns (address);
-    function tail() external view returns (uint256);
-    function tip() external view returns (uint256);
-    function vat() external view returns (address);
-    function vow() external view returns (address);
-    function wards(address) external view returns (uint256);
 }
 
 interface EndAbstractNew {
@@ -275,7 +247,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
-            ilk_count:             26                   // Num expected in system
+            ilk_count:             27                   // Num expected in system
         });
 
         //
@@ -1193,11 +1165,6 @@ contract DssSpellTest is DSTest, DSMath {
     function checkCollateralValues(SystemValues storage values) internal {
         uint256 sumlines;
         bytes32[] memory ilks = reg.list();
-        //bytes32[] memory ilks = new bytes32[](_ilks.length + 1);
-        //for (uint256 i; i < _ilks.length; i++) {
-        //    ilks[i] = _ilks[i];
-        //}
-        //ilks[ilks.length - 1] = "RWA001-A";
         for(uint256 i = 0; i < ilks.length; i++) {
             bytes32 ilk = ilks[i];
             (uint256 duty,)  = jug.ilks(ilk);
@@ -1319,18 +1286,19 @@ contract DssSpellTest is DSTest, DSMath {
                     }
                     (exists, value) = clip.calc().call(abi.encodeWithSignature("cut()"));
                     if (exists) {
-                        uint256 normalizedTestCut = (1000 - values.collaterals[ilk].calc_cut) * 10**23;
+                        uint256 normalizedTestCut = (10000 - values.collaterals[ilk].calc_cut) * 10**23;
                         assertEq(abi.decode(value, (uint256)), normalizedTestCut);
                     }
                 }
             }
-            if (ilk != "RWA001-A") {
+            if (reg.class(ilk) < 3) {
                 {
                 GemJoinAbstract join = GemJoinAbstract(reg.join(ilk));
                 assertEq(join.wards(address(pauseProxy)), 1); // Check pause_proxy ward
                 }
             }
         }
+        //       actual    expected
         assertEq(sumlines, vat.Line());
     }
 
@@ -1718,7 +1686,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Authorization
         bytes32[] memory ilks = IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).list();
         for (uint256 i = 0; i < ilks.length; i++) {
-            FlipAbstract flip = FlipAbstract(IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).flip(ilks[i]));
+            FlipAbstract flip = FlipAbstract(IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).xlip(ilks[i]));
 
             assertEq(flip.wards(address(end)), 1);
             assertEq(flip.wards(address(end_old)), 0);
