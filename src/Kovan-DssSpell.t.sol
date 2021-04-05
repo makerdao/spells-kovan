@@ -1669,6 +1669,12 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_new_End() public {
+        assertEq(vat.wards(address(end_old)), 1);
+        assertEq(cat.wards(address(end_old)), 1);
+        assertEq(vow.wards(address(end_old)), 1);
+        assertEq(pot.wards(address(end_old)), 1);
+        assertEq(spotter.wards(address(end_old)), 1);
+
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
@@ -1694,17 +1700,18 @@ contract DssSpellTest is DSTest, DSMath {
             }
         }
 
-        assertEq(vat.wards(address(end)), 1);
         assertEq(vat.wards(address(end_old)), 0);
-        assertEq(cat.wards(address(end)), 1);
         assertEq(cat.wards(address(end_old)), 0);
+        assertEq(vow.wards(address(end_old)), 0);
+        assertEq(pot.wards(address(end_old)), 0);
+        assertEq(spotter.wards(address(end_old)), 0);
+
+        assertEq(vat.wards(address(end)), 1);
+        assertEq(cat.wards(address(end)), 1);
         assertEq(dog.wards(address(end)), 1);
         assertEq(vow.wards(address(end)), 1);
-        assertEq(vow.wards(address(end_old)), 0);
         assertEq(pot.wards(address(end)), 1);
-        assertEq(pot.wards(address(end_old)), 0);
         assertEq(spotter.wards(address(end)), 1);
-        assertEq(spotter.wards(address(end_old)), 0);
 
         assertEq(end.wards(address(esmBug)), 1);
         assertEq(end.wards(address(esmAttack)), 1);
