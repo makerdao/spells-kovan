@@ -32,6 +32,7 @@ interface EndLike {
 
 interface OldRegistryLike {
     function flip(bytes32) external view returns (address);
+    function pip(bytes32) external view returns (address);
 }
 
 contract DssSpellAction is DssAction {
@@ -89,7 +90,7 @@ contract DssSpellAction is DssAction {
         DssExecLib.authorize(MCD_SPOT, MCD_END);
 
         // Set wait time in END
-        DssExecLib.setEmergencyShutdownProcessingTime(EndLike(MCD_END_OLD).wait());
+        Fileable(MCD_END).file("wait", EndLike(MCD_END_OLD).wait());
 
         // Deauthorize the old END in contracts
         DssExecLib.deauthorize(MCD_VAT, MCD_END_OLD);
@@ -102,9 +103,14 @@ contract DssSpellAction is DssAction {
         // Authorize the new END in all the FLIPS
         bytes32[] memory ilks = IlkRegistryAbstract(ILK_REGISTRY_OLD).list();
         for (uint256 i = 0; i < ilks.length; i++) {
-            address flip = OldRegistryLike(ILK_REGISTRY_OLD).flip(ilks[i]);
+            bytes32 ilk = ilks[i];
+
+            address flip = OldRegistryLike(ILK_REGISTRY_OLD).flip(ilk);
             DssExecLib.deauthorize(flip, MCD_END_OLD);
             DssExecLib.authorize(flip, MCD_END);
+
+            try DssExecLib.removeReaderFromOSMWhitelist(OldRegistryLike(ILK_REGISTRY_OLD).pip(ilk), MCD_END_OLD) {} catch {}
+            try DssExecLib.addReaderToOSMWhitelist(OldRegistryLike(ILK_REGISTRY_OLD).pip(ilk), MCD_END) {} catch {}
         }
 
         // ------------------  ESM  ------------------
@@ -155,11 +161,11 @@ contract DssSpellAction is DssAction {
         // Authorize DOG can kick auctions on CLIP
         DssExecLib.authorize(MCD_CLIP_LINK_A, MCD_DOG);
 
-        // Authorize CLIPPERMOM can set the stopped flag in CLIP
-        DssExecLib.authorize(MCD_CLIP_LINK_A, CLIPPER_MOM);
-
         // Authorize the new END to access the LINK CLIP
         DssExecLib.authorize(MCD_CLIP_LINK_A, MCD_END);
+
+        // Authorize CLIPPERMOM can set the stopped flag in CLIP
+        DssExecLib.authorize(MCD_CLIP_LINK_A, CLIPPER_MOM);
 
         // Authorize new ESM to execute in LINK-A Clipper
         DssExecLib.authorize(MCD_CLIP_LINK_A, MCD_ESM_ATTACK);
@@ -194,13 +200,13 @@ contract DssSpellAction is DssAction {
 
         DssExecLib.setChangelogAddress("MCD_DOG", MCD_DOG);
         DssExecLib.setChangelogAddress("MCD_END", MCD_END);
+        ChainlogLike(DssExecLib.LOG).removeAddress("MCD_ESM");
         DssExecLib.setChangelogAddress("MCD_ESM_BUG", MCD_ESM_BUG);
         DssExecLib.setChangelogAddress("MCD_ESM_ATTACK", MCD_ESM_ATTACK);
         DssExecLib.setChangelogAddress("CLIPPER_MOM", CLIPPER_MOM);
         DssExecLib.setChangelogAddress("MCD_CLIP_LINK_A", MCD_CLIP_LINK_A);
         DssExecLib.setChangelogAddress("MCD_CLIP_CALC_LINK_A", MCD_CLIP_CALC_LINK_A);
         DssExecLib.setChangelogAddress("ILK_REGISTRY", ILK_REGISTRY);
-        ChainlogLike(DssExecLib.LOG).removeAddress("MCD_ESM");
         ChainlogLike(DssExecLib.LOG).removeAddress("MCD_FLIP_LINK_A");
 
         // DssExecLib.setChangelogVersion("1.3.0");

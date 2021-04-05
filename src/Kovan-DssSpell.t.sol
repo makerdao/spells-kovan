@@ -114,7 +114,8 @@ contract DssSpellTest is DSTest, DSMath {
     DaiJoinAbstract      daiJoin = DaiJoinAbstract(    addr.addr("MCD_DAI_JOIN"));
     DSTokenAbstract          gov = DSTokenAbstract(    addr.addr("MCD_GOV"));
     EndAbstract              end = EndAbstract(        addr.addr("MCD_END"));
-    ESMAbstract              esm = ESMAbstract(        addr.addr("MCD_ESM"));
+    ESMAbstract           esmBug = ESMAbstract(        addr.addr("MCD_ESM_BUG"));
+    ESMAbstract        esmAttack = ESMAbstract(        addr.addr("MCD_ESM_ATTACK"));
     IlkRegistryAbstract      reg = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
     FlapAbstract            flap = FlapAbstract(       addr.addr("MCD_FLAP"));
 
@@ -1680,16 +1681,17 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(end.pot(), address(pot));
         assertEq(end.spot(), address(spotter));
 
-        assertEq(esm.end(), address(end));
-
+        assertEq(esmBug.end(), address(end));
+        assertEq(esmAttack.end(), address(end));
 
         // Authorization
         bytes32[] memory ilks = IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).list();
         for (uint256 i = 0; i < ilks.length; i++) {
-            FlipAbstract flip = FlipAbstract(IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).xlip(ilks[i]));
-
-            assertEq(flip.wards(address(end)), 1);
-            assertEq(flip.wards(address(end_old)), 0);
+            if (IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).class(ilks[i]) < 3) {
+                FlipAbstract xlip = FlipAbstract(IlkRegistryAbstract(addr.addr("ILK_REGISTRY")).xlip(ilks[i]));
+                assertEq(xlip.wards(address(end)), 1);
+                assertEq(xlip.wards(address(end_old)), 0);
+            }
         }
 
         assertEq(vat.wards(address(end)), 1);
@@ -1704,7 +1706,9 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(spotter.wards(address(end)), 1);
         assertEq(spotter.wards(address(end_old)), 0);
 
-        assertEq(end.wards(address(esm)), 1);
+        assertEq(end.wards(address(esmBug)), 1);
+        assertEq(end.wards(address(esmAttack)), 1);
+        assertEq(vat.wards(address(esmAttack)), 1);
         assertEq(end_old.wards(address(esm_old)), 1);
     }
 
