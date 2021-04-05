@@ -677,11 +677,11 @@ contract DssSpellTest is DSTest, DSMath {
             flip_tau:     0,
             flipper_mom:  0,
             dog_hole:     10 * THOUSAND,
-            clip_buf:     2000,
-            clip_tail:    1 hours,
-            clip_cusp:    6000,
-            clip_chip:    200,
-            clip_tip:     50,
+            clip_buf:     3000,
+            clip_tail:    140 minutes,
+            clip_cusp:    4000,
+            clip_chip:    10,
+            clip_tip:     0,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     100
@@ -1250,7 +1250,7 @@ contract DssSpellTest is DSTest, DSMath {
                 // Convert whole Dai units to expected RAD
                 uint256 normalizedTesthole = values.collaterals[ilk].dog_hole * RAD;
                 assertEq(hole, normalizedTesthole);
-                assertTrue(hole >= RAD && hole < MILLION * RAD);
+                assertTrue(hole >= RAD && hole < 20 * MILLION * RAD);
                 }
                 (address clipper,,,) = dog.ilks(ilk);
                 ClipAbstract clip = ClipAbstract(clipper);
