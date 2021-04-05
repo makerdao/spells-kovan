@@ -19,12 +19,11 @@ import {Fileable, ChainlogLike} from "dss-exec-lib/DssExecLib.sol";
 import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
 import "dss-interfaces/dss/IlkRegistryAbstract.sol";
+import "dss-interfaces/dss/ClipAbstract.sol";
 
 interface ClipperMomLike {
     function setAuthority(address) external;
 }
-
-import "dss-interfaces/dss/FaucetAbstract.sol";
 
 interface EndLike {
     function wait() external view returns (uint256);
@@ -194,6 +193,8 @@ contract DssSpellAction is DssAction {
         Fileable(MCD_CLIP_LINK_A).file("tip", 0);
         Fileable(MCD_CLIP_CALC_LINK_A).file("cut", 99 * RAY / 100); // 1% cut
         Fileable(MCD_CLIP_CALC_LINK_A).file("step", 90 seconds);
+
+        ClipAbstract(MCD_CLIP_LINK_A).upchost();
 
 
         // ------------------  CHAINLOG  -----------------
