@@ -1687,6 +1687,9 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(end.pot(), address(pot));
         assertEq(end.spot(), address(spotter));
 
+        // Check end.wait
+        assertEq(end.wait(), end_old.wait());
+
         assertEq(esmBug.end(), address(end));
         assertEq(esmAttack.end(), address(end));
 
