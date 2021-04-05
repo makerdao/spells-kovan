@@ -1741,12 +1741,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Add balance to the test address
         uint256 ilkAmt = 1 * THOUSAND * WAD;
 
-        hevm.store(
-            address(LINK),
-            keccak256(abi.encode(address(this), uint256(1))),
-            bytes32(ilkAmt)
-        );
-
+        giveTokens(LINK, ilkAmt);
         assertEq(LINK.balanceOf(address(this)), ilkAmt);
 
         // Contracts set
