@@ -1732,7 +1732,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         hevm.store(
             address(LINK),
-            keccak256(abi.encode(address(this), uint256(0))),
+            keccak256(abi.encode(address(this), uint256(1))),
             bytes32(ilkAmt)
         );
 
@@ -1768,11 +1768,9 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem("LINK-A", address(this)), ilkAmt);
 
         // Generate new DAI to force a liquidation
-        LINK.approve(address(joinLINK), ilkAmt);
-        joinLINK.join(address(this), ilkAmt);
-        (,,uint256 spot,,) = vat.ilks("LINK-A");
+        (,uint256 rate, uint256 spot,,) = vat.ilks("LINK-A");
         // dart max amount of DAI
-        vat.frob("LINK-A", address(this), address(this), address(this), int(ilkAmt), int(mul(ilkAmt, spot) / RAY));
+        vat.frob("LINK-A", address(this), address(this), address(this), int(ilkAmt), int(mul(ilkAmt, spot) / rate));
         hevm.warp(now + 1);
         jug.drip("LINK-A");
         assertEq(clipLINKA.kicks(), 0);
