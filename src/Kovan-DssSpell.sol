@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-pragma solidity 0.6.11;
+pragma solidity 0.6.12;
 
 import {Fileable, ChainlogLike} from "dss-exec-lib/DssExecLib.sol";
 import "dss-exec-lib/DssExec.sol";
@@ -28,6 +28,10 @@ import "dss-interfaces/dss/FaucetAbstract.sol";
 
 interface EndLike {
     function wait() external view returns (uint256);
+}
+
+interface OldRegistryLike {
+    function flip(bytes32) external view returns (address);
 }
 
 contract DssSpellAction is DssAction {
@@ -146,7 +150,7 @@ contract DssSpellAction is DssAction {
         // running auctions and shutdown could happen)
         bytes32[] memory ilks = IlkRegistryAbstract(ILK_REGISTRY_OLD).list();
         for (uint256 i = 0; i < ilks.length; i++) {
-            address flip = IlkRegistryAbstract(ILK_REGISTRY_OLD).flip(ilks[i]);
+            address flip = OldRegistryLike(ILK_REGISTRY_OLD).flip(ilks[i]);
             DssExecLib.deauthorize(flip, MCD_END_OLD);
             DssExecLib.authorize(flip, MCD_END);
         }
