@@ -114,6 +114,7 @@ contract DssSpellTest is DSTest, DSMath {
     FaucetAbstract        faucet = FaucetAbstract(     addr.addr("FAUCET"));
 
     // Specific for this spell
+    OsmAbstract          pipLINK = OsmAbstract(        addr.addr("PIP_LINK"));
     ClipAbstract       clipLINKA = ClipAbstract(       addr.addr("MCD_CLIP_LINK_A"));
     EndAbstract          end_old = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     ESMAbstract          esm_old = ESMAbstract(        0x0C376764F585828ffB52471c1c35f855e312a06c);
@@ -1815,5 +1816,56 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(clipLINKA.wards(address(pauseProxy)), 1);
         esmAttack.deny(address(clipLINKA));
         assertEq(clipLINKA.wards(address(pauseProxy)), 0);
+    }
+
+    function testClipperMomSetBreaker() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        // clipperMom is an authority-based contract, so here we set the Chieftain's hat
+        //  to the current contract to simulate governance authority.
+        hevm.store(
+                address(chief),
+                bytes32(uint256(12)),
+                bytes32(uint256(address(this)))
+            );
+
+        assertEq(clipLINKA.stopped(), 0);
+        clipMom.setBreaker(address(clipLINKA), 1, 0);
+        assertEq(clipLINKA.stopped(), 1);
+        clipMom.setBreaker(address(clipLINKA), 2, 0);
+        assertEq(clipLINKA.stopped(), 2);
+        clipMom.setBreaker(address(clipLINKA), 3, 0);
+        assertEq(clipLINKA.stopped(), 3);
+        clipMom.setBreaker(address(clipLINKA), 0, 0);
+        assertEq(clipLINKA.stopped(), 0);
+    }
+
+    function testFailClipperMomTripBreaker() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        // Assuming we're within bounds at time of testing, this shouldn't work.
+        clipMom.tripBreaker(address(clipLINKA));
+    }
+
+    function testClipperMomTripBreaker() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        // Hacking nxt price to 0x123 (and making it valid)
+        bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
+
+        hevm.store(address(pipLINK), bytes32(uint256(4)), hackedValue);
+
+        assertEq(clipMom.tolerance(address(clipLINKA)), (RAY / 2)); // (RAY / 2) for 50%
+
+        // Price is hacked, anyone can trip the breaker
+        clipMom.tripBreaker(address(clipLINKA));
+
+        assertEq(clipLINKA.stopped(), 2);
     }
 }
