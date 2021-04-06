@@ -20,10 +20,7 @@ import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
 import "dss-interfaces/dss/IlkRegistryAbstract.sol";
 import "dss-interfaces/dss/ClipAbstract.sol";
-
-interface ClipperMomLike {
-    function setAuthority(address) external;
-}
+import "dss-interfaces/dss/ClipperMomAbstract.sol";
 
 interface EndLike {
     function wait() external view returns (uint256);
@@ -137,11 +134,15 @@ contract DssSpellAction is DssAction {
 
         // --------------  CLIPPER_MOM  --------------
 
-        ClipperMomLike(CLIPPER_MOM).setAuthority(DssExecLib.getChangelogAddress("MCD_ADM"));
+        ClipperMomAbstract(CLIPPER_MOM).setAuthority(DssExecLib.getChangelogAddress("MCD_ADM"));
+
+        // TODO: Tolerance currently set to 50%. Verify governance parameter.
+        //   n.b. 600000000000000000000000000 == 40% tolerance
+        ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_LINK_A, 500000000000000000000000000);
 
 
         // ----------------  LINK-A  -----------------
-     
+
         // Set CLIP for LINK-A in the DOG
         DssExecLib.setContract(MCD_DOG, "LINK-A", "clip", MCD_CLIP_LINK_A);
 
