@@ -19,12 +19,6 @@ interface SpellLike {
     function cast() external;
 }
 
-interface ClipperMomAbstract {
-    // TODO: Add all existing methods to dss-interfaces (not only these ones)
-    function authority() external view returns (address);
-    function owner() external view returns (address);
-}
-
 interface EndAbstractNew {
     // TODO: In this case add these two functions to the EndAbstract
     // and remove the EndAbstractNew cast when used in the tests
@@ -1785,5 +1779,49 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(clipLINKA.kicks(), 0);
         dog.bark("LINK-A", address(this), address(this));
         assertEq(clipLINKA.kicks(), 1);
+    }
+
+    function testFireESMBug() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        assertTrue(!esmBug.revokesGovernanceAccess());
+
+        uint256 amt = 50 * THOUSAND * WAD;
+        assertEq(esmBug.min(), amt);
+        giveTokens(gov, amt);
+        gov.approve(address(esmBug), amt);
+        esmBug.join(amt);
+
+        assertEq(vat.wards(address(pauseProxy)), 1);
+        esmBug.fire();
+        assertEq(vat.wards(address(pauseProxy)), 1);
+        assertEq(end.live(), 0);
+        assertEq(vat.live(), 0);
+    }
+
+    function testFireESMAttack() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        assertTrue(esmAttack.revokesGovernanceAccess());
+
+        uint256 amt = 50 * THOUSAND * WAD;
+        assertEq(esmAttack.min(), amt);
+        giveTokens(gov, amt);
+        gov.approve(address(esmAttack), amt);
+        esmAttack.join(amt);
+
+        assertEq(vat.wards(address(pauseProxy)), 1);
+        esmAttack.fire();
+        assertEq(vat.wards(address(pauseProxy)), 0);
+        assertEq(end.live(), 0);
+        assertEq(vat.live(), 0);
+
+        assertEq(clipLINKA.wards(address(pauseProxy)), 1);
+        esmAttack.deny(address(clipLINKA));
+        assertEq(clipLINKA.wards(address(pauseProxy)), 0);
     }
 }
