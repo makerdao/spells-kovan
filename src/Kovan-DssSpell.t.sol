@@ -19,14 +19,6 @@ interface SpellLike {
     function cast() external;
 }
 
-interface EndAbstractNew {
-    // TODO: In this case add these two functions to the EndAbstract
-    // and remove the EndAbstractNew cast when used in the tests
-    function dog() external view returns (address);
-    function snip(bytes32, uint256) external;
-}
-//
-
 contract DssSpellTest is DSTest, DSMath {
 
     struct SpellValues {
@@ -1676,7 +1668,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Contracts set
         assertEq(end.vat(), address(vat));
         assertEq(end.cat(), address(cat));
-        assertEq(EndAbstractNew(address(end)).dog(), address(dog));
+        assertEq(end.dog(), address(dog));
         assertEq(end.vow(), address(vow));
         assertEq(end.pot(), address(pot));
         assertEq(end.spot(), address(spotter));
