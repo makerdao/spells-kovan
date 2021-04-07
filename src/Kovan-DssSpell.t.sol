@@ -114,8 +114,6 @@ contract DssSpellTest is DSTest, DSMath {
     FaucetAbstract        faucet = FaucetAbstract(     addr.addr("FAUCET"));
 
     // Specific for this spell
-    OsmAbstract          pipLINK = OsmAbstract(        addr.addr("PIP_LINK"));
-    ClipAbstract       clipLINKA = ClipAbstract(       addr.addr("MCD_CLIP_LINK_A"));
     EndAbstract          end_old = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
     ESMAbstract          esm_old = ESMAbstract(        0x0C376764F585828ffB52471c1c35f855e312a06c);
     //
@@ -248,7 +246,7 @@ contract DssSpellTest is DSTest, DSMath {
             aL_ttl:       0,               // In seconds
             line:         540 * MILLION,   // In whole Dai units
             dust:         100,             // In whole Dai units
-            pct:          0,               // In basis points
+            pct:          400,             // In basis points
             mat:          15000,           // In basis points
             liqType:      "flip",          // "" or "flip" or "clip"
             liqOn:        true,            // If liquidations are enabled
@@ -975,7 +973,7 @@ contract DssSpellTest is DSTest, DSMath {
     function scheduleWaitAndCastFailDay() public {
         spell.schedule();
 
-        uint256 castTime = now + pause.delay();
+        uint256 castTime = block.timestamp + pause.delay();
         uint256 day = (castTime / 1 days + 3) % 7;
         if (day < 5) {
             castTime += 5 days - day * 86400;
@@ -988,7 +986,7 @@ contract DssSpellTest is DSTest, DSMath {
     function scheduleWaitAndCastFailEarly() public {
         spell.schedule();
 
-        uint256 castTime = now + pause.delay() + 24 hours;
+        uint256 castTime = block.timestamp + pause.delay() + 24 hours;
         uint256 hour = castTime / 1 hours % 24;
         if (hour >= 14) {
             castTime -= hour * 3600 - 13 hours;
@@ -1001,7 +999,7 @@ contract DssSpellTest is DSTest, DSMath {
     function scheduleWaitAndCastFailLate() public {
         spell.schedule();
 
-        uint256 castTime = now + pause.delay();
+        uint256 castTime = block.timestamp + pause.delay();
         uint256 hour = castTime / 1 hours % 24;
         if (hour < 21) {
             castTime += 21 hours - hour * 3600;
@@ -1366,7 +1364,7 @@ contract DssSpellTest is DSTest, DSMath {
         DSTokenAbstract token = DSTokenAbstract(join.gem());
 
         if (_isOSM) OsmAbstract(pip).poke();
-        hevm.warp(now + 3601);
+        hevm.warp(block.timestamp + 3601);
         if (_isOSM) OsmAbstract(pip).poke();
         spotter.poke(_ilk);
 
@@ -1399,7 +1397,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem(_ilk, address(this)), amount);
 
         // Tick the fees forward so that art != dai in wad units
-        hevm.warp(now + 1);
+        hevm.warp(block.timestamp + 1);
         jug.drip(_ilk);
 
         // Deposit collateral, generate DAI
@@ -1432,7 +1430,7 @@ contract DssSpellTest is DSTest, DSMath {
         // dart max amount of DAI
         (,,uint256 spotV,,) = vat.ilks(_ilk);
         vat.frob(_ilk, address(this), address(this), address(this), int(amount), int(mul(amount, spotV) / rate));
-        hevm.warp(now + 1);
+        hevm.warp(block.timestamp + 1);
         jug.drip(_ilk);
         assertEq(flip.kicks(), 0);
         if (_checkLiquidations) {
@@ -1458,7 +1456,7 @@ contract DssSpellTest is DSTest, DSMath {
         DSTokenAbstract token = DSTokenAbstract(join.gem());
 
         pip.poke();
-        hevm.warp(now + 3601);
+        hevm.warp(block.timestamp + 3601);
         pip.poke();
         spotter.poke(_ilk);
 
@@ -1491,7 +1489,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem(_ilk, address(this)), amount);
 
         // Tick the fees forward so that art != dai in wad units
-        hevm.warp(now + 1);
+        hevm.warp(block.timestamp + 1);
         jug.drip(_ilk);
 
         // Deposit collateral, generate DAI
@@ -1517,7 +1515,7 @@ contract DssSpellTest is DSTest, DSMath {
         // dart max amount of DAI
         (,,uint256 spotV,,) = vat.ilks(_ilk);
         vat.frob(_ilk, address(this), address(this), address(this), int(amount), int(mul(amount, spotV) / rate));
-        hevm.warp(now + 1);
+        hevm.warp(block.timestamp + 1);
         jug.drip(_ilk);
         assertEq(flip.kicks(), 0);
         if (_checkLiquidations) {
@@ -1560,7 +1558,7 @@ contract DssSpellTest is DSTest, DSMath {
                 stringToBytes32(description));
 
         if(address(spell) != address(spellValues.deployed_spell)) {
-            assertEq(spell.expiration(), (now + spellValues.expiration_threshold));
+            assertEq(spell.expiration(), (block.timestamp + spellValues.expiration_threshold));
         } else {
             assertEq(spell.expiration(), (spellValues.deployed_spell_created + spellValues.expiration_threshold));
 
@@ -1655,7 +1653,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 8 * MILLION);
     }
 
-    function testSpellIsCast_new_End() public {
+    function testSpellIsCast_new_End_authorities() public {
         assertEq(vat.wards(address(end_old)), 1);
         assertEq(cat.wards(address(end_old)), 1);
         assertEq(vow.wards(address(end_old)), 1);
@@ -1709,6 +1707,106 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(end_old.wards(address(esm_old)), 1);
     }
 
+    function testSpellIsCast_new_End_functionality() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        DSTokenAbstract ETH = DSTokenAbstract(addr.addr("ETH"));
+        GemJoinAbstract joinETHA = GemJoinAbstract(addr.addr("MCD_JOIN_ETH_A"));
+        FlipAbstract flipETHA = FlipAbstract(addr.addr("MCD_FLIP_ETH_A"));
+
+        DSTokenAbstract BAT = DSTokenAbstract(addr.addr("BAT"));
+        GemJoinAbstract joinBATA = GemJoinAbstract(addr.addr("MCD_JOIN_BAT_A"));
+        FlipAbstract flipBATA = FlipAbstract(addr.addr("MCD_FLIP_BAT_A"));
+
+        DSTokenAbstract LINK = DSTokenAbstract(addr.addr("LINK"));
+        GemJoinAbstract joinLINKA = GemJoinAbstract(addr.addr("MCD_JOIN_LINK_A"));
+        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
+
+        uint256 ilkAmt = 1 * THOUSAND * WAD;
+
+        giveTokens(ETH, ilkAmt);
+        giveTokens(BAT, ilkAmt);
+        giveTokens(LINK, ilkAmt);
+
+        ETH.approve(address(joinETHA), ilkAmt);
+        joinETHA.join(address(this), ilkAmt);
+        BAT.approve(address(joinBATA), ilkAmt);
+        joinBATA.join(address(this), ilkAmt);
+        LINK.approve(address(joinLINKA), ilkAmt);
+        joinLINKA.join(address(this), ilkAmt);
+
+        (,uint256 rate, uint256 spot,,) = vat.ilks("ETH-A");
+        vat.frob("ETH-A", address(this), address(this), address(this), int(ilkAmt), int(mul(ilkAmt, spot) / rate));
+        uint256 totDaiGenerated = mul(ilkAmt, spot) / rate;
+        (, rate, spot,,) = vat.ilks("BAT-A");
+        vat.frob("BAT-A", address(this), address(this), address(this), int(ilkAmt), int(mul(ilkAmt, spot) / rate));
+        totDaiGenerated += mul(ilkAmt, spot) / rate;
+        (, rate, spot,,) = vat.ilks("LINK-A");
+        vat.frob("LINK-A", address(this), address(this), address(this), int(ilkAmt), int(mul(ilkAmt, spot) / rate));
+        totDaiGenerated += mul(ilkAmt, spot) / rate;
+
+        hevm.warp(block.timestamp + 1);
+        jug.drip("ETH-A");
+        jug.drip("BAT-A");
+        jug.drip("LINK-A");
+
+        uint256 auctionIdETHA = flipETHA.kicks() + 1;
+        uint256 auctionIdBATA = flipBATA.kicks() + 1;
+        uint256 auctionIdLINKA = clipLINKA.kicks() + 1;
+
+        cat.bite("ETH-A", address(this));
+        cat.bite("BAT-A", address(this));
+        dog.bark("LINK-A", address(this), address(this));
+
+        assertEq(flipETHA.kicks(), auctionIdETHA);
+        assertEq(flipBATA.kicks(), auctionIdBATA);
+        assertEq(clipLINKA.kicks(), auctionIdLINKA);
+
+        hevm.store(
+            address(end),
+            keccak256(abi.encode(address(this), uint256(0))),
+            bytes32(uint256(1))
+        );
+        assertEq(end.wards(address(this)), 1);
+
+        end.cage();
+        end.cage("ETH-A");
+        end.cage("BAT-A");
+        end.cage("LINK-A");
+
+        end.skip("ETH-A", auctionIdETHA);
+        end.skip("BAT-A", auctionIdBATA);
+        end.snip("LINK-A", auctionIdLINKA);
+
+        end.skim("ETH-A", address(this));
+        end.skim("BAT-A", address(this));
+        end.skim("LINK-A", address(this));
+
+        end.free("ETH-A");
+        end.free("BAT-A");
+        end.free("LINK-A");
+
+        hevm.warp(block.timestamp + end.wait());
+
+        vow.heal(min(vat.dai(address(vow)), sub(sub(vat.sin(address(vow)), vow.Sin()), vow.Ash())));
+
+        end.thaw();
+
+        end.flow("ETH-A");
+        end.flow("BAT-A");
+        end.flow("LINK-A");
+
+        vat.hope(address(end));
+
+        end.pack(totDaiGenerated);
+
+        end.cash("ETH-A", totDaiGenerated);
+        end.cash("BAT-A", totDaiGenerated);
+        end.cash("LINK-A", totDaiGenerated);
+    }
+
     function testSpellIsCast_new_ClipperMom() public {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
@@ -1724,9 +1822,9 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
 
         DSTokenAbstract LINK = DSTokenAbstract(addr.addr("LINK"));
-        GemJoinAbstract joinLINK = GemJoinAbstract(addr.addr("MCD_JOIN_LINK_A"));
-        FlipAbstract flipLINK = FlipAbstract(addr.addr("MCD_FLIP_LINK_A"));
-        ClipAbstract clipLINK = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
+        GemJoinAbstract joinLINKA = GemJoinAbstract(addr.addr("MCD_JOIN_LINK_A"));
+        FlipAbstract flipLINKA = FlipAbstract(addr.addr("MCD_FLIP_LINK_A"));
+        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
 
         // Add balance to the test address
         uint256 ilkAmt = 1 * THOUSAND * WAD;
@@ -1738,28 +1836,28 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(dog.vat(), address(vat));
         assertEq(dog.vow(), address(vow));
         (address clip,,,) = dog.ilks("LINK-A");
-        assertEq(clip, address(clipLINK));
-        assertEq(clipLINK.ilk(), "LINK-A");
-        assertEq(clipLINK.vat(), address(vat));
-        assertEq(clipLINK.vow(), address(vow));
-        assertEq(clipLINK.dog(), address(dog));
-        assertEq(clipLINK.spotter(), address(spotter));
-        assertEq(clipLINK.calc(), addr.addr("MCD_CLIP_CALC_LINK_A"));
+        assertEq(clip, address(clipLINKA));
+        assertEq(clipLINKA.ilk(), "LINK-A");
+        assertEq(clipLINKA.vat(), address(vat));
+        assertEq(clipLINKA.vow(), address(vow));
+        assertEq(clipLINKA.dog(), address(dog));
+        assertEq(clipLINKA.spotter(), address(spotter));
+        assertEq(clipLINKA.calc(), addr.addr("MCD_CLIP_CALC_LINK_A"));
 
         // Authorization
-        assertEq(flipLINK.wards(address(cat))    , 0);
-        assertEq(flipLINK.wards(address(flipMom)), 0);
+        assertEq(flipLINKA.wards(address(cat))    , 0);
+        assertEq(flipLINKA.wards(address(flipMom)), 0);
 
-        assertEq(vat.wards(address(clipLINK))    , 1);
-        assertEq(dog.wards(address(clipLINK))    , 1);
-        assertEq(clipLINK.wards(address(dog))    , 1);
-        assertEq(clipLINK.wards(address(end))    , 1);
-        assertEq(clipLINK.wards(address(clipMom)), 1);
+        assertEq(vat.wards(address(clipLINKA))    , 1);
+        assertEq(dog.wards(address(clipLINKA))    , 1);
+        assertEq(clipLINKA.wards(address(dog))    , 1);
+        assertEq(clipLINKA.wards(address(end))    , 1);
+        assertEq(clipLINKA.wards(address(clipMom)), 1);
 
         // Join to adapter
         assertEq(vat.gem("LINK-A", address(this)), 0);
-        LINK.approve(address(joinLINK), ilkAmt);
-        joinLINK.join(address(this), ilkAmt);
+        LINK.approve(address(joinLINKA), ilkAmt);
+        joinLINKA.join(address(this), ilkAmt);
         assertEq(LINK.balanceOf(address(this)), 0);
         assertEq(vat.gem("LINK-A", address(this)), ilkAmt);
 
@@ -1767,7 +1865,7 @@ contract DssSpellTest is DSTest, DSMath {
         (,uint256 rate, uint256 spot,,) = vat.ilks("LINK-A");
         // dart max amount of DAI
         vat.frob("LINK-A", address(this), address(this), address(this), int(ilkAmt), int(mul(ilkAmt, spot) / rate));
-        hevm.warp(now + 1);
+        hevm.warp(block.timestamp + 1);
         jug.drip("LINK-A");
         assertEq(clipLINKA.kicks(), 0);
         dog.bark("LINK-A", address(this), address(this));
@@ -1813,6 +1911,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(end.live(), 0);
         assertEq(vat.live(), 0);
 
+        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
         assertEq(clipLINKA.wards(address(pauseProxy)), 1);
         esmAttack.deny(address(clipLINKA));
         assertEq(clipLINKA.wards(address(pauseProxy)), 0);
@@ -1831,6 +1930,7 @@ contract DssSpellTest is DSTest, DSMath {
                 bytes32(uint256(address(this)))
             );
 
+        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
         assertEq(clipLINKA.stopped(), 0);
         clipMom.setBreaker(address(clipLINKA), 1, 0);
         assertEq(clipLINKA.stopped(), 1);
@@ -1848,6 +1948,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
 
         // Assuming we're within bounds at time of testing, this shouldn't work.
+        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
         clipMom.tripBreaker(address(clipLINKA));
     }
 
@@ -1859,7 +1960,9 @@ contract DssSpellTest is DSTest, DSMath {
         // Hacking nxt price to 0x123 (and making it valid)
         bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
 
-        hevm.store(address(pipLINK), bytes32(uint256(4)), hackedValue);
+        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
+
+        hevm.store(address(addr.addr("PIP_LINK")), bytes32(uint256(4)), hackedValue);
 
         assertEq(clipMom.tolerance(address(clipLINKA)), (RAY / 2)); // (RAY / 2) for 50%
 

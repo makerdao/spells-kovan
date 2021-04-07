@@ -56,6 +56,10 @@ contract DssSpellAction is DssAction {
     }
 
     function actions() public override {
+        // Set stability for ETH-A to 4% (whatever higher than 0)
+        DssExecLib.setIlkStabilityFee("ETH-A", 1000000001243680656318820312, true);
+
+
         address MCD_VAT          = DssExecLib.vat();
         address MCD_CAT          = DssExecLib.cat();
         address MCD_VOW          = DssExecLib.vow();
@@ -65,7 +69,6 @@ contract DssSpellAction is DssAction {
         address MCD_FLIP_LINK_A  = DssExecLib.flip("LINK-A");
         address ILK_REGISTRY_OLD = DssExecLib.reg();
         address PIP_LINK         = DssExecLib.getChangelogAddress("PIP_LINK");
-
 
         // ------------------  END  ------------------
 
