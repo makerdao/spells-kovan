@@ -1895,12 +1895,41 @@ contract DssSpellTest is DSTest, DSMath {
         // Generate new DAI to force a liquidation
         (,uint256 rate, uint256 spot,,) = vat.ilks("LINK-A");
         // dart max amount of DAI
-        vat.frob("LINK-A", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
+        int256 art = int256(mul(ilkAmt, spot) / rate);
+        vat.frob("LINK-A", address(this), address(this), address(this), int256(ilkAmt), art);
         hevm.warp(block.timestamp + 1);
         jug.drip("LINK-A");
         assertEq(clipLINKA.kicks(), 0);
         dog.bark("LINK-A", address(this), address(this));
         assertEq(clipLINKA.kicks(), 1);
+
+        (,rate,,,) = vat.ilks("LINK-A");
+        uint256 debt = mul(mul(rate, uint256(art)), dog.chop("LINK-A")) / WAD;
+        hevm.store(
+            address(vat),
+            keccak256(abi.encode(address(this), uint256(5))),
+            bytes32(debt)
+        );
+        assertEq(vat.dai(address(this)), debt);
+        assertEq(vat.gem("LINK-A", address(this)), 0);
+
+        hevm.warp(block.timestamp + 20 minutes);
+        (, uint256 tab, uint256 lot, address usr,, uint256 top) = clipLINKA.sales(1);
+
+        assertEq(usr, address(this));
+        assertEq(tab, debt);
+        assertEq(lot, ilkAmt);
+        assertTrue(mul(lot, top) > tab); // There is enough collateral to cover the debt at current price
+
+        vat.hope(address(clipLINKA));
+        clipLINKA.take(1, lot, top, address(this), bytes(""));
+
+        (, tab, lot, usr,,) = clipLINKA.sales(1);
+        assertEq(usr, address(0));
+        assertEq(tab, 0);
+        assertEq(lot, 0);
+        assertEq(vat.dai(address(this)), 0);
+        assertEq(vat.gem("LINK-A", address(this)), ilkAmt); // What was purchased + returned back as it is the owner of the vault
     }
 
     function testFireESMBug() public {
@@ -1956,10 +1985,10 @@ contract DssSpellTest is DSTest, DSMath {
         // clipperMom is an authority-based contract, so here we set the Chieftain's hat
         //  to the current contract to simulate governance authority.
         hevm.store(
-                address(chief),
-                bytes32(uint256(12)),
-                bytes32(uint256(address(this)))
-            );
+            address(chief),
+            bytes32(uint256(12)),
+            bytes32(uint256(address(this)))
+        );
 
         ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
         assertEq(clipLINKA.stopped(), 0);
