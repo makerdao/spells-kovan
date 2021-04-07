@@ -141,7 +141,7 @@ contract DssSpellAction is DssAction {
 
         // TODO: Tolerance currently set to 50%. Verify governance parameter.
         //   n.b. 600000000000000000000000000 == 40% tolerance
-        ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_LINK_A, 500000000000000000000000000);
+        ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_LINK_A, 50 * RAY / 100);
 
 
         // ----------------  LINK-A  -----------------

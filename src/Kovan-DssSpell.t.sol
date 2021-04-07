@@ -1745,13 +1745,13 @@ contract DssSpellTest is DSTest, DSMath {
 
         (,uint256 rate, uint256 spot,,) = vat.ilks("ETH-A");
         vat.frob("ETH-A", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
-        uint256 totDaiGenerated = mul(ilkAmt, spot) / rate;
+        uint256 totDaiGenerated = mul(ilkAmt, spot);
         (, rate, spot,,) = vat.ilks("BAT-A");
         vat.frob("BAT-A", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
-        totDaiGenerated += mul(ilkAmt, spot) / rate;
+        totDaiGenerated += mul(ilkAmt, spot);
         (, rate, spot,,) = vat.ilks("LINK-A");
         vat.frob("LINK-A", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
-        totDaiGenerated += mul(ilkAmt, spot) / rate;
+        totDaiGenerated += mul(ilkAmt, spot);
 
         hevm.warp(block.timestamp + 1);
         jug.drip("ETH-A");
