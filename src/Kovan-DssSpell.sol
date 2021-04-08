@@ -136,11 +136,6 @@ contract DssSpellAction is DssAction {
 
         ClipperMomAbstract(CLIPPER_MOM).setAuthority(DssExecLib.getChangelogAddress("MCD_ADM"));
 
-        //  Tolerance currently set to 50%.
-        //   n.b. 600000000000000000000000000 == 40% acceptable drop
-        ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_LINK_A, 50 * RAY / 100);
-
-
         // ----------------  LINK-A  -----------------
 
         // Set CLIP for LINK-A in the DOG
@@ -194,6 +189,10 @@ contract DssSpellAction is DssAction {
         Fileable(MCD_CLIP_LINK_A).file("tip", 0);
         Fileable(MCD_CLIP_CALC_LINK_A).file("cut", 99 * RAY / 100); // 1% cut
         Fileable(MCD_CLIP_CALC_LINK_A).file("step", 90 seconds);
+
+        //  Tolerance currently set to 50%.
+        //   n.b. 600000000000000000000000000 == 40% acceptable drop
+        ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_LINK_A, 50 * RAY / 100);
 
         ClipAbstract(MCD_CLIP_LINK_A).upchost();
 
