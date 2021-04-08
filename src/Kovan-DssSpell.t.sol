@@ -1194,6 +1194,12 @@ contract DssSpellTest is DSTest, DSMath {
 
             if (values.collaterals[ilk].liqType == "flip") {
                 {
+                assertEq(reg.class(ilk), 2);
+                (bool ok, bytes memory val) = reg.xlip(ilk).call(abi.encodeWithSignature("cat()"));
+                assertTrue(ok);
+                assertEq(abi.decode(val, (address)), address(cat));
+                }
+                {
                 (, uint256 chop, uint256 dunk) = cat.ilks(ilk);
                 // Convert BP to system expected value
                 uint256 normalizedTestChop = (values.collaterals[ilk].chop * 10**14) + WAD;
@@ -1224,6 +1230,12 @@ contract DssSpellTest is DSTest, DSMath {
                 }
             }
             if (values.collaterals[ilk].liqType == "clip") {
+                {
+                assertEq(reg.class(ilk), 1);
+                (bool ok, bytes memory val) = reg.xlip(ilk).call(abi.encodeWithSignature("dog()"));
+                assertTrue(ok);
+                assertEq(abi.decode(val, (address)), address(dog));
+                }
                 {
                 (, uint256 chop, uint256 hole,) = dog.ilks(ilk);
                 // Convert BP to system expected value

@@ -200,6 +200,10 @@ contract DssSpellAction is DssAction {
 
         ClipAbstract(MCD_CLIP_LINK_A).upchost();
 
+        // Replace flip to clip in the ilk registry
+        DssExecLib.setContract(ILK_REGISTRY, "LINK-A", "xlip", MCD_CLIP_LINK_A);
+        Fileable(ILK_REGISTRY).file("LINK-A", "class", 1);
+
 
         // ------------------  CHAINLOG  -----------------
 
