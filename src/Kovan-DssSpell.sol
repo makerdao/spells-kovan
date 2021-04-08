@@ -171,8 +171,6 @@ contract DssSpellAction is DssAction {
         // Whitelist CLIPPER_MOM in the LINK osm
         DssExecLib.addReaderToOSMWhitelist(PIP_LINK, CLIPPER_MOM);
 
-        // We can't deauthorize the FLIP yet as there might be running auctions:
-        // DssExecLib.deauthorize(MCD_CAT, MCD_FLIP_LINK_A); TODO in a future spell
 
         // No more auctions kicked via the CAT:
         DssExecLib.deauthorize(MCD_FLIP_LINK_A, MCD_CAT);
