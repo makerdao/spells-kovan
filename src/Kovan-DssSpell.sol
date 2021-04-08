@@ -115,7 +115,7 @@ contract DssSpellAction is DssAction {
         DssExecLib.authorize(MCD_END, MCD_ESM_BUG);
         DssExecLib.authorize(MCD_END, MCD_ESM_ATTACK);
 
-        // Authorize new ESM to execute in new VAT
+        // Authorize new ESM to execute in VAT
         DssExecLib.authorize(MCD_VAT, MCD_ESM_ATTACK);
 
         // ------------------  DOG  ------------------
