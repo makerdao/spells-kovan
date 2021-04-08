@@ -24,11 +24,6 @@ import "dss-interfaces/dss/ClipAbstract.sol";
 import "dss-interfaces/dss/ClipperMomAbstract.sol";
 import "dss-interfaces/dss/EndAbstract.sol";
 
-interface OldRegistryLike {
-    function flip(bytes32) external view returns (address);
-    function pip(bytes32) external view returns (address);
-}
-
 contract DssSpellAction is DssAction {
 
     string public constant description = "Kovan Spell";
@@ -103,13 +98,13 @@ contract DssSpellAction is DssAction {
         for (uint256 i = 0; i < ilks.length; i++) {
             bytes32 ilk = ilks[i];
 
-            address flip = OldRegistryLike(ILK_REGISTRY_OLD).flip(ilk);
+            address flip = DssExecLib.flip(ilk);
             flips[i] = flip;
             DssExecLib.deauthorize(flip, MCD_END_OLD);
             DssExecLib.authorize(flip, MCD_END);
 
-            try DssExecLib.removeReaderFromOSMWhitelist(OldRegistryLike(ILK_REGISTRY_OLD).pip(ilk), MCD_END_OLD) {} catch {}
-            try DssExecLib.addReaderToOSMWhitelist(OldRegistryLike(ILK_REGISTRY_OLD).pip(ilk), MCD_END) {} catch {}
+            try DssExecLib.removeReaderFromOSMWhitelist(IlkRegistryAbstract(ILK_REGISTRY_OLD).pip(ilk), MCD_END_OLD) {} catch {}
+            try DssExecLib.addReaderToOSMWhitelist(IlkRegistryAbstract(ILK_REGISTRY_OLD).pip(ilk), MCD_END) {} catch {}
         }
 
         // ------------------  ESM  ------------------
@@ -208,16 +203,18 @@ contract DssSpellAction is DssAction {
 
         // ------------------  CHAINLOG  -----------------
 
+        address log = DssExecLib.getChangelogAddress("CHANGELOG");
+
         DssExecLib.setChangelogAddress("MCD_DOG", MCD_DOG);
         DssExecLib.setChangelogAddress("MCD_END", MCD_END);
-        ChainlogLike(DssExecLib.LOG).removeAddress("MCD_ESM");
+        ChainlogLike(log).removeAddress("MCD_ESM");
         DssExecLib.setChangelogAddress("MCD_ESM_BUG", MCD_ESM_BUG);
         DssExecLib.setChangelogAddress("MCD_ESM_ATTACK", MCD_ESM_ATTACK);
         DssExecLib.setChangelogAddress("CLIPPER_MOM", CLIPPER_MOM);
         DssExecLib.setChangelogAddress("MCD_CLIP_LINK_A", MCD_CLIP_LINK_A);
         DssExecLib.setChangelogAddress("MCD_CLIP_CALC_LINK_A", MCD_CLIP_CALC_LINK_A);
         DssExecLib.setChangelogAddress("ILK_REGISTRY", ILK_REGISTRY);
-        ChainlogLike(DssExecLib.LOG).removeAddress("MCD_FLIP_LINK_A");
+        ChainlogLike(log).removeAddress("MCD_FLIP_LINK_A");
 
         // DssExecLib.setChangelogVersion("1.3.0");
     }
