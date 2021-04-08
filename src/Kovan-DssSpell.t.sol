@@ -53,6 +53,7 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 clip_cusp;
         uint256 clip_chip;
         uint256 clip_tip;
+        uint256 clipper_mom;
         uint256 calc_tau;
         uint256 calc_step;
         uint256 calc_cut;
@@ -74,6 +75,7 @@ contract DssSpellTest is DSTest, DSMath {
         address pause_authority;
         address osm_mom_authority;
         address flipper_mom_authority;
+        address clipper_mom_authority;
         uint256 ilk_count;
         mapping (bytes32 => CollateralValues) collaterals;
     }
@@ -233,6 +235,7 @@ contract DssSpellTest is DSTest, DSMath {
             pause_authority:       address(chief),      // Pause authority
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
+            clipper_mom_authority: address(chief),      // ClipperMom authority
             ilk_count:             27                   // Num expected in system
         });
 
@@ -262,6 +265,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -289,6 +293,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -316,6 +321,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -343,6 +349,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -370,6 +377,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -397,6 +405,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -424,6 +433,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -451,6 +461,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -478,6 +489,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -505,6 +517,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -532,6 +545,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -559,6 +573,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -586,6 +601,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -613,6 +629,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -640,6 +657,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -667,9 +685,10 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    4000,
             clip_chip:    10,
             clip_tip:     0,
+            clipper_mom:  1,
             calc_tau:     0,
             calc_step:    90,
-            calc_cut:     100
+            calc_cut:     9900
         });
         afterSpell.collaterals["BAL-A"] = CollateralValues({
             aL_enabled:   false,
@@ -694,6 +713,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -721,6 +741,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -748,6 +769,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -775,6 +797,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -802,6 +825,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -829,6 +853,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -856,6 +881,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -883,6 +909,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -910,6 +937,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -937,6 +965,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -964,6 +993,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_cusp:    0,
             clip_chip:    0,
             clip_tip:     0,
+            clipper_mom:  0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -1131,6 +1161,9 @@ contract DssSpellTest is DSTest, DSMath {
         // check FlipperMom authority
         assertEq(flipMom.authority(), values.flipper_mom_authority);
 
+        // check ClipperMom authority
+        assertEq(clipMom.authority(), values.clipper_mom_authority);
+
         // check number of ilks
         assertEq(reg.count(), values.ilk_count);
 
@@ -1257,36 +1290,36 @@ contract DssSpellTest is DSTest, DSMath {
                 assertEq(uint256(clip.buf()), normalizedTestBuf);
                 assertTrue(clip.buf() >= RAY && clip.buf() <= 2 * RAY); // gte 0% and lte 100%
                 assertEq(uint256(clip.tail()), values.collaterals[ilk].clip_tail);
-                assertTrue(clip.tail() >= 600 && clip.tail() < 10 hours); // gt eq 10 minutes and lt 10 hours
+                assertTrue(clip.tail() >= 1200 && clip.tail() < 10 hours); // gt eq 20 minutes and lt 10 hours
                 uint256 normalizedTestCusp = (values.collaterals[ilk].clip_cusp)  * 10**23;
                 assertEq(uint256(clip.cusp()), normalizedTestCusp);
                 assertTrue(clip.cusp() >= RAY / 10 && clip.cusp() < RAY); // gte 10% and lt 100%
+                assertTrue(rmul(clip.buf(), clip.cusp()) <= RAY);
                 uint256 normalizedTestChip = (values.collaterals[ilk].clip_chip)  * 10**14;
                 assertEq(uint256(clip.chip()), normalizedTestChip);
-                assertTrue(clip.chip() < 13 * RAY / 100); // lt 13% (typical liquidation penalty)
+                assertTrue(clip.chip() < 1 * WAD / 100); // lt 13% (typical liquidation penalty)
                 uint256 normalizedTestTip = values.collaterals[ilk].clip_tip * RAD;
                 assertEq(uint256(clip.tip()), normalizedTestTip);
                 assertTrue(clip.tip() == 0 || clip.tip() >= RAD && clip.tip() <= 100 * RAD);
 
-                // assertEq(clip.wards(address(clipMom)), values.collaterals[ilk].clipper_mom);
+                assertEq(clip.wards(address(clipMom)), values.collaterals[ilk].clipper_mom);
 
-                // assertEq(clip.wards(address(dog)), values.collaterals[ilk].liqOn ? 1 : 0);
+                if (values.collaterals[ilk].liqOn) {
+                    assertEq(clip.stopped(), 0);
+                } else {
+                    assertTrue(clip.stopped() > 0);
+                }
+
                 assertEq(clip.wards(address(pauseProxy)), 1); // Check pause_proxy ward
                 }
                 {
                     (bool exists, bytes memory value) = clip.calc().call(abi.encodeWithSignature("tau()"));
-                    if (exists) {
-                        assertEq(abi.decode(value, (uint256)), values.collaterals[ilk].calc_tau);
-                    }
+                    assertEq(exists ? abi.decode(value, (uint256)) : 0, values.collaterals[ilk].calc_tau);
                     (exists, value) = clip.calc().call(abi.encodeWithSignature("step()"));
-                    if (exists) {
-                        assertEq(abi.decode(value, (uint256)), values.collaterals[ilk].calc_step);
-                    }
+                    assertEq(exists ? abi.decode(value, (uint256)) : 0, values.collaterals[ilk].calc_step);
                     (exists, value) = clip.calc().call(abi.encodeWithSignature("cut()"));
-                    if (exists) {
-                        uint256 normalizedTestCut = (10000 - values.collaterals[ilk].calc_cut) * 10**23;
-                        assertEq(abi.decode(value, (uint256)), normalizedTestCut);
-                    }
+                    uint256 normalizedTestCut = values.collaterals[ilk].calc_cut * 10**23;
+                    assertEq(exists ? abi.decode(value, (uint256)) : 0, normalizedTestCut);
                 }
             }
             if (reg.class(ilk) < 3) {
