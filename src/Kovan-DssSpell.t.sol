@@ -1678,13 +1678,15 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(esmBug.end(), address(end));
         assertEq(esmAttack.end(), address(end));
 
-        // Authorization
+        // Check flippers/clippers authorities and osms whitelisting
         bytes32[] memory ilks = reg.list();
         for (uint256 i = 0; i < ilks.length; i++) {
             if (reg.class(ilks[i]) < 3) {
                 FlipAbstract xlip = FlipAbstract(reg.xlip(ilks[i]));
                 assertEq(xlip.wards(address(end)), 1);
                 assertEq(xlip.wards(address(end_old)), 0);
+
+                assertEq(xlip.wards(address(esmAttack)), 1);
 
                 OsmAbstract osm = OsmAbstract(reg.pip(ilks[i]));
                 try osm.bud(address(123)) { // Check is an OSM or Median
@@ -1693,6 +1695,12 @@ contract DssSpellTest is DSTest, DSMath {
                 } catch {}
             }
         }
+
+        // Check also old flipper for LINK-A
+        FlipAbstract oldFlipLINKA = FlipAbstract(addr.addr("MCD_FLIP_LINK_A"));
+        assertEq(oldFlipLINKA.wards(address(end)), 1);
+        assertEq(oldFlipLINKA.wards(address(end_old)), 0);
+        assertEq(oldFlipLINKA.wards(address(esmAttack)), 1);
 
         assertEq(vat.wards(address(end_old)), 0);
         assertEq(cat.wards(address(end_old)), 0);

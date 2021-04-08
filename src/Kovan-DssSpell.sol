@@ -98,10 +98,12 @@ contract DssSpellAction is DssAction {
         // Deauthorize the old END from all the FLIPS
         // Authorize the new END in all the FLIPS
         bytes32[] memory ilks = IlkRegistryAbstract(ILK_REGISTRY_OLD).list();
+        address[] memory flips = new address[](ilks.length);
         for (uint256 i = 0; i < ilks.length; i++) {
             bytes32 ilk = ilks[i];
 
             address flip = OldRegistryLike(ILK_REGISTRY_OLD).flip(ilk);
+            flips[i] = flip;
             DssExecLib.deauthorize(flip, MCD_END_OLD);
             DssExecLib.authorize(flip, MCD_END);
 
@@ -117,6 +119,11 @@ contract DssSpellAction is DssAction {
 
         // Authorize new ESM to execute in VAT
         DssExecLib.authorize(MCD_VAT, MCD_ESM_ATTACK);
+
+        // Make every flipper relies the MCD_ESM_ATTACK
+        for (uint256 i = 0; i < flips.length; i++) {
+            DssExecLib.authorize(flips[i], MCD_ESM_ATTACK);
+        }
 
         // ------------------  DOG  ------------------
 
@@ -170,7 +177,6 @@ contract DssSpellAction is DssAction {
 
         // Whitelist CLIPPER_MOM in the LINK osm
         DssExecLib.addReaderToOSMWhitelist(PIP_LINK, CLIPPER_MOM);
-
 
         // No more auctions kicked via the CAT:
         DssExecLib.deauthorize(MCD_FLIP_LINK_A, MCD_CAT);
