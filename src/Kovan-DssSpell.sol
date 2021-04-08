@@ -21,10 +21,7 @@ import "dss-exec-lib/DssAction.sol";
 import "dss-interfaces/dss/IlkRegistryAbstract.sol";
 import "dss-interfaces/dss/ClipAbstract.sol";
 import "dss-interfaces/dss/ClipperMomAbstract.sol";
-
-interface EndLike {
-    function wait() external view returns (uint256);
-}
+import "dss-interfaces/dss/EndAbstract.sol";
 
 interface OldRegistryLike {
     function flip(bytes32) external view returns (address);
@@ -89,7 +86,7 @@ contract DssSpellAction is DssAction {
         DssExecLib.authorize(MCD_SPOT, MCD_END);
 
         // Set wait time in END
-        Fileable(MCD_END).file("wait", EndLike(MCD_END_OLD).wait());
+        Fileable(MCD_END).file("wait", EndAbstract(MCD_END_OLD).wait());
 
         // Deauthorize the old END in contracts
         DssExecLib.deauthorize(MCD_VAT, MCD_END_OLD);
