@@ -1888,7 +1888,7 @@ contract DssSpellTest is DSTest, DSMath {
         ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
 
         // Add balance to the test address
-        uint256 ilkAmt = 1 * THOUSAND * WAD;
+        uint256 ilkAmt = 500 * WAD;
 
         giveTokens(LINK, ilkAmt);
         assertEq(LINK.balanceOf(address(this)), ilkAmt);
