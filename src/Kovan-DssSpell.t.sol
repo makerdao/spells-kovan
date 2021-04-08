@@ -661,7 +661,7 @@ contract DssSpellTest is DSTest, DSMath {
             flip_ttl:     0,
             flip_tau:     0,
             flipper_mom:  0,
-            dog_hole:     10 * THOUSAND,
+            dog_hole:     5 * THOUSAND,
             clip_buf:     3000,
             clip_tail:    140 minutes,
             clip_cusp:    4000,

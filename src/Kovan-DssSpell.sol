@@ -185,7 +185,7 @@ contract DssSpellAction is DssAction {
         // No more circuit breaker for the FLIP in LINK-A:
         DssExecLib.deauthorize(MCD_FLIP_LINK_A, DssExecLib.flipperMom());
 
-        Fileable(MCD_DOG).file("LINK-A", "hole", 10 * THOUSAND * RAD);
+        Fileable(MCD_DOG).file("LINK-A", "hole", 5 * THOUSAND * RAD);
         Fileable(MCD_DOG).file("LINK-A", "chop", 113 * WAD / 100);
         Fileable(MCD_CLIP_LINK_A).file("buf", 130 * RAY / 100);
         Fileable(MCD_CLIP_LINK_A).file("tail", 140 minutes);
