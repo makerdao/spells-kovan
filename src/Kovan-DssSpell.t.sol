@@ -102,7 +102,7 @@ contract DssSpellTest is DSTest, DSMath {
     DaiJoinAbstract      daiJoin = DaiJoinAbstract(    addr.addr("MCD_DAI_JOIN"));
     DSTokenAbstract          gov = DSTokenAbstract(    addr.addr("MCD_GOV"));
     EndAbstract              end = EndAbstract(        addr.addr("MCD_END"));
-    ESMAbstract        esm       = ESMAbstract(        addr.addr("MCD_ESM_ATTACK"));
+    ESMAbstract              esm = ESMAbstract(        addr.addr("MCD_ESM_ATTACK"));
     IlkRegistryAbstract      reg = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
     FlapAbstract            flap = FlapAbstract(       addr.addr("MCD_FLAP"));
 
@@ -115,7 +115,7 @@ contract DssSpellTest is DSTest, DSMath {
     FaucetAbstract        faucet = FaucetAbstract(     addr.addr("FAUCET"));
 
     // Specific for this spell
-    ESMAbstract           esmBug = ESMAbstract(        0x0798603b8AE1f76D2823aDbc2E15d047Eac1Efd7);
+    ESMAbstract        oldEsmBug = ESMAbstract(        0x0798603b8AE1f76D2823aDbc2E15d047Eac1Efd7);
     //
 
     DssSpell spell;
@@ -1719,12 +1719,12 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
 
         uint256 amt = 50 * THOUSAND * WAD;
-        assertEq(esmBug.min(), amt);
+        assertEq(oldEsmBug.min(), amt);
         giveTokens(gov, amt);
-        gov.approve(address(esmBug), amt);
-        esmBug.join(amt);
+        gov.approve(address(oldEsmBug), amt);
+        oldEsmBug.join(amt);
 
-        esmBug.fire();
+        oldEsmBug.fire();
     }
 
     function testFireESM() public {
