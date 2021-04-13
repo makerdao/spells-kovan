@@ -102,8 +102,7 @@ contract DssSpellTest is DSTest, DSMath {
     DaiJoinAbstract      daiJoin = DaiJoinAbstract(    addr.addr("MCD_DAI_JOIN"));
     DSTokenAbstract          gov = DSTokenAbstract(    addr.addr("MCD_GOV"));
     EndAbstract              end = EndAbstract(        addr.addr("MCD_END"));
-    ESMAbstract           esmBug = ESMAbstract(        addr.addr("MCD_ESM_BUG"));
-    ESMAbstract        esmAttack = ESMAbstract(        addr.addr("MCD_ESM_ATTACK"));
+    ESMAbstract        esm       = ESMAbstract(        addr.addr("MCD_ESM_ATTACK"));
     IlkRegistryAbstract      reg = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
     FlapAbstract            flap = FlapAbstract(       addr.addr("MCD_FLAP"));
 
@@ -116,8 +115,7 @@ contract DssSpellTest is DSTest, DSMath {
     FaucetAbstract        faucet = FaucetAbstract(     addr.addr("FAUCET"));
 
     // Specific for this spell
-    EndAbstract          end_old = EndAbstract(        0x24728AcF2E2C403F5d2db4Df6834B8998e56aA5F);
-    ESMAbstract          esm_old = ESMAbstract(        0x0C376764F585828ffB52471c1c35f855e312a06c);
+    ESMAbstract           esmBug = ESMAbstract(        0x0798603b8AE1f76D2823aDbc2E15d047Eac1Efd7);
     //
 
     DssSpell spell;
@@ -206,7 +204,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0xcBF462D09556790c837184a44260532ae4FC953b),        // populate with deployed spell if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
             deployed_spell_created:         1617920932,                 // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
@@ -942,14 +940,14 @@ contract DssSpellTest is DSTest, DSMath {
             calc_step:    0,
             calc_cut:     0
         });
-        afterSpell.collaterals["NS2DRP-A"] = CollateralValues({
+        afterSpell.collaterals["RWA002-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
             aL_gap:       0 * MILLION,
             aL_ttl:       0,
             line:         5 * MILLION,
             dust:         0,
-            pct:          360,
+            pct:          350,
             mat:          10000,
             liqType:      "",
             liqOn:        false,
@@ -1630,20 +1628,36 @@ contract DssSpellTest is DSTest, DSMath {
 
         ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
 
-        assertEq(chainLog.getAddress("MCD_DOG"), addr.addr("MCD_DOG"));
-        assertEq(chainLog.getAddress("MCD_END"), addr.addr("MCD_END"));
-        assertEq(chainLog.getAddress("MCD_ESM_BUG"), addr.addr("MCD_ESM_BUG"));
-        assertEq(chainLog.getAddress("MCD_ESM_ATTACK"), addr.addr("MCD_ESM_ATTACK"));
-        try chainLog.getAddress("MCD_ESM") returns (address) {
+        try chainLog.getAddress("NS2DRP") returns (address) {
             assertTrue(false);
         } catch {}
-        assertEq(chainLog.getAddress("CLIPPER_MOM"), addr.addr("CLIPPER_MOM"));
-        assertEq(chainLog.getAddress("MCD_CLIP_LINK_A"), addr.addr("MCD_CLIP_LINK_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_LINK_A"), addr.addr("MCD_CLIP_CALC_LINK_A"));
-        try chainLog.getAddress("MCD_FLIP_LINK_A") returns (address) {
+        try chainLog.getAddress("MCD_JOIN_NS2DRP_A") returns (address) {
             assertTrue(false);
         } catch {}
-        assertEq(chainLog.getAddress("ILK_REGISTRY"), addr.addr("ILK_REGISTRY"));
+        try chainLog.getAddress("NS2DRP_A_URN") returns (address) {
+            assertTrue(false);
+        } catch {}
+        try chainLog.getAddress("NS2DRP_A_INPUT_CONDUIT") returns (address) {
+            assertTrue(false);
+        } catch {}
+        try chainLog.getAddress("NS2DRP_A_OUTPUT_CONDUIT") returns (address) {
+            assertTrue(false);
+        } catch {}
+
+        assertEq(chainLog.getAddress("RWA002"), addr.addr("RWA002"));
+        assertEq(chainLog.getAddress("MCD_JOIN_RWA002_A"), addr.addr("MCD_JOIN_RWA002_A"));
+        assertEq(chainLog.getAddress("RWA002_A_URN"), addr.addr("RWA002_A_URN"));
+        assertEq(chainLog.getAddress("RWA002_A_INPUT_CONDUIT"), addr.addr("RWA002_A_INPUT_CONDUIT"));
+        assertEq(chainLog.getAddress("RWA002_A_OUTPUT_CONDUIT"), addr.addr("RWA002_A_OUTPUT_CONDUIT"));
+
+
+        assertEq(chainLog.getAddress("MCD_ESM"), addr.addr("MCD_ESM"));
+        try chainLog.getAddress("MCD_ESM_BUG") returns (address) {
+            assertTrue(false);
+        } catch {}
+        try chainLog.getAddress("MCD_ESM_ATTACK") returns (address) {
+            assertTrue(false);
+        } catch {}
     }
 
     function testFailWrongDay() public {
@@ -1698,299 +1712,11 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 8 * MILLION);
     }
 
-    function testSpellIsCast_new_End_authorities() public {
-        assertEq(vat.wards(address(end_old)), 1);
-        assertEq(cat.wards(address(end_old)), 1);
-        assertEq(vow.wards(address(end_old)), 1);
-        assertEq(pot.wards(address(end_old)), 1);
-        assertEq(spotter.wards(address(end_old)), 1);
 
+    function testFailFireOldESMBug() public {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
-
-        // Contracts set
-        assertEq(end.vat(), address(vat));
-        assertEq(end.cat(), address(cat));
-        assertEq(end.dog(), address(dog));
-        assertEq(end.vow(), address(vow));
-        assertEq(end.pot(), address(pot));
-        assertEq(end.spot(), address(spotter));
-
-        // Check end.wait
-        assertEq(end.wait(), end_old.wait());
-
-        assertEq(esmBug.end(), address(end));
-        assertEq(esmAttack.end(), address(end));
-
-        // Check flippers/clippers authorities and osms whitelisting
-        bytes32[] memory ilks = reg.list();
-        for (uint256 i = 0; i < ilks.length; i++) {
-            if (reg.class(ilks[i]) < 3) {
-                FlipAbstract xlip = FlipAbstract(reg.xlip(ilks[i]));
-                assertEq(xlip.wards(address(end)), 1);
-                assertEq(xlip.wards(address(end_old)), 0);
-
-                assertEq(xlip.wards(address(esmAttack)), 1);
-
-                OsmAbstract osm = OsmAbstract(reg.pip(ilks[i]));
-                try osm.bud(address(123)) { // Check is an OSM or Median
-                    assertEq(osm.bud(address(end)), 1);
-                    assertEq(osm.bud(address(end_old)), 0);
-                } catch {}
-            }
-        }
-
-        // Check also old flipper for LINK-A
-        FlipAbstract oldFlipLINKA = FlipAbstract(addr.addr("MCD_FLIP_LINK_A"));
-        assertEq(oldFlipLINKA.wards(address(end)), 1);
-        assertEq(oldFlipLINKA.wards(address(end_old)), 0);
-        assertEq(oldFlipLINKA.wards(address(esmAttack)), 1);
-
-        assertEq(vat.wards(address(end_old)), 0);
-        assertEq(cat.wards(address(end_old)), 0);
-        assertEq(vow.wards(address(end_old)), 0);
-        assertEq(pot.wards(address(end_old)), 0);
-        assertEq(spotter.wards(address(end_old)), 0);
-
-        assertEq(vat.wards(address(end)), 1);
-        assertEq(cat.wards(address(end)), 1);
-        assertEq(dog.wards(address(end)), 1);
-        assertEq(vow.wards(address(end)), 1);
-        assertEq(pot.wards(address(end)), 1);
-        assertEq(spotter.wards(address(end)), 1);
-
-        assertEq(end.wards(address(esmBug)), 1);
-        assertEq(end.wards(address(esmAttack)), 1);
-        assertEq(vat.wards(address(esmAttack)), 1);
-        assertEq(end_old.wards(address(esm_old)), 1);
-    }
-
-    function testSpellIsCast_new_End_functionality() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        DSTokenAbstract ETH = DSTokenAbstract(addr.addr("ETH"));
-        GemJoinAbstract joinETHA = GemJoinAbstract(addr.addr("MCD_JOIN_ETH_A"));
-        FlipAbstract flipETHA = FlipAbstract(addr.addr("MCD_FLIP_ETH_A"));
-
-        DSTokenAbstract BAT = DSTokenAbstract(addr.addr("BAT"));
-        GemJoinAbstract joinBATA = GemJoinAbstract(addr.addr("MCD_JOIN_BAT_A"));
-        FlipAbstract flipBATA = FlipAbstract(addr.addr("MCD_FLIP_BAT_A"));
-
-        DSTokenAbstract LINK = DSTokenAbstract(addr.addr("LINK"));
-        GemJoinAbstract joinLINKA = GemJoinAbstract(addr.addr("MCD_JOIN_LINK_A"));
-        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
-
-        uint256 ilkAmt = 1 * THOUSAND * WAD;
-
-        giveTokens(ETH, ilkAmt);
-        giveTokens(BAT, ilkAmt);
-        giveTokens(LINK, ilkAmt);
-
-        ETH.approve(address(joinETHA), ilkAmt);
-        joinETHA.join(address(this), ilkAmt);
-        BAT.approve(address(joinBATA), ilkAmt);
-        joinBATA.join(address(this), ilkAmt);
-        LINK.approve(address(joinLINKA), ilkAmt);
-        joinLINKA.join(address(this), ilkAmt);
-
-        (,uint256 rate, uint256 spot,,) = vat.ilks("ETH-A");
-        vat.frob("ETH-A", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
-        (, rate, spot,,) = vat.ilks("BAT-A");
-        vat.frob("BAT-A", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
-        (, rate, spot,,) = vat.ilks("LINK-A");
-        vat.frob("LINK-A", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
-
-        hevm.warp(block.timestamp + 1);
-        jug.drip("ETH-A");
-        jug.drip("BAT-A");
-        jug.drip("LINK-A");
-
-        uint256 auctionIdETHA = flipETHA.kicks() + 1;
-        uint256 auctionIdBATA = flipBATA.kicks() + 1;
-        uint256 auctionIdLINKA = clipLINKA.kicks() + 1;
-
-        cat.bite("ETH-A", address(this));
-        cat.bite("BAT-A", address(this));
-        dog.bark("LINK-A", address(this), address(this));
-
-        assertEq(flipETHA.kicks(), auctionIdETHA);
-        assertEq(flipBATA.kicks(), auctionIdBATA);
-        assertEq(clipLINKA.kicks(), auctionIdLINKA);
-
-        hevm.store(
-            address(end),
-            keccak256(abi.encode(address(this), uint256(0))),
-            bytes32(uint256(1))
-        );
-        assertEq(end.wards(address(this)), 1);
-
-        end.cage();
-        end.cage("ETH-A");
-        end.cage("BAT-A");
-        end.cage("LINK-A");
-
-        (,, address usr,,,,,) = flipETHA.bids(auctionIdETHA);
-        assertTrue(usr != address(0));
-        (,, usr,,,,,) = flipBATA.bids(auctionIdBATA);
-        assertTrue(usr != address(0));
-        (,,, usr,,) = clipLINKA.sales(auctionIdLINKA);
-        assertTrue(usr != address(0));
-
-        end.skip("ETH-A", auctionIdETHA);
-        end.skip("BAT-A", auctionIdBATA);
-        end.snip("LINK-A", auctionIdLINKA);
-
-        (,, usr,,,,,) = flipETHA.bids(auctionIdETHA);
-        assertTrue(usr == address(0));
-        (,, usr,,,,,) = flipBATA.bids(auctionIdBATA);
-        assertTrue(usr == address(0));
-        (,,, usr,,) = clipLINKA.sales(auctionIdLINKA);
-        assertTrue(usr == address(0));
-
-        end.skim("ETH-A", address(this));
-        end.skim("BAT-A", address(this));
-        end.skim("LINK-A", address(this));
-
-        end.free("ETH-A");
-        end.free("BAT-A");
-        end.free("LINK-A");
-
-        hevm.warp(block.timestamp + end.wait());
-
-        vow.heal(min(vat.dai(address(vow)), sub(sub(vat.sin(address(vow)), vow.Sin()), vow.Ash())));
-
-        end.thaw();
-
-        end.flow("ETH-A");
-        end.flow("BAT-A");
-        end.flow("LINK-A");
-
-        vat.hope(address(end));
-
-        uint256 daiToRedeem = vat.dai(address(this)) / RAY;
-        assertTrue(daiToRedeem > 0);
-
-        end.pack(daiToRedeem);
-
-        end.cash("ETH-A", daiToRedeem);
-        end.cash("BAT-A", daiToRedeem);
-        end.cash("LINK-A", daiToRedeem);
-    }
-
-    function testSpellIsCast_new_ClipperMom() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        assertEq(clipMom.owner(), address(pauseProxy));
-        assertEq(clipMom.authority(), address(chief));
-    }
-
-    function testSpellIsCast_LINK_A_CLIP_authorities() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        FlipAbstract flipLINKA = FlipAbstract(addr.addr("MCD_FLIP_LINK_A"));
-        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
-        OsmAbstract pipLINK    = OsmAbstract(addr.addr("PIP_LINK"));
-
-        // Contracts set
-        assertEq(dog.vat(), address(vat));
-        assertEq(dog.vow(), address(vow));
-        (address clip,,,) = dog.ilks("LINK-A");
-        assertEq(clip, address(clipLINKA));
-        assertEq(clipLINKA.ilk(), "LINK-A");
-        assertEq(clipLINKA.vat(), address(vat));
-        assertEq(clipLINKA.vow(), address(vow));
-        assertEq(clipLINKA.dog(), address(dog));
-        assertEq(clipLINKA.spotter(), address(spotter));
-        assertEq(clipLINKA.calc(), addr.addr("MCD_CLIP_CALC_LINK_A"));
-
-        // Authorization
-        assertEq(flipLINKA.wards(address(cat))    , 0);
-        assertEq(flipLINKA.wards(address(flipMom)), 0);
-
-        assertEq(vat.wards(address(clipLINKA))    , 1);
-        assertEq(dog.wards(address(clipLINKA))    , 1);
-        assertEq(clipLINKA.wards(address(dog))    , 1);
-        assertEq(clipLINKA.wards(address(end))    , 1);
-        assertEq(clipLINKA.wards(address(clipMom)), 1);
-
-        assertEq(pipLINK.bud(address(clipLINKA)), 1);
-    }
-
-    function testSpellIsCast_LINK_A_CLIP_functionality() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        DSTokenAbstract LINK = DSTokenAbstract(addr.addr("LINK"));
-        GemJoinAbstract joinLINKA = GemJoinAbstract(addr.addr("MCD_JOIN_LINK_A"));
-        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
-
-        // Add balance to the test address
-        uint256 ilkAmt = 500 * WAD;
-
-        giveTokens(LINK, ilkAmt);
-        assertEq(LINK.balanceOf(address(this)), ilkAmt);
-
-        // Join to adapter
-        assertEq(vat.gem("LINK-A", address(this)), 0);
-        LINK.approve(address(joinLINKA), ilkAmt);
-        joinLINKA.join(address(this), ilkAmt);
-        assertEq(LINK.balanceOf(address(this)), 0);
-        assertEq(vat.gem("LINK-A", address(this)), ilkAmt);
-
-        // Generate new DAI to force a liquidation
-        (,uint256 rate, uint256 spot,,) = vat.ilks("LINK-A");
-        // dart max amount of DAI
-        int256 art = int256(mul(ilkAmt, spot) / rate);
-        vat.frob("LINK-A", address(this), address(this), address(this), int256(ilkAmt), art);
-        hevm.warp(block.timestamp + 1);
-        jug.drip("LINK-A");
-        assertEq(clipLINKA.kicks(), 0);
-        dog.bark("LINK-A", address(this), address(this));
-        assertEq(clipLINKA.kicks(), 1);
-
-        (,rate,,,) = vat.ilks("LINK-A");
-        uint256 debt = mul(mul(rate, uint256(art)), dog.chop("LINK-A")) / WAD;
-        hevm.store(
-            address(vat),
-            keccak256(abi.encode(address(this), uint256(5))),
-            bytes32(debt)
-        );
-        assertEq(vat.dai(address(this)), debt);
-        assertEq(vat.gem("LINK-A", address(this)), 0);
-
-        hevm.warp(block.timestamp + 20 minutes);
-        (, uint256 tab, uint256 lot, address usr,, uint256 top) = clipLINKA.sales(1);
-
-        assertEq(usr, address(this));
-        assertEq(tab, debt);
-        assertEq(lot, ilkAmt);
-        assertTrue(mul(lot, top) > tab); // There is enough collateral to cover the debt at current price
-
-        vat.hope(address(clipLINKA));
-        clipLINKA.take(1, lot, top, address(this), bytes(""));
-
-        (, tab, lot, usr,,) = clipLINKA.sales(1);
-        assertEq(usr, address(0));
-        assertEq(tab, 0);
-        assertEq(lot, 0);
-        assertEq(vat.dai(address(this)), 0);
-        assertEq(vat.gem("LINK-A", address(this)), ilkAmt); // What was purchased + returned back as it is the owner of the vault
-    }
-
-    function testFireESMBug() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        assertTrue(!esmBug.revokesGovernanceAccess());
 
         uint256 amt = 50 * THOUSAND * WAD;
         assertEq(esmBug.min(), amt);
@@ -1998,90 +1724,31 @@ contract DssSpellTest is DSTest, DSMath {
         gov.approve(address(esmBug), amt);
         esmBug.join(amt);
 
-        assertEq(vat.wards(address(pauseProxy)), 1);
         esmBug.fire();
-        assertEq(vat.wards(address(pauseProxy)), 1);
-        assertEq(end.live(), 0);
-        assertEq(vat.live(), 0);
     }
 
-    function testFireESMAttack() public {
+    function testFireESM() public {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
 
-        assertTrue(esmAttack.revokesGovernanceAccess());
+        assertTrue(esm.revokesGovernanceAccess());
 
         uint256 amt = 50 * THOUSAND * WAD;
-        assertEq(esmAttack.min(), amt);
+        assertEq(esm.min(), amt);
         giveTokens(gov, amt);
-        gov.approve(address(esmAttack), amt);
-        esmAttack.join(amt);
+        gov.approve(address(esm), amt);
+        esm.join(amt);
 
         assertEq(vat.wards(address(pauseProxy)), 1);
-        esmAttack.fire();
+        esm.fire();
         assertEq(vat.wards(address(pauseProxy)), 0);
         assertEq(end.live(), 0);
         assertEq(vat.live(), 0);
 
         ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
         assertEq(clipLINKA.wards(address(pauseProxy)), 1);
-        esmAttack.deny(address(clipLINKA));
+        esm.deny(address(clipLINKA));
         assertEq(clipLINKA.wards(address(pauseProxy)), 0);
-    }
-
-    function testClipperMomSetBreaker() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        // clipperMom is an authority-based contract, so here we set the Chieftain's hat
-        //  to the current contract to simulate governance authority.
-        hevm.store(
-            address(chief),
-            bytes32(uint256(12)),
-            bytes32(uint256(address(this)))
-        );
-
-        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
-        assertEq(clipLINKA.stopped(), 0);
-        clipMom.setBreaker(address(clipLINKA), 1, 0);
-        assertEq(clipLINKA.stopped(), 1);
-        clipMom.setBreaker(address(clipLINKA), 2, 0);
-        assertEq(clipLINKA.stopped(), 2);
-        clipMom.setBreaker(address(clipLINKA), 3, 0);
-        assertEq(clipLINKA.stopped(), 3);
-        clipMom.setBreaker(address(clipLINKA), 0, 0);
-        assertEq(clipLINKA.stopped(), 0);
-    }
-
-    function testFailClipperMomTripBreaker() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        // Assuming we're within bounds at time of testing, this shouldn't work.
-        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
-        clipMom.tripBreaker(address(clipLINKA));
-    }
-
-    function testClipperMomTripBreaker() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        // Hacking nxt price to 0x123 (and making it valid)
-        bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
-
-        ClipAbstract clipLINKA = ClipAbstract(addr.addr("MCD_CLIP_LINK_A"));
-
-        hevm.store(address(addr.addr("PIP_LINK")), bytes32(uint256(4)), hackedValue);
-
-        assertEq(clipMom.tolerance(address(clipLINKA)), (RAY / 2)); // (RAY / 2) for 50%
-
-        // Price is hacked, anyone can trip the breaker
-        clipMom.tripBreaker(address(clipLINKA));
-
-        assertEq(clipLINKA.stopped(), 2);
     }
 }
