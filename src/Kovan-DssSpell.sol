@@ -84,7 +84,7 @@ contract DssSpellAction is DssAction {
         CHANGELOG.removeAddress("NS2DRP_A_INPUT_CONDUIT");
         CHANGELOG.removeAddress("NS2DRP_A_OUTPUT_CONDUIT");
 
-        IlkRegistryAbstract(ILK_REGISTRY).remove(oldIlk);
+        IlkRegistryAbstract(ILK_REGISTRY).removeAuth(oldIlk);
 
         // Add new one
 
