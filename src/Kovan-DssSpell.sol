@@ -107,10 +107,8 @@ contract DssSpellAction is DssAction {
         address MIP21_LIQUIDATION_ORACLE =
             DssExecLib.getChangelogAddress("MIP21_LIQUIDATION_ORACLE");
 
-        address vat = DssExecLib.vat();
-
         // Sanity checks
-        require(GemJoinAbstract(MCD_JOIN_RWA002_A).vat() == vat, "join-vat-not-match");
+        require(GemJoinAbstract(MCD_JOIN_RWA002_A).vat() == MCD_VAT, "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_RWA002_A).ilk() == ilk, "join-ilk-not-match");
         require(GemJoinAbstract(MCD_JOIN_RWA002_A).gem() == RWA002_GEM, "join-gem-not-match");
         require(GemJoinAbstract(MCD_JOIN_RWA002_A).dec() == DSTokenAbstract(RWA002_GEM).decimals(), "join-dec-not-match");
@@ -124,19 +122,17 @@ contract DssSpellAction is DssAction {
         DssExecLib.setContract(DssExecLib.spotter(), ilk, "pip", pip);
 
         // Init RWA-002 in Vat
-        Initializable(vat).init(ilk);
+        Initializable(MCD_VAT).init(ilk);
         // Init RWA-002 in Jug
         Initializable(DssExecLib.jug()).init(ilk);
 
         // Allow RWA-002 Join to modify Vat registry
-        DssExecLib.authorize(vat, MCD_JOIN_RWA002_A);
+        DssExecLib.authorize(MCD_VAT, MCD_JOIN_RWA002_A);
 
         // Allow RwaLiquidationOracle to modify Vat registry
-        // DssExecLib.authorize(vat, MIP21_LIQUIDATION_ORACLE);
+        // DssExecLib.authorize(MCD_VAT, MIP21_LIQUIDATION_ORACLE);
 
-        // Increase the global debt ceiling by the ilk ceiling
-        DssExecLib.increaseGlobalDebtCeiling(CEIL);
-        // Set the ilk debt ceiling
+        // Set the ilk debt ceiling (not increasing global one as we are replacing the collateral)
         DssExecLib.setIlkDebtCeiling(ilk, CEIL);
 
         // No dust
