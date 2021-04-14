@@ -36,11 +36,6 @@ interface ManagerLike {
     function wipe(uint256) external;
 }
 
-interface EpochCoordinatorLike {
-    function closeEpoch() external;
-    function currentEpoch() external returns(uint);
-}
-
 interface Root {
     function relyContract(address, address) external;
 }
@@ -49,9 +44,6 @@ interface MemberList {
     function updateMember(address, uint) external;
 }
 
-interface AssessorLike {
-    function calcSeniorTokenPrice() external returns (uint);
-}
 //
 
 contract DssSpellTest is DSTest, DSMath {
@@ -152,11 +144,7 @@ contract DssSpellTest is DSTest, DSMath {
     // Specific for this spell
     ESMAbstract            oldEsmBug = ESMAbstract(        0x0798603b8AE1f76D2823aDbc2E15d047Eac1Efd7);
     Root                        root = Root(0x25dF507570c8285E9c8E7FFabC87db7836850dCd);
-    MemberList            memberlist = MemberList(0xD927F069faf59eD83A1072624Eeb794235bBA652);
-    EpochCoordinatorLike coordinator = EpochCoordinatorLike(0xB51D3cbaa5CCeEf896B96091E69be48bCbDE8367);
-    address          seniorOperator_ = 0x6B902D49580320779262505e346E3f9B986e99e8;
-    address           seniorTranche_ = 0xDF0c780Ae58cD067ce10E0D7cdB49e92EEe716d9;
-    address                assessor_ = 0x49527a20904aF41d1cbFc0ba77576B9FBd8ec9E5;
+    MemberList            memberlist = MemberList(0xBBfBde40aF416e6A112fAAc887eA19e602cE3999);
     //
 
     DssSpell spell;
