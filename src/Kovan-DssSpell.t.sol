@@ -102,7 +102,7 @@ contract DssSpellTest is DSTest, DSMath {
     DaiJoinAbstract      daiJoin = DaiJoinAbstract(    addr.addr("MCD_DAI_JOIN"));
     DSTokenAbstract          gov = DSTokenAbstract(    addr.addr("MCD_GOV"));
     EndAbstract              end = EndAbstract(        addr.addr("MCD_END"));
-    ESMAbstract              esm = ESMAbstract(        addr.addr("MCD_ESM_ATTACK"));
+    ESMAbstract              esm = ESMAbstract(        addr.addr("MCD_ESM"));
     IlkRegistryAbstract      reg = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
     FlapAbstract            flap = FlapAbstract(       addr.addr("MCD_FLAP"));
 
