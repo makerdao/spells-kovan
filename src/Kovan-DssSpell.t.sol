@@ -40,8 +40,12 @@ interface Root {
     function relyContract(address, address) external;
 }
 
-interface MemberList {
+interface Memberlist {
     function updateMember(address, uint) external;
+}
+
+interface DropToken is DSTokenAbstract {
+    function memberlist() external view returns (address);
 }
 
 //
@@ -140,12 +144,6 @@ contract DssSpellTest is DSTest, DSMath {
 
     // Faucet
     FaucetAbstract        faucet = FaucetAbstract(     addr.addr("FAUCET"));
-
-    // Specific for this spell
-    ESMAbstract            oldEsmBug = ESMAbstract(        0x0798603b8AE1f76D2823aDbc2E15d047Eac1Efd7);
-    Root                        root = Root(0x25dF507570c8285E9c8E7FFabC87db7836850dCd);
-    MemberList            memberlist = MemberList(0xBBfBde40aF416e6A112fAAc887eA19e602cE3999);
-    //
 
     DssSpell spell;
 
@@ -1743,7 +1741,9 @@ contract DssSpellTest is DSTest, DSMath {
 
     function testRWA002() public {
         ManagerLike dropMgr = ManagerLike(address(addr.addr("RWA002_A_INPUT_CONDUIT")));
-        DSTokenAbstract drop = DSTokenAbstract(address(dropMgr.gem()));
+        DropToken drop = DropToken(address(dropMgr.gem()));
+        Memberlist memberlist = Memberlist(drop.memberlist());
+        Root root = Root(0x25dF507570c8285E9c8E7FFabC87db7836850dCd);
 
         assertEq(dropMgr.urn(), address(addr.addr("RWA002_A_URN")));
         assertEq(dropMgr.vat(), address(vat));
@@ -1753,27 +1753,29 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(dropMgr.end(), address(end));
 
         // welcome to hevm KYC
-        hevm.store(address(root), keccak256(abi.encode(address(this), uint(0))), bytes32(uint(1)));
+        hevm.store(address(root), keccak256(abi.encode(address(this), uint256(0))), bytes32(uint256(1)));
 
         root.relyContract(address(memberlist), address(this));
-        memberlist.updateMember(address(this), uint(-1));
-        memberlist.updateMember(address(dropMgr), uint(-1));
+        memberlist.updateMember(address(this), uint256(-1));
+        memberlist.updateMember(address(dropMgr), uint256(-1));
 
         // set this contract as owner of dropMgr // override slot 1
-        // check what's inside slot 1 with: bytes32 slot = hevm.load(address(dropMgr), bytes32(uint(1)));
-        hevm.store(address(dropMgr), bytes32(uint(1)), bytes32(0x0000000000000000000101013bE95e4159a131E56A84657c4ad4D43eC7Cd865d));
-        // ste this contract as ward on the mgr
-        hevm.store(address(dropMgr), keccak256(abi.encode(address(this), uint(0))), bytes32(uint(1)));
+        // check what's inside slot 1 with: bytes32 slot = hevm.load(address(dropMgr), bytes32(uint256(1)));
+        // hevm.store(address(dropMgr), bytes32(uint256(1)), bytes32(0x0000000000000000000101013bE95e4159a131E56A84657c4ad4D43eC7Cd865d));
+        // set this contract as ward on the mgr
+        hevm.store(address(dropMgr), keccak256(abi.encode(address(this), uint256(0))), bytes32(uint256(1)));
+
+        assertEq(dropMgr.owner(), address(this));
 
         // give this address 1500 dai and 1000 drop
-        hevm.store(address(dai), keccak256(abi.encode(address(this), uint(2))), bytes32(uint(1500 ether)));
-        hevm.store(address(drop), keccak256(abi.encode(address(this), uint(8))), bytes32(uint(1000 ether)));
+        hevm.store(address(dai), keccak256(abi.encode(address(this), uint256(2))), bytes32(uint256(1500 ether)));
+        hevm.store(address(drop), keccak256(abi.encode(address(this), uint256(8))), bytes32(uint256(1000 ether)));
         assertEq(dai.balanceOf(address(this)), 1500 ether);
         assertEq(drop.balanceOf(address(this)), 1000 ether);
 
         // approve the manager
-        drop.approve(address(dropMgr), uint(-1));
-        dai.approve(address(dropMgr), uint(-1));
+        drop.approve(address(dropMgr), uint256(-1));
+        dai.approve(address(dropMgr), uint256(-1));
 
         //execute spell and lock rwa token
         vote(address(spell));
@@ -1796,6 +1798,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testFailFireOldESMBug() public {
+        ESMAbstract oldEsmBug = ESMAbstract(0x0798603b8AE1f76D2823aDbc2E15d047Eac1Efd7);
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
