@@ -45,7 +45,7 @@ contract DssSpellAction is DssAction {
     }
 
     address constant RWA002_OPERATOR           = 0x2474F297214E5d96Ba4C81986A9F0e5C260f445D;
-    address constant RWA002_GEM                = 0x038D3804e17ED7A3B927DF3D5078a794c37Cbf98;
+    address constant RWA002                    = 0x038D3804e17ED7A3B927DF3D5078a794c37Cbf98;
     address constant MCD_JOIN_RWA002_A         = 0xBC077F8A49eA38592B90E5A0F21bc211BB62138C;
     address constant RWA002_A_URN              = 0x9f5A541C53D1E588F4d6Cb8dDBe1c2c91a20eFc6;
     address constant RWA002_A_INPUT_CONDUIT    = 0x2474F297214E5d96Ba4C81986A9F0e5C260f445D;
@@ -98,8 +98,8 @@ contract DssSpellAction is DssAction {
         // Sanity checks
         require(GemJoinAbstract(MCD_JOIN_RWA002_A).vat() == MCD_VAT, "join-vat-not-match");
         require(GemJoinAbstract(MCD_JOIN_RWA002_A).ilk() == ilk, "join-ilk-not-match");
-        require(GemJoinAbstract(MCD_JOIN_RWA002_A).gem() == RWA002_GEM, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_RWA002_A).dec() == DSTokenAbstract(RWA002_GEM).decimals(), "join-dec-not-match");
+        require(GemJoinAbstract(MCD_JOIN_RWA002_A).gem() == RWA002, "join-gem-not-match");
+        require(GemJoinAbstract(MCD_JOIN_RWA002_A).dec() == DSTokenAbstract(RWA002).decimals(), "join-dec-not-match");
 
         // init the RwaLiquidationOracle
         // doc: "IPFS Hash"
@@ -139,10 +139,21 @@ contract DssSpellAction is DssAction {
         // set up the urn
         RwaUrnLike(RWA002_A_URN).hope(RWA002_OPERATOR);
 
-        // TODO: Add collateral in IlkRegistry
+        // Add collateral in IlkRegistry
+        IlkRegistryAbstract(ILK_REGISTRY).put(
+            ilk,
+            MCD_JOIN_RWA002_A,
+            RWA002,
+            18,
+            3,
+            pip,
+            address(0),
+            "RWA-002",
+            "RWA002"
+        );
 
         // add NS2DRP contract to the changelog
-        DssExecLib.setChangelogAddress("RWA002", RWA002_GEM);
+        DssExecLib.setChangelogAddress("RWA002", RWA002);
         DssExecLib.setChangelogAddress("PIP_RWA002", pip);
         DssExecLib.setChangelogAddress("MCD_JOIN_RWA002_A", MCD_JOIN_RWA002_A);
         DssExecLib.setChangelogAddress("RWA002_A_URN", RWA002_A_URN);
