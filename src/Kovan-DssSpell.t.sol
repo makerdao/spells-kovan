@@ -34,6 +34,7 @@ interface ManagerLike {
     function join(uint256) external;
     function lock(uint256) external;
     function wipe(uint256) external;
+    function file(bytes32, address) external;
 }
 
 interface Root {
@@ -1739,12 +1740,11 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 8 * MILLION);
     }
 
-    function testRWA002() public {
+  function testRWA002() public {
         ManagerLike dropMgr = ManagerLike(address(addr.addr("RWA002_A_INPUT_CONDUIT")));
         DropToken drop = DropToken(address(dropMgr.gem()));
         Memberlist memberlist = Memberlist(drop.memberlist());
-        Root root = Root(0x25dF507570c8285E9c8E7FFabC87db7836850dCd);
-
+        Root root = Root(0xc5BfCcBe24b037459922F70ADA6706638A550338);
         assertEq(dropMgr.urn(), address(addr.addr("RWA002_A_URN")));
         assertEq(dropMgr.vat(), address(vat));
         assertEq(dropMgr.vow(), address(vow));
@@ -1754,11 +1754,11 @@ contract DssSpellTest is DSTest, DSMath {
 
         // welcome to hevm KYC
         hevm.store(address(root), keccak256(abi.encode(address(this), uint256(0))), bytes32(uint256(1)));
-
         root.relyContract(address(memberlist), address(this));
         memberlist.updateMember(address(this), uint256(-1));
         memberlist.updateMember(address(dropMgr), uint256(-1));
-
+        root.relyContract(address(dropMgr), address(this));
+        dropMgr.file("owner", address(this));
         // set this contract as owner of dropMgr // override slot 1
         // check what's inside slot 1 with: bytes32 slot = hevm.load(address(dropMgr), bytes32(uint256(1)));
         // hevm.store(address(dropMgr), bytes32(uint256(1)), bytes32(0x0000000000000000000101013bE95e4159a131E56A84657c4ad4D43eC7Cd865d));
@@ -1766,7 +1766,6 @@ contract DssSpellTest is DSTest, DSMath {
         hevm.store(address(dropMgr), keccak256(abi.encode(address(this), uint256(0))), bytes32(uint256(1)));
 
         assertEq(dropMgr.owner(), address(this));
-
         // give this address 1500 dai and 1000 drop
         hevm.store(address(dai), keccak256(abi.encode(address(this), uint256(2))), bytes32(uint256(1500 ether)));
         hevm.store(address(drop), keccak256(abi.encode(address(this), uint256(8))), bytes32(uint256(1000 ether)));
@@ -1783,6 +1782,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
         dropMgr.lock(1 ether);
 
+        uint preBal = drop.balanceOf(address(dropMgr));
         assertEq(dai.balanceOf(address(this)), 1500 ether);
         assertEq(drop.balanceOf(address(this)), 1000 ether);
 
@@ -1790,7 +1790,7 @@ contract DssSpellTest is DSTest, DSMath {
         dropMgr.draw(200 ether);
         assertEq(dai.balanceOf(address(this)), 1700 ether);
         assertEq(drop.balanceOf(address(this)), 600 ether);
-        assertEq(drop.balanceOf(address(dropMgr)), 400 ether);
+        assertEq(drop.balanceOf(address(dropMgr)), preBal + 400 ether);
         dropMgr.wipe(10 ether);
         dropMgr.exit(10 ether);
         assertEq(dai.balanceOf(address(this)), 1690 ether);
