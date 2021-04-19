@@ -20,28 +20,8 @@ import {Fileable, ChainlogLike} from "dss-exec-lib/DssExecLib.sol";
 import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
 import "dss-interfaces/dss/IlkRegistryAbstract.sol";
-import "dss-interfaces/dss/VatAbstract.sol";
-import "dss-interfaces/dss/GemJoinAbstract.sol";
-import "dss-interfaces/dss/JugAbstract.sol";
-import "dss-interfaces/dss/SpotAbstract.sol";
-import "dss-interfaces/dapp/DSTokenAbstract.sol";
-
-interface Initializable {
-    function init(bytes32) external;
-}
-
-interface Hopeable {
-    function hope(address) external;
-}
-
-interface Kissable {
-    function kiss(address) external;
-}
-
-interface RwaLiquidationLike {
-    function ilks(bytes32) external returns (string memory,address,uint48,uint48);
-    function init(bytes32, uint256, string calldata, uint48) external;
-}
+import "dss-interfaces/dss/EndAbstract.sol";
+import "dss-interfaces/dss/ESMAbstract.sol";
 
 contract DssSpellAction is DssAction {
 
@@ -52,154 +32,110 @@ contract DssSpellAction is DssAction {
         return false;
     }
 
-    address constant RWA002_OPERATOR         = 0x2CfADbd094a4D650049C53832B15842a3c59Db34;
-    address constant RWA002_GEM              = 0xea8a2f6DC9236edb3f53744f5019a444e24F4379;
-    address constant MCD_JOIN_RWA002_A       = 0x3B3fAD77D6977a19cc7B156143056a3E9C6Ca329;
-    address constant RWA002_A_URN            = 0xc615F4188C255445290fB9E6dB5E021fe4CA8ECf;
-    address constant RWA002_A_INPUT_CONDUIT  = 0x2CfADbd094a4D650049C53832B15842a3c59Db34;
-    address constant RWA002_A_OUTPUT_CONDUIT = 0x2CfADbd094a4D650049C53832B15842a3c59Db34;
+    uint256 constant WAD = 10**18;
 
-    uint256 constant THREE_PT_FIVE_PCT      = 1000000001090862085746321732;
+    address constant MCD_END         = 0x3d9603037FF096af03B83725dFdB1CDA9EA02CE4;
+    address constant MCD_ESM         = 0xD5D728446275B0A12E4a4038527974b92353B4a9;
+    address constant ILK_REGISTRY    = 0xc3F42deABc0C506e8Ae9356F2d4fc1505196DCDB;
 
-    // precision
-    uint256 constant public MILLION  = 10 ** 6;
-    uint256 constant public WAD      = 10 ** 18;
-    uint256 constant public RAY      = 10 ** 27;
-    uint256 constant public RAD      = 10 ** 45;
-
+    address constant MCD_FLIP_LINK_A = 0xfbDCDF5Bd98f68cEfc3f37829189b97B602eCFF2;
 
     function actions() public override {
-        // --------------------- Replace MIP22 ---------------------
+        address MCD_VAT          = DssExecLib.vat();
+        address MCD_CAT          = DssExecLib.cat();
+        address MCD_DOG          = DssExecLib.getChangelogAddress("MCD_DOG");
+        address MCD_VOW          = DssExecLib.vow();
+        address MCD_POT          = DssExecLib.pot();
+        address MCD_SPOT         = DssExecLib.spotter();
+        address MCD_END_OLD      = DssExecLib.end();
+        address MCD_ESM_OLD      = DssExecLib.getChangelogAddress("MCD_ESM");
+        address MCD_CLIP_LINK_A  = DssExecLib.getChangelogAddress("MCD_CLIP_LINK_A");
+        address PIP_LINK         = DssExecLib.getChangelogAddress("PIP_LINK");
 
-        // Remove old NS2DRP (now RWA002)
-        address MCD_VAT      = DssExecLib.vat();
-        address ILK_REGISTRY = DssExecLib.reg();
-        ChainlogLike CHANGELOG = ChainlogLike(
-            DssExecLib.getChangelogAddress("CHANGELOG")
-        );
+        // ------------------  END  ------------------
 
-        bytes32 oldIlk = "NS2DRP-A";
+        // Set contracts in END
+        DssExecLib.setContract(MCD_END,  "vat", MCD_VAT);
+        DssExecLib.setContract(MCD_END,  "cat", MCD_CAT);
+        DssExecLib.setContract(MCD_END,  "dog", MCD_DOG);
+        DssExecLib.setContract(MCD_END,  "vow", MCD_VOW);
+        DssExecLib.setContract(MCD_END,  "pot", MCD_POT);
+        DssExecLib.setContract(MCD_END, "spot", MCD_SPOT);
 
-        VatAbstract(MCD_VAT).file(oldIlk, "line", 0);
-        VatAbstract(MCD_VAT).deny(
-            DssExecLib.getChangelogAddress("MCD_JOIN_NS2DRP_A")
-        );
+        // Authorize the new END in contracts
+        DssExecLib.authorize(MCD_VAT, MCD_END);
+        DssExecLib.authorize(MCD_CAT, MCD_END);
+        DssExecLib.authorize(MCD_DOG, MCD_END);
+        DssExecLib.authorize(MCD_VOW, MCD_END);
+        DssExecLib.authorize(MCD_POT, MCD_END);
+        DssExecLib.authorize(MCD_SPOT, MCD_END);
 
-        CHANGELOG.removeAddress("NS2DRP");
-        CHANGELOG.removeAddress("MCD_JOIN_NS2DRP_A");
-        CHANGELOG.removeAddress("PIP_NS2DRP");
-        CHANGELOG.removeAddress("NS2DRP_A_URN");
-        CHANGELOG.removeAddress("NS2DRP_A_INPUT_CONDUIT");
-        CHANGELOG.removeAddress("NS2DRP_A_OUTPUT_CONDUIT");
+        // Set wait time in END
+        Fileable(MCD_END).file("wait", EndAbstract(MCD_END_OLD).wait());
 
-        IlkRegistryAbstract(ILK_REGISTRY).removeAuth(oldIlk);
+        // Deauthorize the old END in contracts
+        DssExecLib.deauthorize(MCD_VAT, MCD_END_OLD);
+        DssExecLib.deauthorize(MCD_CAT, MCD_END_OLD);
+        DssExecLib.deauthorize(MCD_DOG, MCD_END_OLD);
+        DssExecLib.deauthorize(MCD_VOW, MCD_END_OLD);
+        DssExecLib.deauthorize(MCD_POT, MCD_END_OLD);
+        DssExecLib.deauthorize(MCD_SPOT, MCD_END_OLD);
 
-        // Add fixed RWA002
-        bytes32 ilk   = "RWA002-A";
-        uint256 CEIL  = 5 * MILLION;
-        uint256 PRICE = 5_634_804 * WAD;
-        uint256 MAT   = 10_500;
-        uint48 TAU    = 0;
+        // Deauthorize the old END from all the FLIPS
+        // Authorize the new END in all the FLIPS
+        bytes32[] memory ilks = IlkRegistryAbstract(ILK_REGISTRY).list();
+        for (uint256 i = 0; i < ilks.length; i++) {
+            bytes32 ilk = ilks[i];
+            if (IlkRegistryAbstract(ILK_REGISTRY).class(ilk) < 3) {
+                address xlip = IlkRegistryAbstract(ILK_REGISTRY).xlip(ilk);
+                DssExecLib.deauthorize(xlip, MCD_END_OLD);
+                DssExecLib.authorize(xlip, MCD_END);
 
-        // https://ipfs.io/ipfs/QmdfuQSLmNFHoxvMjXvv8qbJ2NWprrsvp5L3rGr3JHw18E
-        string memory DOC = "QmdfuQSLmNFHoxvMjXvv8qbJ2NWprrsvp5L3rGr3JHw18E";
+                try DssExecLib.addReaderToOSMWhitelist(IlkRegistryAbstract(ILK_REGISTRY).pip(ilk), MCD_END) {} catch {}
+                try DssExecLib.removeReaderFromOSMWhitelist(IlkRegistryAbstract(ILK_REGISTRY).pip(ilk), MCD_END_OLD) {} catch {}
+            }
+        }
 
-        address MIP21_LIQUIDATION_ORACLE =
-            DssExecLib.getChangelogAddress("MIP21_LIQUIDATION_ORACLE");
+        DssExecLib.deauthorize(MCD_FLIP_LINK_A, MCD_END_OLD);
+        DssExecLib.authorize(MCD_FLIP_LINK_A, MCD_END);
 
-        // Sanity checks
-        require(GemJoinAbstract(MCD_JOIN_RWA002_A).vat() == MCD_VAT, "join-vat-not-match");
-        require(GemJoinAbstract(MCD_JOIN_RWA002_A).ilk() == ilk, "join-ilk-not-match");
-        require(GemJoinAbstract(MCD_JOIN_RWA002_A).gem() == RWA002_GEM, "join-gem-not-match");
-        require(GemJoinAbstract(MCD_JOIN_RWA002_A).dec() == DSTokenAbstract(RWA002_GEM).decimals(), "join-dec-not-match");
+        DssExecLib.addReaderToOSMWhitelist(PIP_LINK, MCD_END);
+        DssExecLib.removeReaderFromOSMWhitelist(PIP_LINK, MCD_END_OLD);
 
-        RwaLiquidationLike(MIP21_LIQUIDATION_ORACLE).init(
-            ilk, PRICE, DOC, TAU
-        );
-        (,address pip,,) = RwaLiquidationLike(MIP21_LIQUIDATION_ORACLE).ilks(ilk);
+        // ------------------  ESM  ------------------
 
-        // Set price feed for RWA002
-        DssExecLib.setContract(DssExecLib.spotter(), ilk, "pip", pip);
+        require(ESMAbstract(MCD_ESM).min() == 75_000 * WAD, "DssSpell/error-esm-min");
+        require(ESMAbstract(MCD_ESM).end() == MCD_END, "DssSpell/error-esm-end");
+        require(ESMAbstract(MCD_ESM).gem() == DssExecLib.getChangelogAddress("MCD_GOV"), "DssSpell/error-esm-gov");
+        require(ESMAbstract(MCD_ESM).proxy() == address(this), "DssSpell/error-esm-proxy");
 
-        // Init RWA-002 in Vat
-        Initializable(MCD_VAT).init(ilk);
-        // Init RWA-002 in Jug
-        Initializable(DssExecLib.jug()).init(ilk);
+        // Authorize new ESM to execute in new END
+        DssExecLib.authorize(MCD_END, MCD_ESM);
 
-        // Allow RWA-002 Join to modify Vat registry
-        DssExecLib.authorize(MCD_VAT, MCD_JOIN_RWA002_A);
+        // Authorize new ESM to execute in VAT
+        DssExecLib.authorize(MCD_VAT, MCD_ESM);
 
-        // Allow RwaLiquidationOracle to modify Vat registry
-        // DssExecLib.authorize(MCD_VAT, MIP21_LIQUIDATION_ORACLE);
+        // Deauthorize old ESM to execute in VAT
+        DssExecLib.deauthorize(MCD_VAT, MCD_ESM_OLD);
 
-        // Set the ilk debt ceiling (not increasing global one as we are replacing the collateral)
-        DssExecLib.setIlkDebtCeiling(ilk, CEIL);
+        // Make every flipper relies the MCD_ESM and denies the MCD_ESM_OLD
+        for (uint256 i = 0; i < ilks.length; i++) {
+            bytes32 ilk = ilks[i];
+            if (IlkRegistryAbstract(ILK_REGISTRY).class(ilk) < 3) {
+                address xlip = IlkRegistryAbstract(ILK_REGISTRY).xlip(ilk);
+                DssExecLib.authorize(xlip, MCD_ESM);
+                DssExecLib.deauthorize(xlip, MCD_ESM_OLD);
+            }
+        }
 
-        // No dust
-        // DssExecLib.setIlkMinVaultAmount(ilk, 0);
-
-        // stability fee
-        DssExecLib.setIlkStabilityFee(ilk, THREE_PT_FIVE_PCT, false);
-
-        // collateralization ratio
-        DssExecLib.setIlkLiquidationRatio(ilk, MAT);
-
-        // poke the spotter to pull in a price
-        DssExecLib.updateCollateralPrice(ilk);
-
-        // give the urn permissions on the join adapter
-        // DssExecLib.authorize(MCD_JOIN_RWA002_A, RWA002_A_URN);
-
-        // set up the urn
-        Hopeable(RWA002_A_URN).hope(RWA002_OPERATOR);
-
-        // set up output conduit
-        // Hopeable(RWA002_A_OUTPUT_CONDUIT).hope(RWA002_OPERATOR);
-
-        // Authorize the SC Domain team deployer address on the output conduit
-        // during introductory phase. This allows the SC team to assist in the
-        // testing of a complete circuit. Once a broker dealer arrangement is
-        // established the deployer address should be `deny`ed on the conduit.
-        // Kissable(RWA002_A_OUTPUT_CONDUIT).kiss(SC_DOMAIN_DEPLOYER_07);
-
-        // Add collateral in IlkRegistry
-        IlkRegistryAbstract(ILK_REGISTRY).put(
-            ilk,
-            MCD_JOIN_RWA002_A,
-            RWA002_GEM,
-            18,
-            3,
-            pip,
-            address(0),
-            "RWA-002",
-            "RWA002"
-        );
-
-        // add RWA-002 contract to the changelog
-        DssExecLib.setChangelogAddress("RWA002", RWA002_GEM);
-        DssExecLib.setChangelogAddress("PIP_RWA002", pip);
-        DssExecLib.setChangelogAddress("MCD_JOIN_RWA002_A", MCD_JOIN_RWA002_A);
-        DssExecLib.setChangelogAddress("RWA002_A_URN", RWA002_A_URN);
-        DssExecLib.setChangelogAddress(
-            "RWA002_A_INPUT_CONDUIT", RWA002_A_INPUT_CONDUIT
-        );
-        DssExecLib.setChangelogAddress(
-            "RWA002_A_OUTPUT_CONDUIT", RWA002_A_OUTPUT_CONDUIT
-        );
-        DssExecLib.setChangelogVersion("1.2.11");
-
-        // --------------------- Remove ESM_BUG ---------------------
-        address MCD_ESM          = DssExecLib.getChangelogAddress("MCD_ESM_ATTACK");
-        address MCD_ESM_BUG      = DssExecLib.getChangelogAddress("MCD_ESM_BUG");
-        address MCD_END          = DssExecLib.end();
-
-        DssExecLib.deauthorize(MCD_END, MCD_ESM_BUG);
-
-        CHANGELOG.removeAddress("MCD_ESM_BUG");
-        CHANGELOG.removeAddress("MCD_ESM_ATTACK");
+        DssExecLib.deauthorize(MCD_FLIP_LINK_A, MCD_ESM_OLD);
+        DssExecLib.authorize(MCD_FLIP_LINK_A, MCD_ESM);
+        
+        // ------------------  CHAINLOG  -----------------
+        
+        DssExecLib.setChangelogAddress("MCD_END", MCD_END);
         DssExecLib.setChangelogAddress("MCD_ESM", MCD_ESM);
-
-        DssExecLib.setChangelogVersion("1.3.0");
+        DssExecLib.setChangelogAddress("ILK_REGISTRY", ILK_REGISTRY);
     }
 
 }
