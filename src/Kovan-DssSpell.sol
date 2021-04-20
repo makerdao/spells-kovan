@@ -49,7 +49,6 @@ contract DssSpellAction is DssAction {
         address MCD_SPOT         = DssExecLib.spotter();
         address MCD_END_OLD      = DssExecLib.end();
         address MCD_ESM_OLD      = DssExecLib.getChangelogAddress("MCD_ESM");
-        address MCD_CLIP_LINK_A  = DssExecLib.getChangelogAddress("MCD_CLIP_LINK_A");
         address PIP_LINK         = DssExecLib.getChangelogAddress("PIP_LINK");
 
         // ------------------  END  ------------------
