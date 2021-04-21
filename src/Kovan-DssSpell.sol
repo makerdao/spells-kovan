@@ -19,9 +19,8 @@ pragma solidity 0.6.12;
 import {Fileable, ChainlogLike} from "dss-exec-lib/DssExecLib.sol";
 import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
-import "dss-interfaces/dss/IlkRegistryAbstract.sol";
-import "dss-interfaces/dss/EndAbstract.sol";
-import "dss-interfaces/dss/ESMAbstract.sol";
+import "dss-interfaces/dss/ClipAbstract.sol";
+import "dss-interfaces/dss/ClipperMomAbstract.sol";
 
 contract DssSpellAction is DssAction {
 
@@ -33,108 +32,89 @@ contract DssSpellAction is DssAction {
     }
 
     uint256 constant WAD = 10**18;
+    uint256 constant RAY = 10**27;
+    uint256 constant RAD = 10**45;
 
-    address constant MCD_END         = 0x3d9603037FF096af03B83725dFdB1CDA9EA02CE4;
-    address constant MCD_ESM         = 0xD5D728446275B0A12E4a4038527974b92353B4a9;
-    address constant ILK_REGISTRY    = 0xc3F42deABc0C506e8Ae9356F2d4fc1505196DCDB;
-
-    address constant MCD_FLIP_LINK_A = 0xfbDCDF5Bd98f68cEfc3f37829189b97B602eCFF2;
+    address constant MCD_CLIP_YFI_A      = 0x9020C96B06d2ac59e98A0F35f131D491EEcAa2C2; 
+    address constant MCD_CLIP_CALC_YFI_A = 0xbd586d6352Fcf0C45f77FC9348F4Ee7539F6e2bD;
 
     function actions() public override {
-        address MCD_VAT          = DssExecLib.vat();
-        address MCD_CAT          = DssExecLib.cat();
-        address MCD_DOG          = DssExecLib.getChangelogAddress("MCD_DOG");
-        address MCD_VOW          = DssExecLib.vow();
-        address MCD_POT          = DssExecLib.pot();
-        address MCD_SPOT         = DssExecLib.spotter();
-        address MCD_END_OLD      = DssExecLib.end();
-        address MCD_ESM_OLD      = DssExecLib.getChangelogAddress("MCD_ESM");
-        address PIP_LINK         = DssExecLib.getChangelogAddress("PIP_LINK");
+        address MCD_VAT = DssExecLib.vat();
+        address MCD_CAT = DssExecLib.cat();
+        address MCD_DOG = DssExecLib.getChangelogAddress("MCD_DOG");
+        address MCD_VOW = DssExecLib.vow();
+        address MCD_END = DssExecLib.end();
+        address MCD_ESM = DssExecLib.getChangelogAddress("MCD_ESM");
+        address CLIPPER_MOM = DssExecLib.getChangelogAddress("CLIPPER_MOM");
+        address ILK_REGISTRY = DssExecLib.getChangelogAddress("ILK_REGISTRY");
+        address PIP_YFI = DssExecLib.getChangelogAddress("PIP_YFI");
+        address MCD_FLIP_YFI_A = DssExecLib.getChangelogAddress("MCD_FLIP_YFI_A");
 
-        // ------------------  END  ------------------
+        // Set CLIP for YFI-A in the DOG
+        DssExecLib.setContract(MCD_DOG, "YFI-A", "clip", MCD_CLIP_YFI_A);
 
-        // Set contracts in END
-        DssExecLib.setContract(MCD_END,  "vat", MCD_VAT);
-        DssExecLib.setContract(MCD_END,  "cat", MCD_CAT);
-        DssExecLib.setContract(MCD_END,  "dog", MCD_DOG);
-        DssExecLib.setContract(MCD_END,  "vow", MCD_VOW);
-        DssExecLib.setContract(MCD_END,  "pot", MCD_POT);
-        DssExecLib.setContract(MCD_END, "spot", MCD_SPOT);
+        // Set VOW in the YFI-A CLIP
+        DssExecLib.setContract(MCD_CLIP_YFI_A, "vow", MCD_VOW);
 
-        // Authorize the new END in contracts
-        DssExecLib.authorize(MCD_VAT, MCD_END);
-        DssExecLib.authorize(MCD_CAT, MCD_END);
-        DssExecLib.authorize(MCD_DOG, MCD_END);
-        DssExecLib.authorize(MCD_VOW, MCD_END);
-        DssExecLib.authorize(MCD_POT, MCD_END);
-        DssExecLib.authorize(MCD_SPOT, MCD_END);
+        // Set CALC in the YFI-A CLIP
+        DssExecLib.setContract(MCD_CLIP_YFI_A, "calc", MCD_CLIP_CALC_YFI_A);
 
-        // Set wait time in END
-        Fileable(MCD_END).file("wait", EndAbstract(MCD_END_OLD).wait());
+        // Authorize CLIP can access to VAT
+        DssExecLib.authorize(MCD_VAT, MCD_CLIP_YFI_A);
 
-        // Deauthorize the old END in contracts
-        DssExecLib.deauthorize(MCD_VAT, MCD_END_OLD);
-        DssExecLib.deauthorize(MCD_CAT, MCD_END_OLD);
-        DssExecLib.deauthorize(MCD_DOG, MCD_END_OLD);
-        DssExecLib.deauthorize(MCD_VOW, MCD_END_OLD);
-        DssExecLib.deauthorize(MCD_POT, MCD_END_OLD);
-        DssExecLib.deauthorize(MCD_SPOT, MCD_END_OLD);
+        // Authorize CLIP can access to DOG
+        DssExecLib.authorize(MCD_DOG, MCD_CLIP_YFI_A);
 
-        // Deauthorize the old END from all the FLIPS
-        // Authorize the new END in all the FLIPS
-        bytes32[] memory ilks = IlkRegistryAbstract(ILK_REGISTRY).list();
-        for (uint256 i = 0; i < ilks.length; i++) {
-            bytes32 ilk = ilks[i];
-            if (IlkRegistryAbstract(ILK_REGISTRY).class(ilk) < 3) {
-                address xlip = IlkRegistryAbstract(ILK_REGISTRY).xlip(ilk);
-                DssExecLib.deauthorize(xlip, MCD_END_OLD);
-                DssExecLib.authorize(xlip, MCD_END);
+        // Authorize DOG can kick auctions on CLIP
+        DssExecLib.authorize(MCD_CLIP_YFI_A, MCD_DOG);
 
-                try DssExecLib.addReaderToOSMWhitelist(IlkRegistryAbstract(ILK_REGISTRY).pip(ilk), MCD_END) {} catch {}
-                try DssExecLib.removeReaderFromOSMWhitelist(IlkRegistryAbstract(ILK_REGISTRY).pip(ilk), MCD_END_OLD) {} catch {}
-            }
-        }
+        // Authorize the new END to access the YFI CLIP
+        DssExecLib.authorize(MCD_CLIP_YFI_A, MCD_END);
 
-        DssExecLib.deauthorize(MCD_FLIP_LINK_A, MCD_END_OLD);
-        DssExecLib.authorize(MCD_FLIP_LINK_A, MCD_END);
+        // Authorize CLIPPERMOM can set the stopped flag in CLIP
+        DssExecLib.authorize(MCD_CLIP_YFI_A, CLIPPER_MOM);
 
-        DssExecLib.addReaderToOSMWhitelist(PIP_LINK, MCD_END);
-        DssExecLib.removeReaderFromOSMWhitelist(PIP_LINK, MCD_END_OLD);
+        // Authorize new ESM to execute in YFI-A Clipper
+        DssExecLib.authorize(MCD_CLIP_YFI_A, MCD_ESM);
 
-        // ------------------  ESM  ------------------
+        // Whitelist CLIP in the YFI osm
+        DssExecLib.addReaderToOSMWhitelist(PIP_YFI, MCD_CLIP_YFI_A);
 
-        require(ESMAbstract(MCD_ESM).min() == 75_000 * WAD, "DssSpell/error-esm-min");
-        require(ESMAbstract(MCD_ESM).end() == MCD_END, "DssSpell/error-esm-end");
-        require(ESMAbstract(MCD_ESM).gem() == DssExecLib.getChangelogAddress("MCD_GOV"), "DssSpell/error-esm-gov");
-        require(ESMAbstract(MCD_ESM).proxy() == address(this), "DssSpell/error-esm-proxy");
+        // Whitelist CLIPPER_MOM in the YFI osm
+        DssExecLib.addReaderToOSMWhitelist(PIP_YFI, CLIPPER_MOM);
 
-        // Authorize new ESM to execute in new END
-        DssExecLib.authorize(MCD_END, MCD_ESM);
+        // No more auctions kicked via the CAT:
+        DssExecLib.deauthorize(MCD_FLIP_YFI_A, MCD_CAT);
 
-        // Authorize new ESM to execute in VAT
-        DssExecLib.authorize(MCD_VAT, MCD_ESM);
+        // No more circuit breaker for the FLIP in YFI-A:
+        DssExecLib.deauthorize(MCD_FLIP_YFI_A, DssExecLib.flipperMom());
 
-        // Deauthorize old ESM to execute in VAT
-        DssExecLib.deauthorize(MCD_VAT, MCD_ESM_OLD);
+        Fileable(MCD_DOG).file("YFI-A", "hole", 5_000 * RAD);
+        Fileable(MCD_DOG).file("YFI-A", "chop", 113 * WAD / 100);
+        Fileable(MCD_CLIP_YFI_A).file("buf", 130 * RAY / 100);
+        Fileable(MCD_CLIP_YFI_A).file("tail", 140 minutes);
+        Fileable(MCD_CLIP_YFI_A).file("cusp", 40 * RAY / 100);
+        Fileable(MCD_CLIP_YFI_A).file("chip", 1 * WAD / 1000);
+        Fileable(MCD_CLIP_YFI_A).file("tip", 0);
+        Fileable(MCD_CLIP_CALC_YFI_A).file("cut", 99 * RAY / 100); // 1% cut
+        Fileable(MCD_CLIP_CALC_YFI_A).file("step", 90 seconds);
 
-        // Make every flipper relies the MCD_ESM and denies the MCD_ESM_OLD
-        for (uint256 i = 0; i < ilks.length; i++) {
-            bytes32 ilk = ilks[i];
-            if (IlkRegistryAbstract(ILK_REGISTRY).class(ilk) < 3) {
-                address xlip = IlkRegistryAbstract(ILK_REGISTRY).xlip(ilk);
-                DssExecLib.authorize(xlip, MCD_ESM);
-                DssExecLib.deauthorize(xlip, MCD_ESM_OLD);
-            }
-        }
+        //  Tolerance currently set to 50%.
+        //   n.b. 600000000000000000000000000 == 40% acceptable drop
+        ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_YFI_A, 50 * RAY / 100);
 
-        DssExecLib.deauthorize(MCD_FLIP_LINK_A, MCD_ESM_OLD);
-        DssExecLib.authorize(MCD_FLIP_LINK_A, MCD_ESM);
-        
-        // ------------------  CHAINLOG  -----------------
-        
-        DssExecLib.setChangelogAddress("MCD_END", MCD_END);
-        DssExecLib.setChangelogAddress("MCD_ESM", MCD_ESM);
-        DssExecLib.setChangelogAddress("ILK_REGISTRY", ILK_REGISTRY);
+        ClipAbstract(MCD_CLIP_YFI_A).upchost();
+
+        // Replace flip to clip in the ilk registry
+        DssExecLib.setContract(ILK_REGISTRY, "YFI-A", "xlip", MCD_CLIP_YFI_A);
+        Fileable(ILK_REGISTRY).file("YFI-A", "class", 1);
+
+        address log = DssExecLib.getChangelogAddress("CHANGELOG");
+        DssExecLib.setChangelogAddress("MCD_CLIP_YFI_A", MCD_CLIP_YFI_A);
+        DssExecLib.setChangelogAddress("MCD_CLIP_CALC_YFI_A", MCD_CLIP_CALC_YFI_A);
+        ChainlogLike(log).removeAddress("MCD_FLIP_YFI_A");
+
+        DssExecLib.setChangelogVersion("1.4.0");
     }
 
 }
