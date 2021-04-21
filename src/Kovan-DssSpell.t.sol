@@ -6,7 +6,7 @@ import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
 import "./test/addresses_kovan.sol";
 
-import {DssSpell} from "./Kovan-DssSpell.sol";
+import {DssSpell, LerpFabLike} from "./Kovan-DssSpell.sol";
 
 interface Hevm {
     function warp(uint) external;
@@ -47,6 +47,10 @@ interface Memberlist {
 
 interface DropToken is DSTokenAbstract {
     function memberlist() external view returns (address);
+}
+
+interface LerpLike {
+    function tick() external;
 }
 
 //
@@ -1665,6 +1669,8 @@ contract DssSpellTest is DSTest, DSMath {
         try chainLog.getAddress("MCD_FLIP_YFI_A") returns (address) {
             assertTrue(false);
         } catch {}
+
+        assertEq(chainLog.getAddress("LERP_FAB"), addr.addr("LERP_FAB"));
     }
 
     function testFailWrongDay() public {
@@ -1867,5 +1873,46 @@ contract DssSpellTest is DSTest, DSMath {
         clipMom.tripBreaker(address(clipYFIA));
 
         assertEq(clipYFIA.stopped(), 2);
+    }
+
+    function testLerp() public {
+        LerpFabLike factory = LerpFabLike(addr.addr("LERP_FAB"));
+
+        assertEq(vow.hump(), 500 * RAD);
+        assertEq(factory.count(), 0);
+
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        assertEq(factory.count(), 1);
+        LerpLike lerp = LerpLike(factory.active(0));
+
+        assertEq(vow.hump(), 500 * RAD);
+
+        // Should do nothing as we are before the start date
+        lerp.tick();
+        assertEq(vow.hump(), 500 * RAD);
+
+        // Warp to the start time Thu Apr 22 2021 16:00:00 GMT+0000
+        hevm.warp(1619107200);
+
+        // Should do nothing as we are exactly at the start date
+        lerp.tick();
+        assertEq(vow.hump(), 500 * RAD);
+
+        hevm.warp(now + 1 days);
+
+        // Should advance to an intermediary value
+        factory.tall();
+        assertTrue(vow.hump() > 500 * RAD);
+        assertTrue(vow.hump() < 1000 * RAD);
+
+        hevm.warp(now + 20 days);
+
+        // Should be done
+        factory.tall();
+        assertEq(factory.count(), 0);
+        assertEq(vow.hump(), 1000 * RAD);
     }
 }
