@@ -1754,8 +1754,15 @@ contract DssSpellTest is DSTest, DSMath {
 
         assertEq(pipYFI.bud(address(clipYFIA)), 1);
 
+        // Force max debt ceiling for YFI-A
+        hevm.store(
+            address(vat),
+            bytes32(uint256(keccak256(abi.encode(bytes32("YFI-A"), uint256(2)))) + 3),
+            bytes32(uint256(-1))
+        );
+
         // Add balance to the test address
-        uint256 ilkAmt = 500 * WAD;
+        uint256 ilkAmt = 0.05 * 10 ** 18;
 
         giveTokens(YFI, ilkAmt);
         assertEq(YFI.balanceOf(address(this)), ilkAmt);
@@ -1830,5 +1837,35 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(clipYFIA.stopped(), 3);
         clipMom.setBreaker(address(clipYFIA), 0, 0);
         assertEq(clipYFIA.stopped(), 0);
+    }
+
+    function testFailClipperMomTripBreaker() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        // Assuming we're within bounds at time of testing, this shouldn't work.
+        ClipAbstract clipYFIA = ClipAbstract(addr.addr("MCD_CLIP_YFI_A"));
+        clipMom.tripBreaker(address(clipYFIA));
+    }
+
+    function testClipperMomTripBreaker() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        // Hacking nxt price to 0x123 (and making it valid)
+        bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
+
+        ClipAbstract clipYFIA = ClipAbstract(addr.addr("MCD_CLIP_YFI_A"));
+
+        hevm.store(address(addr.addr("PIP_YFI")), bytes32(uint256(4)), hackedValue);
+
+        assertEq(clipMom.tolerance(address(clipYFIA)), (RAY / 2)); // (RAY / 2) for 50%
+
+        // Price is hacked, anyone can trip the breaker
+        clipMom.tripBreaker(address(clipYFIA));
+
+        assertEq(clipYFIA.stopped(), 2);
     }
 }

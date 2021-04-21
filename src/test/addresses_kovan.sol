@@ -117,7 +117,7 @@ contract Addresses {
         addr["MCD_JOIN_YFI_A"]         = 0x5b683137481F2FE683E2f2385792B1DeB018050F;
         addr["MCD_FLIP_YFI_A"]         = 0x5eB5D3B028CD255d79019f7C44a502b31bFFde9d;
         addr["MCD_CLIP_YFI_A"]         = 0x9020C96B06d2ac59e98A0F35f131D491EEcAa2C2;
-        addr["MCD_CLIP_CALC_YFI_A"]    = 0xbd586d6352Fcf0C45f77FC9348F4Ee7539F6e2bD;
+        addr["MCD_CLIP_CALC_YFI_A"]    = 0x54A18C6ceEBDf42D8532EBf5e0a67C430a51b2f6;
         addr["GUSD"]                   = 0x31D8EdbF6F33ef858c80d68D06Ec83f33c2aA150;
         addr["PIP_GUSD"]               = 0xb6630DE6Eda0f3f3d96Db4639914565d6b82CfEF;
         addr["MCD_JOIN_GUSD_A"]        = 0x0c6B26e6AB583D2e4528034037F74842ea988909;

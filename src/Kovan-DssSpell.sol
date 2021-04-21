@@ -36,7 +36,7 @@ contract DssSpellAction is DssAction {
     uint256 constant RAD = 10**45;
 
     address constant MCD_CLIP_YFI_A      = 0x9020C96B06d2ac59e98A0F35f131D491EEcAa2C2; 
-    address constant MCD_CLIP_CALC_YFI_A = 0xbd586d6352Fcf0C45f77FC9348F4Ee7539F6e2bD;
+    address constant MCD_CLIP_CALC_YFI_A = 0x54A18C6ceEBDf42D8532EBf5e0a67C430a51b2f6;
 
     function actions() public override {
         address MCD_VAT = DssExecLib.vat();
@@ -116,7 +116,6 @@ contract DssSpellAction is DssAction {
 
         DssExecLib.setChangelogVersion("1.4.0");
     }
-
 }
 
 contract DssSpell is DssExec {
