@@ -24,8 +24,9 @@ import "dss-interfaces/dss/ClipperMomAbstract.sol";
 import "dss-interfaces/dss/VowAbstract.sol";
 
 interface LerpFabLike {
-    function newLerp(address, bytes32, uint256, uint256, uint256, uint256) external returns (address);
+    function newLerp(bytes32, address, bytes32, uint256, uint256, uint256, uint256) external returns (address);
     function active(uint256) external returns (address);
+    function lerps(bytes32) external returns (address);
     function tall() external;
     function count() external returns (uint256);
 }
@@ -46,7 +47,7 @@ contract DssSpellAction is DssAction {
     address constant MCD_CLIP_YFI_A      = 0x9020C96B06d2ac59e98A0F35f131D491EEcAa2C2; 
     address constant MCD_CLIP_CALC_YFI_A = 0x54A18C6ceEBDf42D8532EBf5e0a67C430a51b2f6;
 
-    address constant LERP_FAB = 0x04b20CEf1d5d09B2E9084a1ee01c2dc2B25ea6eD;
+    address constant LERP_FAB = 0xa6766Ed3574bAFc6114618E74035C7bb5e9a6aa9;
 
     function actions() public override {
         address MCD_VAT = DssExecLib.vat();
@@ -116,7 +117,7 @@ contract DssSpellAction is DssAction {
         ClipAbstract(MCD_CLIP_YFI_A).upchost();
 
         // Increase the Surplus Buffer to 1000 DAI over 7 days starting Thu Apr 22 2021 16:00:00 GMT+0000
-        address lerp = LerpFabLike(LERP_FAB).newLerp(MCD_VOW, "hump", 1619107200, 500 * RAD, 1000 * RAD, 7 days);
+        address lerp = LerpFabLike(LERP_FAB).newLerp("20210421_VOW_HUMP1", MCD_VOW, "hump", 1619107200, 500 * RAD, 1000 * RAD, 7 days);
         VowAbstract(MCD_VOW).rely(lerp);
 
         // Replace flip to clip in the ilk registry

@@ -1886,7 +1886,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
 
         assertEq(factory.count(), 1);
-        LerpLike lerp = LerpLike(factory.active(0));
+        LerpLike lerp = LerpLike(factory.lerps("20210421_VOW_HUMP1"));
 
         assertEq(vow.hump(), 500 * RAD);
 
