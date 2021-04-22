@@ -1759,6 +1759,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(clipYFIA.wards(address(clipMom)), 1);
 
         assertEq(pipYFI.bud(address(clipYFIA)), 1);
+        assertEq(pipYFI.bud(address(clipMom)), 1);
 
         // Force max debt ceiling for YFI-A
         hevm.store(
