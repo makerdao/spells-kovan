@@ -1757,6 +1757,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(clipYFIA.wards(address(dog))    , 1);
         assertEq(clipYFIA.wards(address(end))    , 1);
         assertEq(clipYFIA.wards(address(clipMom)), 1);
+        assertEq(clipYFIA.wards(address(esm)), 1);
 
         assertEq(pipYFI.bud(address(clipYFIA)), 1);
         assertEq(pipYFI.bud(address(clipMom)), 1);
