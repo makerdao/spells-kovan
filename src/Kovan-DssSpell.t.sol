@@ -66,7 +66,8 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 vow_dump;
         uint256 vow_sump;
         uint256 vow_bump;
-        uint256 vow_hump;
+        uint256 vow_hump_min;
+        uint256 vow_hump_max;
         uint256 flap_beg;
         uint256 flap_ttl;
         uint256 flap_tau;
@@ -147,7 +148,7 @@ contract DssSpellTest is DSTest, DSMath {
     // Rates table is in ./test/rates.sol
 
     // not provided in DSMath
-    function rpow(uint x, uint n, uint b) internal pure returns (uint z) {
+    function rpow(uint256 x, uint256 n, uint256 b) internal pure returns (uint256 z) {
       assembly {
         switch x case 0 {switch n case 0 {z := b} default {z := 0}}
         default {
@@ -224,7 +225,8 @@ contract DssSpellTest is DSTest, DSMath {
             vow_dump:              2,                   // In whole Dai units
             vow_sump:              50,                  // In whole Dai units
             vow_bump:              10,                  // In whole Dai units
-            vow_hump:              500,                 // In whole Dai units
+            vow_hump_min:          500,                 // In whole Dai units
+            vow_hump_max:          1000,                // In whole Dai units
             flap_beg:              200,                 // In Basis Points
             flap_ttl:              1 hours,             // In seconds
             flap_tau:              1 hours,             // In seconds
@@ -1075,7 +1077,7 @@ contract DssSpellTest is DSTest, DSMath {
 
     function checkSystemValues(SystemValues storage values) internal {
         // dsr
-        uint expectedDSRRate = rates.rates(values.pot_dsr);
+        uint256 expectedDSRRate = rates.rates(values.pot_dsr);
         // make sure dsr is less than 100% APR
         // bc -l <<< 'scale=27; e( l(2.00)/(60 * 60 * 24 * 365) )'
         // 1000000021979553151239153027
@@ -1099,7 +1101,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vow.wait(), values.vow_wait);
         {
         // dump values in WAD
-        uint normalizedDump = values.vow_dump * WAD;
+        uint256 normalizedDump = values.vow_dump * WAD;
         assertEq(vow.dump(), normalizedDump);
         assertTrue(
             (vow.dump() >= WAD && vow.dump() < 2 * THOUSAND * WAD) ||
@@ -1108,7 +1110,7 @@ contract DssSpellTest is DSTest, DSMath {
         }
         {
         // sump values in RAD
-        uint normalizedSump = values.vow_sump * RAD;
+        uint256 normalizedSump = values.vow_sump * RAD;
         assertEq(vow.sump(), normalizedSump);
         assertTrue(
             (vow.sump() >= RAD && vow.sump() < 500 * THOUSAND * RAD) ||
@@ -1117,7 +1119,7 @@ contract DssSpellTest is DSTest, DSMath {
         }
         {
         // bump values in RAD
-        uint normalizedBump = values.vow_bump * RAD;
+        uint256 normalizedBump = values.vow_bump * RAD;
         assertEq(vow.bump(), normalizedBump);
         assertTrue(
             (vow.bump() >= RAD && vow.bump() < HUNDRED * THOUSAND * RAD) ||
@@ -1126,8 +1128,9 @@ contract DssSpellTest is DSTest, DSMath {
         }
         {
         // hump values in RAD
-        uint normalizedHump = values.vow_hump * RAD;
-        assertEq(vow.hump(), normalizedHump);
+        uint256 normalizedHumpMin = values.vow_hump_min * RAD;
+        uint256 normalizedHumpMax = values.vow_hump_max * RAD;
+        assertTrue(vow.hump() >= normalizedHumpMin && vow.hump() <= normalizedHumpMax);
         assertTrue(
             (vow.hump() >= RAD && vow.hump() < HUNDRED * MILLION * RAD) ||
             vow.hump() == 0
@@ -1136,7 +1139,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         // box value in RAD
         {
-            uint normalizedBox = values.cat_box * RAD;
+            uint256 normalizedBox = values.cat_box * RAD;
             assertEq(cat.box(), normalizedBox);
             assertTrue(cat.box() >= THOUSAND * RAD);
             assertTrue(cat.box() < 50 * MILLION * RAD);
@@ -1144,7 +1147,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         // Hole value in RAD
         {
-            uint normalizedHole = values.dog_Hole * RAD;
+            uint256 normalizedHole = values.dog_Hole * RAD;
             assertEq(dog.Hole(), normalizedHole);
             assertTrue(dog.Hole() >= THOUSAND * RAD);
             assertTrue(dog.Hole() < 50 * MILLION * RAD);
@@ -1341,7 +1344,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Price is bounded in the spot by around 10^23
         // Give a 10^9 buffer for price appreciation over time
         // Note: This currently can't be hit due to the uint112, but we want to backstop
-        //       once the PIP uint size is increased
+        //       once the PIP uint256 size is increased
         assertTrue(price <= (10 ** 14) * WAD);
 
         return price;
@@ -1357,7 +1360,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Price is bounded in the spot by around 10^23
         // Give a 10^9 buffer for price appreciation over time
         // Note: This currently can't be hit due to the uint112, but we want to backstop
-        //       once the PIP uint size is increased
+        //       once the PIP uint256 size is increased
         assertTrue(price <= (10 ** 14) * WAD);
 
         return price;
