@@ -2044,15 +2044,15 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 0.05 * 10 ** 8;
+        uint256 ilkAmt = 0.05 * 10 ** 18;
 
-        giveTokens(WBTC, ilkAmt);
-        assertEq(WBTC.balanceOf(address(this)), ilkAmt);
+        giveTokens(WBTC, ilkAmt / 10 ** (18 - 8));
+        assertEq(WBTC.balanceOf(address(this)), ilkAmt / 10 ** (18 - 8));
 
         // Join to adapter
         assertEq(vat.gem("WBTC-A", address(this)), 0);
-        WBTC.approve(address(joinWBTCA), ilkAmt);
-        joinWBTCA.join(address(this), ilkAmt);
+        WBTC.approve(address(joinWBTCA), ilkAmt / 10 ** (18 - 8));
+        joinWBTCA.join(address(this), ilkAmt / 10 ** (18 - 8));
         assertEq(WBTC.balanceOf(address(this)), 0);
         assertEq(vat.gem("WBTC-A", address(this)), ilkAmt);
 
@@ -2226,7 +2226,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         {
             uint256 ETHIlkAmt = 2 * WAD;
-            uint256 WBTCIlkAmt = 0.05 * 10 ** 8;
+            uint256 WBTCIlkAmt = 0.05 * 10 ** 18;
 
             giveTokens(ETH, ETHIlkAmt * 3);
             giveTokens(WBTC, WBTCIlkAmt);
@@ -2236,8 +2236,8 @@ contract DssSpellTest is DSTest, DSMath {
             joinETHB.join(address(this), ETHIlkAmt);
             joinETHC.join(address(this), ETHIlkAmt);
 
-            WBTC.approve(address(joinWBTCA), WBTCIlkAmt);
-            joinWBTCA.join(address(this), WBTCIlkAmt);
+            WBTC.approve(address(joinWBTCA), WBTCIlkAmt / 10 ** (18 - 8));
+            joinWBTCA.join(address(this), WBTCIlkAmt / 10 ** (18 - 8));
 
             (,uint256 rate, uint256 spot,,) = vat.ilks("ETH-A");
             vat.frob("ETH-A", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
