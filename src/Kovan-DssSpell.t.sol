@@ -2229,11 +2229,13 @@ contract DssSpellTest is DSTest, DSMath {
             uint256 WBTCIlkAmt = 0.05 * 10 ** 18;
 
             giveTokens(ETH, ETHIlkAmt * 3);
-            giveTokens(WBTC, WBTCIlkAmt);
+            giveTokens(WBTC, WBTCIlkAmt / 10 ** (18 - 8));
 
-            ETH.approve(address(joinETHA), ETHIlkAmt * 3);
+            ETH.approve(address(joinETHA), ETHIlkAmt);
             joinETHA.join(address(this), ETHIlkAmt);
+            ETH.approve(address(joinETHB), ETHIlkAmt);
             joinETHB.join(address(this), ETHIlkAmt);
+            ETH.approve(address(joinETHC), ETHIlkAmt);
             joinETHC.join(address(this), ETHIlkAmt);
 
             WBTC.approve(address(joinWBTCA), WBTCIlkAmt / 10 ** (18 - 8));
