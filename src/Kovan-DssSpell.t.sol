@@ -1753,7 +1753,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 0.05 * 10 ** 18;
+        uint256 ilkAmt = 20 * 10 ** 18;
 
         giveTokens(ETH, ilkAmt);
         assertEq(ETH.balanceOf(address(this)), ilkAmt);
@@ -1850,7 +1850,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 0.05 * 10 ** 18;
+        uint256 ilkAmt = 20 * 10 ** 18;
 
         giveTokens(ETH, ilkAmt);
         assertEq(ETH.balanceOf(address(this)), ilkAmt);
@@ -1947,7 +1947,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 0.05 * 10 ** 18;
+        uint256 ilkAmt = 20 * 10 ** 18;
 
         giveTokens(ETH, ilkAmt);
         assertEq(ETH.balanceOf(address(this)), ilkAmt);
@@ -2044,7 +2044,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 0.05 * 10 ** 18;
+        uint256 ilkAmt = 1 * 10 ** 18;
 
         giveTokens(WBTC, ilkAmt);
         assertEq(WBTC.balanceOf(address(this)), ilkAmt);
@@ -2224,27 +2224,31 @@ contract DssSpellTest is DSTest, DSMath {
             bytes32(uint256(-1))
         );
 
-        uint256 ilkAmt = 2 * WAD;
+        uint256 ETHIlkAmt = 20 * WAD;
+        uint256 WBTCIlkAmt = 20 * WAD;
 
-        giveTokens(ETH, ilkAmt * 3);
-        giveTokens(WBTC, ilkAmt);
+        giveTokens(ETH, ETHIlkAmt * 3);
+        giveTokens(WBTC, WBTCIlkAmt);
 
-        ETH.approve(address(joinETHA), ilkAmt * 3);
-        joinETHA.join(address(this), ilkAmt);
-        joinETHB.join(address(this), ilkAmt);
-        joinETHC.join(address(this), ilkAmt);
+        ETH.approve(address(joinETHA), ETHIlkAmt * 3);
+        joinETHA.join(address(this), ETHIlkAmt);
+        joinETHB.join(address(this), ETHIlkAmt);
+        joinETHC.join(address(this), ETHIlkAmt);
 
-        WBTC.approve(address(joinWBTCA), ilkAmt * 3);
-        joinWBTCA.join(address(this), ilkAmt);
+        WBTC.approve(address(joinWBTCA), WBTCIlkAmt);
+        joinWBTCA.join(address(this), WBTCIlkAmt);
 
         (,uint256 rate, uint256 spot,,) = vat.ilks("ETH-A");
-        vat.frob("ETH-A", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
+        vat.frob("ETH-A", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
 
         (, rate, spot,,) = vat.ilks("ETH-B");
-        vat.frob("ETH-B", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
+        vat.frob("ETH-B", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
 
         (, rate, spot,,) = vat.ilks("ETH-C");
-        vat.frob("ETH-C", address(this), address(this), address(this), int256(ilkAmt), int256(mul(ilkAmt, spot) / rate));
+        vat.frob("ETH-C", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
+
+        (, rate, spot,,) = vat.ilks("WBTC-A");
+        vat.frob("WBTC-A", address(this), address(this), address(this), int256(WBTCIlkAmt), int256(mul(WBTCIlkAmt, spot) / rate));
 
         hevm.warp(block.timestamp + 1);
         jug.drip("ETH-A");
