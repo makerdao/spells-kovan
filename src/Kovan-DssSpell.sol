@@ -45,13 +45,13 @@ contract DssSpellAction is DssAction {
     uint256 constant RAD = 10**45;
 
     address constant MCD_CLIP_ETH_A       = 0x7dD1Fb6b9aFdBA9F28DB89c81723b8c6B27A2Fbe;
-    address constant MCD_CLIP_CALC_ETH_A  = 0x11e43AD52827019F8f9458771459B358222720d6;
+    address constant MCD_CLIP_CALC_ETH_A  = 0x46bE29C1993d64f0C93e81D69FfAFDF4881806f2;
     address constant MCD_CLIP_ETH_B       = 0x004676c737FC75A2799dFe745d23F5597620Ad43;
-    address constant MCD_CLIP_CALC_ETH_B  = 0x85e52B219b4bFDBFFC29c71ffF6eB9FdDD5D221E;
+    address constant MCD_CLIP_CALC_ETH_B  = 0x4672215ADF0556Af60261e97E221c875ce9F0863;
     address constant MCD_CLIP_ETH_C       = 0x86D5eA244cf6c79227CA73004C963b72431f23ac;
-    address constant MCD_CLIP_CALC_ETH_C  = 0xeD58984595292Dd30f838e9A6f932d1acd8f979F;
+    address constant MCD_CLIP_CALC_ETH_C  = 0xa8AfB2680cced6de0E1dfe5C35F0FEdFB8E95720;
     address constant MCD_CLIP_WBTC_A      = 0x5518C2f409Bed4bD5FF3542d9D5002251EEDA892;
-    address constant MCD_CLIP_CALC_WBTC_A = 0xAEd4894E0965D37007B6970d13bDd013263a939A;
+    address constant MCD_CLIP_CALC_WBTC_A = 0x2c39F8C9aE16B84076D7fEA15CE5855925a09DA6;
 
     function actions() public override {
         address MCD_VAT         = DssExecLib.vat();
