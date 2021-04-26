@@ -2224,31 +2224,33 @@ contract DssSpellTest is DSTest, DSMath {
             bytes32(uint256(-1))
         );
 
-        uint256 ETHIlkAmt = 20 * WAD;
-        uint256 WBTCIlkAmt = 20 * WAD;
+        {
+            uint256 ETHIlkAmt = 20 * WAD;
+            uint256 WBTCIlkAmt = 20 * WAD;
 
-        giveTokens(ETH, ETHIlkAmt * 3);
-        giveTokens(WBTC, WBTCIlkAmt);
+            giveTokens(ETH, ETHIlkAmt * 3);
+            giveTokens(WBTC, WBTCIlkAmt);
 
-        ETH.approve(address(joinETHA), ETHIlkAmt * 3);
-        joinETHA.join(address(this), ETHIlkAmt);
-        joinETHB.join(address(this), ETHIlkAmt);
-        joinETHC.join(address(this), ETHIlkAmt);
+            ETH.approve(address(joinETHA), ETHIlkAmt * 3);
+            joinETHA.join(address(this), ETHIlkAmt);
+            joinETHB.join(address(this), ETHIlkAmt);
+            joinETHC.join(address(this), ETHIlkAmt);
 
-        WBTC.approve(address(joinWBTCA), WBTCIlkAmt);
-        joinWBTCA.join(address(this), WBTCIlkAmt);
+            WBTC.approve(address(joinWBTCA), WBTCIlkAmt);
+            joinWBTCA.join(address(this), WBTCIlkAmt);
 
-        (,uint256 rate, uint256 spot,,) = vat.ilks("ETH-A");
-        vat.frob("ETH-A", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
+            (,uint256 rate, uint256 spot,,) = vat.ilks("ETH-A");
+            vat.frob("ETH-A", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
 
-        (, rate, spot,,) = vat.ilks("ETH-B");
-        vat.frob("ETH-B", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
+            (, rate, spot,,) = vat.ilks("ETH-B");
+            vat.frob("ETH-B", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
 
-        (, rate, spot,,) = vat.ilks("ETH-C");
-        vat.frob("ETH-C", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
+            (, rate, spot,,) = vat.ilks("ETH-C");
+            vat.frob("ETH-C", address(this), address(this), address(this), int256(ETHIlkAmt), int256(mul(ETHIlkAmt, spot) / rate));
 
-        (, rate, spot,,) = vat.ilks("WBTC-A");
-        vat.frob("WBTC-A", address(this), address(this), address(this), int256(WBTCIlkAmt), int256(mul(WBTCIlkAmt, spot) / rate));
+            (, rate, spot,,) = vat.ilks("WBTC-A");
+            vat.frob("WBTC-A", address(this), address(this), address(this), int256(WBTCIlkAmt), int256(mul(WBTCIlkAmt, spot) / rate));
+        }
 
         hevm.warp(block.timestamp + 1);
         jug.drip("ETH-A");
