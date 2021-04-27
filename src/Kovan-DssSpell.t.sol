@@ -1946,6 +1946,13 @@ contract DssSpellTest is DSTest, DSMath {
             bytes32(uint256(-1))
         );
 
+        // Make Hole a big one
+        hevm.store(
+            address(dog),
+            bytes32(uint256(4)),
+            bytes32(uint256(100 * MILLION * RAD))
+        );
+
         // Add balance to the test address
         uint256 ilkAmt = 1 * WAD;
 
