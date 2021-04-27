@@ -1321,6 +1321,9 @@ contract DssSpellTest is DSTest, DSMath {
                     (exists, value) = clip.calc().call(abi.encodeWithSignature("cut()"));
                     uint256 normalizedTestCut = values.collaterals[ilk].calc_cut * 10**23;
                     assertEq(exists ? abi.decode(value, (uint256)) : 0, normalizedTestCut);
+                    if (exists) {
+                       assertTrue(abi.decode(value, (uint256)) > 0 && abi.decode(value, (uint256)) < RAY);
+                    }
                 }
             }
             if (reg.class(ilk) < 3) {
