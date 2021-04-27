@@ -260,7 +260,7 @@ contract DssSpellTest is DSTest, DSMath {
             flip_tau:     0,               // In seconds
             flipper_mom:  0,               // 1 if circuit breaker enabled
             dog_hole:     5 * THOUSAND,
-            clip_buf:     3000,
+            clip_buf:     13000,
             clip_tail:    140 minutes,
             clip_cusp:    4000,
             clip_chip:    10,
@@ -288,7 +288,7 @@ contract DssSpellTest is DSTest, DSMath {
             flip_tau:     0,
             flipper_mom:  0,
             dog_hole:     5 * THOUSAND,
-            clip_buf:     3000,
+            clip_buf:     13000,
             clip_tail:    140 minutes,
             clip_cusp:    4000,
             clip_chip:    10,
@@ -316,7 +316,7 @@ contract DssSpellTest is DSTest, DSMath {
             flip_tau:     0,
             flipper_mom:  0,
             dog_hole:     5 * THOUSAND,
-            clip_buf:     3000,
+            clip_buf:     13000,
             clip_tail:    140 minutes,
             clip_cusp:    4000,
             clip_chip:    10,
@@ -428,7 +428,7 @@ contract DssSpellTest is DSTest, DSMath {
             flip_tau:     0,
             flipper_mom:  0,
             dog_hole:     5 * THOUSAND,
-            clip_buf:     3000,
+            clip_buf:     13000,
             clip_tail:    140 minutes,
             clip_cusp:    4000,
             clip_chip:    10,
@@ -680,7 +680,7 @@ contract DssSpellTest is DSTest, DSMath {
             flip_tau:     0,
             flipper_mom:  0,
             dog_hole:     5 * THOUSAND,
-            clip_buf:     3000,
+            clip_buf:     13000,
             clip_tail:    140 minutes,
             clip_cusp:    4000,
             clip_chip:    10,
@@ -736,7 +736,7 @@ contract DssSpellTest is DSTest, DSMath {
             flip_tau:     0,
             flipper_mom:  0,
             dog_hole:     5 * THOUSAND,
-            clip_buf:     3000,
+            clip_buf:     13000,
             clip_tail:    140 minutes,
             clip_cusp:    4000,
             clip_chip:    10,
@@ -1287,7 +1287,7 @@ contract DssSpellTest is DSTest, DSMath {
                 ClipAbstract clip = ClipAbstract(clipper);
                 {
                 // Convert BP to system expected value
-                uint256 normalizedTestBuf = (values.collaterals[ilk].clip_buf + 10000)  * 10**23;
+                uint256 normalizedTestBuf = values.collaterals[ilk].clip_buf * 10**23;
                 assertEq(uint256(clip.buf()), normalizedTestBuf);
                 assertTrue(clip.buf() >= RAY && clip.buf() <= 2 * RAY); // gte 0% and lte 100%
                 assertEq(uint256(clip.tail()), values.collaterals[ilk].clip_tail);
