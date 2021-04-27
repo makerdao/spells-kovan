@@ -31,6 +31,37 @@ interface LerpFabLike {
     function count() external returns (uint256);
 }
 
+struct Collateral {
+    bytes32 ilk;
+    address vat;
+    address vow;
+    address spotter;
+    address cat;
+    address dog;
+    address end;
+    address esm;
+    address flipperMom;
+    address clipperMom;
+    address ilkRegistry;
+    address pip;
+    address clipper;
+    address flipper;
+    address calc;
+    uint256 hole;
+    uint256 chop;
+    uint256 buf;
+    uint256 tail;
+    uint256 cusp;
+    uint256 chip;
+    uint256 tip;
+    uint256 cut;
+    uint256 step;
+    uint256 tolerance;
+    bytes32 clipKey;
+    bytes32 calcKey;
+    bytes32 flipKey;
+}
+
 contract DssSpellAction is DssAction {
 
     string public constant description = "Kovan Spell";
@@ -53,6 +84,62 @@ contract DssSpellAction is DssAction {
     address constant MCD_CLIP_WBTC_A      = 0x5518C2f409Bed4bD5FF3542d9D5002251EEDA892;
     address constant MCD_CLIP_CALC_WBTC_A = 0x2c39F8C9aE16B84076D7fEA15CE5855925a09DA6;
 
+    function flipperToClipper(Collateral memory col) internal {
+        // Check constructor values of Clipper
+        require(ClipAbstract(col.clipper).vat() == col.vat, "DssSpell/clip-wrong-vat");
+        require(ClipAbstract(col.clipper).spotter() == col.spotter, "DssSpell/clip-wrong-spotter");
+        require(ClipAbstract(col.clipper).dog() == col.dog, "DssSpell/clip-wrong-dog");
+        require(ClipAbstract(col.clipper).ilk() == col.ilk, "DssSpell/clip-wrong-ilk");
+        // Set CLIP for ETH-A in the DOG
+        DssExecLib.setContract(col.dog, col.ilk, "clip", col.clipper);
+        // Set VOW in the ETH-A CLIP
+        DssExecLib.setContract(col.clipper, "vow", col.vow);
+        // Set CALC in the ETH-A CLIP
+        DssExecLib.setContract(col.clipper, "calc", col.calc);
+        // Authorize CLIP can access to VAT
+        DssExecLib.authorize(col.vat, col.clipper);
+        // Authorize CLIP can access to DOG
+        DssExecLib.authorize(col.dog, col.clipper);
+        // Authorize DOG can kick auctions on CLIP
+        DssExecLib.authorize(col.clipper, col.dog);
+        // Authorize the new END to access the ETH CLIP
+        DssExecLib.authorize(col.clipper, col.end);
+        // Authorize CLIPPERMOM can set the stopped flag in CLIP
+        DssExecLib.authorize(col.clipper, col.clipperMom);
+        // Authorize new ESM to execute in ETH-A Clipper
+        DssExecLib.authorize(col.clipper, col.esm);
+        // Whitelist CLIP in the ETH osm
+        DssExecLib.addReaderToOSMWhitelist(col.pip, col.clipper);
+        // Whitelist clipperMom in the ETH osm
+        DssExecLib.addReaderToOSMWhitelist(col.pip, col.clipperMom);
+        // No more auctions kicked via the CAT:
+        DssExecLib.deauthorize(col.flipper, col.cat);
+        // No more circuit breaker for the FLIP in ETH-A:
+        DssExecLib.deauthorize(col.flipper, col.flipperMom);
+        // Set values
+        Fileable(col.dog).file(col.ilk, "hole", col.hole);
+        Fileable(col.dog).file(col.ilk, "chop", col.chop);
+        Fileable(col.clipper).file("buf", col.buf);
+        Fileable(col.clipper).file("tail", col.tail);
+        Fileable(col.clipper).file("cusp", col.cusp);
+        Fileable(col.clipper).file("chip", col.chip);
+        Fileable(col.clipper).file("tip", col.tip);
+        Fileable(col.calc).file("cut", col.cut); // 1% cut
+        Fileable(col.calc).file("step", col.step);
+        //  Tolerance currently set to 50%.
+        //   n.b. 600000000000000000000000000 == 40% acceptable drop
+        ClipperMomAbstract(col.clipperMom).setPriceTolerance(col.clipper, col.tolerance);
+        // Update chost
+        ClipAbstract(col.clipper).upchost();
+        // Replace flip to clip in the ilk registry
+        DssExecLib.setContract(col.ilkRegistry, col.ilk, "xlip", col.clipper);
+        Fileable(col.ilkRegistry).file(col.ilk, "class", 1);
+        // Update Chainlog
+        DssExecLib.setChangelogAddress(col.clipKey, col.clipper);
+        DssExecLib.setChangelogAddress(col.calcKey, col.calc);
+        ChainlogLike(DssExecLib.LOG).removeAddress(col.flipKey);
+    }
+
     function actions() public override {
         address MCD_VAT         = DssExecLib.vat();
         address MCD_CAT         = DssExecLib.cat();
@@ -61,246 +148,143 @@ contract DssSpellAction is DssAction {
         address MCD_SPOT        = DssExecLib.spotter();
         address MCD_END         = DssExecLib.end();
         address MCD_ESM         = DssExecLib.getChangelogAddress("MCD_ESM");
+        address FLIPPER_MOM     = DssExecLib.getChangelogAddress("FLIPPER_MOM");
         address CLIPPER_MOM     = DssExecLib.getChangelogAddress("CLIPPER_MOM");
         address ILK_REGISTRY    = DssExecLib.getChangelogAddress("ILK_REGISTRY");
-        address CHANGELOG       = DssExecLib.getChangelogAddress("CHANGELOG");
         address PIP_ETH         = DssExecLib.getChangelogAddress("PIP_ETH");
         address PIP_WBTC        = DssExecLib.getChangelogAddress("PIP_WBTC");
 
         // --------------------------------- ETH-A ---------------------------------
-        {
-            address MCD_FLIP_ETH_A  = DssExecLib.getChangelogAddress("MCD_FLIP_ETH_A");
-            // Check constructor values of Clipper
-            require(ClipAbstract(MCD_CLIP_ETH_A).vat() == MCD_VAT, "DssSpell/clip-wrong-vat");
-            require(ClipAbstract(MCD_CLIP_ETH_A).spotter() == MCD_SPOT, "DssSpell/clip-wrong-spotter");
-            require(ClipAbstract(MCD_CLIP_ETH_A).dog() == MCD_DOG, "DssSpell/clip-wrong-dog");
-            require(ClipAbstract(MCD_CLIP_ETH_A).ilk() == "ETH-A", "DssSpell/clip-wrong-ilk");
-            // Set CLIP for ETH-A in the DOG
-            DssExecLib.setContract(MCD_DOG, "ETH-A", "clip", MCD_CLIP_ETH_A);
-            // Set VOW in the ETH-A CLIP
-            DssExecLib.setContract(MCD_CLIP_ETH_A, "vow", MCD_VOW);
-            // Set CALC in the ETH-A CLIP
-            DssExecLib.setContract(MCD_CLIP_ETH_A, "calc", MCD_CLIP_CALC_ETH_A);
-            // Authorize CLIP can access to VAT
-            DssExecLib.authorize(MCD_VAT, MCD_CLIP_ETH_A);
-            // Authorize CLIP can access to DOG
-            DssExecLib.authorize(MCD_DOG, MCD_CLIP_ETH_A);
-            // Authorize DOG can kick auctions on CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_A, MCD_DOG);
-            // Authorize the new END to access the ETH CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_A, MCD_END);
-            // Authorize CLIPPERMOM can set the stopped flag in CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_A, CLIPPER_MOM);
-            // Authorize new ESM to execute in ETH-A Clipper
-            DssExecLib.authorize(MCD_CLIP_ETH_A, MCD_ESM);
-            // Whitelist CLIP in the ETH osm
-            DssExecLib.addReaderToOSMWhitelist(PIP_ETH, MCD_CLIP_ETH_A);
-            // Whitelist CLIPPER_MOM in the ETH osm
-            DssExecLib.addReaderToOSMWhitelist(PIP_ETH, CLIPPER_MOM);
-            // No more auctions kicked via the CAT:
-            DssExecLib.deauthorize(MCD_FLIP_ETH_A, MCD_CAT);
-            // No more circuit breaker for the FLIP in ETH-A:
-            DssExecLib.deauthorize(MCD_FLIP_ETH_A, DssExecLib.flipperMom());
-            // Set values
-            Fileable(MCD_DOG).file("ETH-A", "hole", 5_000 * RAD);
-            Fileable(MCD_DOG).file("ETH-A", "chop", 113 * WAD / 100);
-            Fileable(MCD_CLIP_ETH_A).file("buf", 130 * RAY / 100);
-            Fileable(MCD_CLIP_ETH_A).file("tail", 140 minutes);
-            Fileable(MCD_CLIP_ETH_A).file("cusp", 40 * RAY / 100);
-            Fileable(MCD_CLIP_ETH_A).file("chip", 1 * WAD / 1000);
-            Fileable(MCD_CLIP_ETH_A).file("tip", 0);
-            Fileable(MCD_CLIP_CALC_ETH_A).file("cut", 99 * RAY / 100); // 1% cut
-            Fileable(MCD_CLIP_CALC_ETH_A).file("step", 90 seconds);
-            //  Tolerance currently set to 50%.
-            //   n.b. 600000000000000000000000000 == 40% acceptable drop
-            ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_ETH_A, 50 * RAY / 100);
-            // Update chost
-            ClipAbstract(MCD_CLIP_ETH_A).upchost();
-            // Replace flip to clip in the ilk registry
-            DssExecLib.setContract(ILK_REGISTRY, "ETH-A", "xlip", MCD_CLIP_ETH_A);
-            Fileable(ILK_REGISTRY).file("ETH-A", "class", 1);
-            // Update Chainlog
-            DssExecLib.setChangelogAddress("MCD_CLIP_ETH_A", MCD_CLIP_ETH_A);
-            DssExecLib.setChangelogAddress("MCD_CLIP_CALC_ETH_A", MCD_CLIP_CALC_ETH_A);
-            ChainlogLike(CHANGELOG).removeAddress("MCD_FLIP_ETH_A");
-        }
+        flipperToClipper(Collateral({
+            ilk: "ETH-A",
+            vat: MCD_VAT,
+            vow: MCD_VOW,
+            spotter: MCD_SPOT,
+            cat: MCD_CAT,
+            dog: MCD_DOG,
+            end: MCD_END,
+            esm: MCD_ESM,
+            flipperMom: FLIPPER_MOM,
+            clipperMom: CLIPPER_MOM,
+            ilkRegistry: ILK_REGISTRY,
+            pip: PIP_ETH,
+            clipper: MCD_CLIP_ETH_A,
+            flipper: DssExecLib.getChangelogAddress("MCD_FLIP_ETH_A"),
+            calc: MCD_CLIP_CALC_ETH_A,
+            hole: 5_000 * RAD,
+            chop: 113 * WAD / 100,
+            buf: 130 * RAY / 100,
+            tail: 140 minutes,
+            cusp: 40 * RAY / 100,
+            chip: 1 * WAD / 1000,
+            tip: 0,
+            cut: 99 * RAY / 100,
+            step: 90 seconds,
+            tolerance: 50 * RAY / 100,
+            clipKey: "MCD_CLIP_ETH_A",
+            calcKey: "MCD_CLIP_CALC_ETH_A",
+            flipKey: "MCD_FLIP_ETH_A"
+        }));
 
         // --------------------------------- ETH-B ---------------------------------
 
-        {
-            address MCD_FLIP_ETH_B  = DssExecLib.getChangelogAddress("MCD_FLIP_ETH_B");
-            // Check constructor values of Clipper
-            require(ClipAbstract(MCD_CLIP_ETH_B).vat() == MCD_VAT, "DssSpell/clip-wrong-vat");
-            require(ClipAbstract(MCD_CLIP_ETH_B).spotter() == MCD_SPOT, "DssSpell/clip-wrong-spotter");
-            require(ClipAbstract(MCD_CLIP_ETH_B).dog() == MCD_DOG, "DssSpell/clip-wrong-dog");
-            require(ClipAbstract(MCD_CLIP_ETH_B).ilk() == "ETH-B", "DssSpell/clip-wrong-ilk");
-            // Set CLIP for ETH-B in the DOG
-            DssExecLib.setContract(MCD_DOG, "ETH-B", "clip", MCD_CLIP_ETH_B);
-            // Set VOW in the ETH-B CLIP
-            DssExecLib.setContract(MCD_CLIP_ETH_B, "vow", MCD_VOW);
-            // Set CALC in the ETH-B CLIP
-            DssExecLib.setContract(MCD_CLIP_ETH_B, "calc", MCD_CLIP_CALC_ETH_B);
-            // Authorize CLIP can access to VAT
-            DssExecLib.authorize(MCD_VAT, MCD_CLIP_ETH_B);
-            // Authorize CLIP can access to DOG
-            DssExecLib.authorize(MCD_DOG, MCD_CLIP_ETH_B);
-            // Authorize DOG can kick auctions on CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_B, MCD_DOG);
-            // Authorize the new END to access the ETH CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_B, MCD_END);
-            // Authorize CLIPPERMOM can set the stopped flag in CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_B, CLIPPER_MOM);
-            // Authorize new ESM to execute in ETH-B Clipper
-            DssExecLib.authorize(MCD_CLIP_ETH_B, MCD_ESM);
-            // Whitelist CLIP in the ETH osm
-            DssExecLib.addReaderToOSMWhitelist(PIP_ETH, MCD_CLIP_ETH_B);
-            // Whitelist CLIPPER_MOM in the ETH osm
-            DssExecLib.addReaderToOSMWhitelist(PIP_ETH, CLIPPER_MOM);
-            // No more auctions kicked via the CAT:
-            DssExecLib.deauthorize(MCD_FLIP_ETH_B, MCD_CAT);
-            // No more circuit breaker for the FLIP in ETH-B:
-            DssExecLib.deauthorize(MCD_FLIP_ETH_B, DssExecLib.flipperMom());
-            // Set values
-            Fileable(MCD_DOG).file("ETH-B", "hole", 5_000 * RAD);
-            Fileable(MCD_DOG).file("ETH-B", "chop", 113 * WAD / 100);
-            Fileable(MCD_CLIP_ETH_B).file("buf", 130 * RAY / 100);
-            Fileable(MCD_CLIP_ETH_B).file("tail", 140 minutes);
-            Fileable(MCD_CLIP_ETH_B).file("cusp", 40 * RAY / 100);
-            Fileable(MCD_CLIP_ETH_B).file("chip", 1 * WAD / 1000);
-            Fileable(MCD_CLIP_ETH_B).file("tip", 0);
-            Fileable(MCD_CLIP_CALC_ETH_B).file("cut", 99 * RAY / 100); // 1% cut
-            Fileable(MCD_CLIP_CALC_ETH_B).file("step", 90 seconds);
-            //  Tolerance currently set to 50%.
-            //   n.b. 600000000000000000000000000 == 40% acceptable drop
-            ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_ETH_B, 50 * RAY / 100);
-            // Update chost
-            ClipAbstract(MCD_CLIP_ETH_B).upchost();
-            // Replace flip to clip in the ilk registry
-            DssExecLib.setContract(ILK_REGISTRY, "ETH-B", "xlip", MCD_CLIP_ETH_B);
-            Fileable(ILK_REGISTRY).file("ETH-B", "class", 1);
-            // Update Chainlog
-            DssExecLib.setChangelogAddress("MCD_CLIP_ETH_B", MCD_CLIP_ETH_B);
-            DssExecLib.setChangelogAddress("MCD_CLIP_CALC_ETH_B", MCD_CLIP_CALC_ETH_B);
-            ChainlogLike(CHANGELOG).removeAddress("MCD_FLIP_ETH_B");
-        }
+        flipperToClipper(Collateral({
+            ilk: "ETH-B",
+            vat: MCD_VAT,
+            vow: MCD_VOW,
+            spotter: MCD_SPOT,
+            cat: MCD_CAT,
+            dog: MCD_DOG,
+            end: MCD_END,
+            esm: MCD_ESM,
+            flipperMom: FLIPPER_MOM,
+            clipperMom: CLIPPER_MOM,
+            ilkRegistry: ILK_REGISTRY,
+            pip: PIP_ETH,
+            clipper: MCD_CLIP_ETH_B,
+            flipper: DssExecLib.getChangelogAddress("MCD_FLIP_ETH_B"),
+            calc: MCD_CLIP_CALC_ETH_B,
+            hole: 5_000 * RAD,
+            chop: 113 * WAD / 100,
+            buf: 130 * RAY / 100,
+            tail: 140 minutes,
+            cusp: 40 * RAY / 100,
+            chip: 1 * WAD / 1000,
+            tip: 0,
+            cut: 99 * RAY / 100,
+            step: 90 seconds,
+            tolerance: 50 * RAY / 100,
+            clipKey: "MCD_CLIP_ETH_B",
+            calcKey: "MCD_CLIP_CALC_ETH_B",
+            flipKey: "MCD_FLIP_ETH_B"
+        }));
 
         // --------------------------------- ETH-C ---------------------------------
 
-        {
-            address MCD_FLIP_ETH_C  = DssExecLib.getChangelogAddress("MCD_FLIP_ETH_C");
-            // Check constructor values of Clipper
-            require(ClipAbstract(MCD_CLIP_ETH_C).vat() == MCD_VAT, "DssSpell/clip-wrong-vat");
-            require(ClipAbstract(MCD_CLIP_ETH_C).spotter() == MCD_SPOT, "DssSpell/clip-wrong-spotter");
-            require(ClipAbstract(MCD_CLIP_ETH_C).dog() == MCD_DOG, "DssSpell/clip-wrong-dog");
-            require(ClipAbstract(MCD_CLIP_ETH_C).ilk() == "ETH-C", "DssSpell/clip-wrong-ilk");
-            // Set CLIP for ETH-C in the DOG
-            DssExecLib.setContract(MCD_DOG, "ETH-C", "clip", MCD_CLIP_ETH_C);
-            // Set VOW in the ETH-C CLIP
-            DssExecLib.setContract(MCD_CLIP_ETH_C, "vow", MCD_VOW);
-            // Set CALC in the ETH-C CLIP
-            DssExecLib.setContract(MCD_CLIP_ETH_C, "calc", MCD_CLIP_CALC_ETH_C);
-            // Authorize CLIP can access to VAT
-            DssExecLib.authorize(MCD_VAT, MCD_CLIP_ETH_C);
-            // Authorize CLIP can access to DOG
-            DssExecLib.authorize(MCD_DOG, MCD_CLIP_ETH_C);
-            // Authorize DOG can kick auctions on CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_C, MCD_DOG);
-            // Authorize the new END to access the ETH CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_C, MCD_END);
-            // Authorize CLIPPERMOM can set the stopped flag in CLIP
-            DssExecLib.authorize(MCD_CLIP_ETH_C, CLIPPER_MOM);
-            // Authorize new ESM to execute in ETH-C Clipper
-            DssExecLib.authorize(MCD_CLIP_ETH_C, MCD_ESM);
-            // Whitelist CLIP in the ETH osm
-            DssExecLib.addReaderToOSMWhitelist(PIP_ETH, MCD_CLIP_ETH_C);
-            // Whitelist CLIPPER_MOM in the ETH osm
-            DssExecLib.addReaderToOSMWhitelist(PIP_ETH, CLIPPER_MOM);
-            // No more auctions kicked via the CAT:
-            DssExecLib.deauthorize(MCD_FLIP_ETH_C, MCD_CAT);
-            // No more circuit breaker for the FLIP in ETH-C:
-            DssExecLib.deauthorize(MCD_FLIP_ETH_C, DssExecLib.flipperMom());
-            // Set values
-            Fileable(MCD_DOG).file("ETH-C", "hole", 5_000 * RAD);
-            Fileable(MCD_DOG).file("ETH-C", "chop", 113 * WAD / 100);
-            Fileable(MCD_CLIP_ETH_C).file("buf", 130 * RAY / 100);
-            Fileable(MCD_CLIP_ETH_C).file("tail", 140 minutes);
-            Fileable(MCD_CLIP_ETH_C).file("cusp", 40 * RAY / 100);
-            Fileable(MCD_CLIP_ETH_C).file("chip", 1 * WAD / 1000);
-            Fileable(MCD_CLIP_ETH_C).file("tip", 0);
-            Fileable(MCD_CLIP_CALC_ETH_C).file("cut", 99 * RAY / 100); // 1% cut
-            Fileable(MCD_CLIP_CALC_ETH_C).file("step", 90 seconds);
-            //  Tolerance currently set to 50%.
-            //   n.b. 600000000000000000000000000 == 40% acceptable drop
-            ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_ETH_C, 50 * RAY / 100);
-            // Update chost
-            ClipAbstract(MCD_CLIP_ETH_C).upchost();
-            // Replace flip to clip in the ilk registry
-            DssExecLib.setContract(ILK_REGISTRY, "ETH-C", "xlip", MCD_CLIP_ETH_C);
-            Fileable(ILK_REGISTRY).file("ETH-C", "class", 1);
-            // Update Chainlog
-            DssExecLib.setChangelogAddress("MCD_CLIP_ETH_C", MCD_CLIP_ETH_C);
-            DssExecLib.setChangelogAddress("MCD_CLIP_CALC_ETH_C", MCD_CLIP_CALC_ETH_C);
-            ChainlogLike(CHANGELOG).removeAddress("MCD_FLIP_ETH_C");
-        }
+        flipperToClipper(Collateral({
+            ilk: "ETH-C",
+            vat: MCD_VAT,
+            vow: MCD_VOW,
+            spotter: MCD_SPOT,
+            cat: MCD_CAT,
+            dog: MCD_DOG,
+            end: MCD_END,
+            esm: MCD_ESM,
+            flipperMom: FLIPPER_MOM,
+            clipperMom: CLIPPER_MOM,
+            ilkRegistry: ILK_REGISTRY,
+            pip: PIP_ETH,
+            clipper: MCD_CLIP_ETH_C,
+            flipper: DssExecLib.getChangelogAddress("MCD_FLIP_ETH_C"),
+            calc: MCD_CLIP_CALC_ETH_C,
+            hole: 5_000 * RAD,
+            chop: 113 * WAD / 100,
+            buf: 130 * RAY / 100,
+            tail: 140 minutes,
+            cusp: 40 * RAY / 100,
+            chip: 1 * WAD / 1000,
+            tip: 0,
+            cut: 99 * RAY / 100,
+            step: 90 seconds,
+            tolerance: 50 * RAY / 100,
+            clipKey: "MCD_CLIP_ETH_C",
+            calcKey: "MCD_CLIP_CALC_ETH_C",
+            flipKey: "MCD_FLIP_ETH_C"
+        }));
 
         // --------------------------------- WBTC-A ---------------------------------
 
-        {
-            address MCD_FLIP_WBTC_A = DssExecLib.getChangelogAddress("MCD_FLIP_WBTC_A");
-            // Check constructor values of Clipper
-            require(ClipAbstract(MCD_CLIP_WBTC_A).vat() == MCD_VAT, "DssSpell/clip-wrong-vat");
-            require(ClipAbstract(MCD_CLIP_WBTC_A).spotter() == MCD_SPOT, "DssSpell/clip-wrong-spotter");
-            require(ClipAbstract(MCD_CLIP_WBTC_A).dog() == MCD_DOG, "DssSpell/clip-wrong-dog");
-            require(ClipAbstract(MCD_CLIP_WBTC_A).ilk() == "WBTC-A", "DssSpell/clip-wrong-ilk");
-            // Set CLIP for WBTC-A in the DOG
-            DssExecLib.setContract(MCD_DOG, "WBTC-A", "clip", MCD_CLIP_WBTC_A);
-            // Set VOW in the WBTC-A CLIP
-            DssExecLib.setContract(MCD_CLIP_WBTC_A, "vow", MCD_VOW);
-            // Set CALC in the WBTC-A CLIP
-            DssExecLib.setContract(MCD_CLIP_WBTC_A, "calc", MCD_CLIP_CALC_WBTC_A);
-            // Authorize CLIP can access to VAT
-            DssExecLib.authorize(MCD_VAT, MCD_CLIP_WBTC_A);
-            // Authorize CLIP can access to DOG
-            DssExecLib.authorize(MCD_DOG, MCD_CLIP_WBTC_A);
-            // Authorize DOG can kick auctions on CLIP
-            DssExecLib.authorize(MCD_CLIP_WBTC_A, MCD_DOG);
-            // Authorize the new END to access the WBTC CLIP
-            DssExecLib.authorize(MCD_CLIP_WBTC_A, MCD_END);
-            // Authorize CLIPPERMOM can set the stopped flag in CLIP
-            DssExecLib.authorize(MCD_CLIP_WBTC_A, CLIPPER_MOM);
-            // Authorize new ESM to execute in WBTC-A Clipper
-            DssExecLib.authorize(MCD_CLIP_WBTC_A, MCD_ESM);
-            // Whitelist CLIP in the WBTC osm
-            DssExecLib.addReaderToOSMWhitelist(PIP_WBTC, MCD_CLIP_WBTC_A);
-            // Whitelist CLIPPER_MOM in the WBTC osm
-            DssExecLib.addReaderToOSMWhitelist(PIP_WBTC, CLIPPER_MOM);
-            // No more auctions kicked via the CAT:
-            DssExecLib.deauthorize(MCD_FLIP_WBTC_A, MCD_CAT);
-            // No more circuit breaker for the FLIP in WBTC-A:
-            DssExecLib.deauthorize(MCD_FLIP_WBTC_A, DssExecLib.flipperMom());
-            // Set values
-            Fileable(MCD_DOG).file("WBTC-A", "hole", 5_000 * RAD);
-            Fileable(MCD_DOG).file("WBTC-A", "chop", 113 * WAD / 100);
-            Fileable(MCD_CLIP_WBTC_A).file("buf", 130 * RAY / 100);
-            Fileable(MCD_CLIP_WBTC_A).file("tail", 140 minutes);
-            Fileable(MCD_CLIP_WBTC_A).file("cusp", 40 * RAY / 100);
-            Fileable(MCD_CLIP_WBTC_A).file("chip", 1 * WAD / 1000);
-            Fileable(MCD_CLIP_WBTC_A).file("tip", 0);
-            Fileable(MCD_CLIP_CALC_WBTC_A).file("cut", 99 * RAY / 100); // 1% cut
-            Fileable(MCD_CLIP_CALC_WBTC_A).file("step", 90 seconds);
-            //  Tolerance currently set to 50%.
-            //   n.b. 600000000000000000000000000 == 40% acceptable drop
-            ClipperMomAbstract(CLIPPER_MOM).setPriceTolerance(MCD_CLIP_WBTC_A, 50 * RAY / 100);
-            // Update chost
-            ClipAbstract(MCD_CLIP_WBTC_A).upchost();
-            // Replace flip to clip in the ilk registry
-            DssExecLib.setContract(ILK_REGISTRY, "WBTC-A", "xlip", MCD_CLIP_WBTC_A);
-            Fileable(ILK_REGISTRY).file("WBTC-A", "class", 1);
-            // Update Chainlog
-            DssExecLib.setChangelogAddress("MCD_CLIP_WBTC_A", MCD_CLIP_WBTC_A);
-            DssExecLib.setChangelogAddress("MCD_CLIP_CALC_WBTC_A", MCD_CLIP_CALC_WBTC_A);
-            ChainlogLike(CHANGELOG).removeAddress("MCD_FLIP_WBTC_A");
-        }
+        flipperToClipper(Collateral({
+            ilk: "WBTC-A",
+            vat: MCD_VAT,
+            vow: MCD_VOW,
+            spotter: MCD_SPOT,
+            cat: MCD_CAT,
+            dog: MCD_DOG,
+            end: MCD_END,
+            esm: MCD_ESM,
+            flipperMom: FLIPPER_MOM,
+            clipperMom: CLIPPER_MOM,
+            ilkRegistry: ILK_REGISTRY,
+            pip: PIP_WBTC,
+            clipper: MCD_CLIP_WBTC_A,
+            flipper: DssExecLib.getChangelogAddress("MCD_FLIP_WBTC_A"),
+            calc: MCD_CLIP_CALC_WBTC_A,
+            hole: 5_000 * RAD,
+            chop: 113 * WAD / 100,
+            buf: 130 * RAY / 100,
+            tail: 140 minutes,
+            cusp: 40 * RAY / 100,
+            chip: 1 * WAD / 1000,
+            tip: 0,
+            cut: 99 * RAY / 100,
+            step: 90 seconds,
+            tolerance: 50 * RAY / 100,
+            clipKey: "MCD_CLIP_WBTC_A",
+            calcKey: "MCD_CLIP_CALC_WBTC_A",
+            flipKey: "MCD_FLIP_WBTC_A"
+        }));
+
 
         DssExecLib.setChangelogVersion("1.5.0");
     }
