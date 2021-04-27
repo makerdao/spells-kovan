@@ -112,10 +112,6 @@ contract DssSpellTest is DSTest, DSMath {
     ClipperMomAbstract   clipMom = ClipperMomAbstract( addr.addr("CLIPPER_MOM"));
     DssAutoLineAbstract autoLine = DssAutoLineAbstract(addr.addr("MCD_IAM_AUTO_LINE"));
 
-    // Specific for this spell
-    EndAbstract          end_old = EndAbstract(0x0D1a98E93d9cE32E44bC035e8C6E4209fdB70C27);
-    ESMAbstract          esm_old = ESMAbstract(0x23Aa7cbeb266413f968D284acce3a3f9EEFFC2Ec);
-
     // Faucet
     FaucetAbstract        faucet = FaucetAbstract(     addr.addr("FAUCET"));
 

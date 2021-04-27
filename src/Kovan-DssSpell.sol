@@ -23,14 +23,6 @@ import "dss-interfaces/dss/ClipAbstract.sol";
 import "dss-interfaces/dss/ClipperMomAbstract.sol";
 import "dss-interfaces/dss/VowAbstract.sol";
 
-interface LerpFabLike {
-    function newLerp(bytes32, address, bytes32, uint256, uint256, uint256, uint256) external returns (address);
-    function active(uint256) external returns (address);
-    function lerps(bytes32) external returns (address);
-    function tall() external;
-    function count() external returns (uint256);
-}
-
 struct Collateral {
     bytes32 ilk;
     address vat;
