@@ -2359,6 +2359,29 @@ contract DssSpellTest is DSTest, DSMath {
 
         end.pack(daiToRedeem);
 
+        // Force a lot of collateral available to pay in end.cash
+        hevm.store(
+            address(vat),
+            keccak256(abi.encode(address(end), keccak256(abi.encode(bytes32("ETH-A"), uint256(4))))),
+            bytes32(uint256(1 * MILLION * WAD))
+        );
+        hevm.store(
+            address(vat),
+            keccak256(abi.encode(address(end), keccak256(abi.encode(bytes32("ETH-B"), uint256(4))))),
+            bytes32(uint256(1 * MILLION * WAD))
+        );
+        hevm.store(
+            address(vat),
+            keccak256(abi.encode(address(end), keccak256(abi.encode(bytes32("ETH-C"), uint256(4))))),
+            bytes32(uint256(1 * MILLION * WAD))
+        );
+        hevm.store(
+            address(vat),
+            keccak256(abi.encode(address(end), keccak256(abi.encode(bytes32("WBTC-A"), uint256(4))))),
+            bytes32(uint256(1 * MILLION * WAD))
+        );
+
+
         end.cash("ETH-A", daiToRedeem);
         end.cash("ETH-B", daiToRedeem);
         end.cash("ETH-C", daiToRedeem);
