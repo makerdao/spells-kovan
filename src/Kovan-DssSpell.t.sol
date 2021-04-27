@@ -1753,7 +1753,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 2 * WAD;
+        uint256 ilkAmt = 1 * WAD;
 
         giveTokens(ETH, ilkAmt);
         assertEq(ETH.balanceOf(address(this)), ilkAmt);
@@ -1850,7 +1850,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 2 * WAD;
+        uint256 ilkAmt = 1 * WAD;
 
         giveTokens(ETH, ilkAmt);
         assertEq(ETH.balanceOf(address(this)), ilkAmt);
@@ -1947,7 +1947,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 2 * WAD;
+        uint256 ilkAmt = 1 * WAD;
 
         giveTokens(ETH, ilkAmt);
         assertEq(ETH.balanceOf(address(this)), ilkAmt);
@@ -2225,7 +2225,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         {
-            uint256 ETHIlkAmt = 2 * WAD;
+            uint256 ETHIlkAmt = 1 * WAD;
             uint256 WBTCIlkAmt = 0.05 * 10 ** 18;
 
             giveTokens(ETH, ETHIlkAmt * 3);
