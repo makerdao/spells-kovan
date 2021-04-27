@@ -124,10 +124,8 @@ contract DssSpellAction is DssAction {
         Fileable(col.clipper).file("cusp", col.cusp);
         Fileable(col.clipper).file("chip", col.chip);
         Fileable(col.clipper).file("tip", col.tip);
-        Fileable(col.calc).file("cut", col.cut); // 1% cut
+        Fileable(col.calc).file("cut", col.cut);
         Fileable(col.calc).file("step", col.step);
-        //  Tolerance currently set to 50%.
-        //   n.b. 600000000000000000000000000 == 40% acceptable drop
         ClipperMomAbstract(col.clipperMom).setPriceTolerance(col.clipper, col.tolerance);
         // Update chost
         ClipAbstract(col.clipper).upchost();
