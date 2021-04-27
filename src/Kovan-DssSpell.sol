@@ -90,11 +90,11 @@ contract DssSpellAction is DssAction {
         require(ClipAbstract(col.clipper).spotter() == col.spotter, "DssSpell/clip-wrong-spotter");
         require(ClipAbstract(col.clipper).dog() == col.dog, "DssSpell/clip-wrong-dog");
         require(ClipAbstract(col.clipper).ilk() == col.ilk, "DssSpell/clip-wrong-ilk");
-        // Set CLIP for ETH-A in the DOG
+        // Set CLIP for the ilk in the DOG
         DssExecLib.setContract(col.dog, col.ilk, "clip", col.clipper);
-        // Set VOW in the ETH-A CLIP
+        // Set VOW in the CLIP
         DssExecLib.setContract(col.clipper, "vow", col.vow);
-        // Set CALC in the ETH-A CLIP
+        // Set CALC in the CLIP
         DssExecLib.setContract(col.clipper, "calc", col.calc);
         // Authorize CLIP can access to VAT
         DssExecLib.authorize(col.vat, col.clipper);
@@ -102,19 +102,19 @@ contract DssSpellAction is DssAction {
         DssExecLib.authorize(col.dog, col.clipper);
         // Authorize DOG can kick auctions on CLIP
         DssExecLib.authorize(col.clipper, col.dog);
-        // Authorize the new END to access the ETH CLIP
+        // Authorize the END to access the CLIP
         DssExecLib.authorize(col.clipper, col.end);
         // Authorize CLIPPERMOM can set the stopped flag in CLIP
         DssExecLib.authorize(col.clipper, col.clipperMom);
-        // Authorize new ESM to execute in ETH-A Clipper
+        // Authorize ESM to execute in Clipper
         DssExecLib.authorize(col.clipper, col.esm);
-        // Whitelist CLIP in the ETH osm
+        // Whitelist CLIP in the osm
         DssExecLib.addReaderToOSMWhitelist(col.pip, col.clipper);
-        // Whitelist clipperMom in the ETH osm
+        // Whitelist clipperMom in the osm
         DssExecLib.addReaderToOSMWhitelist(col.pip, col.clipperMom);
         // No more auctions kicked via the CAT:
         DssExecLib.deauthorize(col.flipper, col.cat);
-        // No more circuit breaker for the FLIP in ETH-A:
+        // No more circuit breaker for the FLIP:
         DssExecLib.deauthorize(col.flipper, col.flipperMom);
         // Set values
         Fileable(col.dog).file(col.ilk, "hole", col.hole);
