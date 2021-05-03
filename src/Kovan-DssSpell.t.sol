@@ -1798,6 +1798,7 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 totalGas = startGas - endGas;
 
         assertTrue(spell.done());
+        emit log_named_uint("totalGas", totalGas);
         // Fail if cast is too expensive
         assertTrue(totalGas <= 8 * MILLION);
     }
@@ -1847,7 +1848,7 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // Add balance to the test address
-        uint256 ilkAmt = 10 * WAD;
+        uint256 ilkAmt = 2000 * WAD;
 
         giveTokens(BAT, ilkAmt);
         assertEq(BAT.balanceOf(address(this)), ilkAmt);
@@ -1984,8 +1985,8 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         {
-            uint256 BATIlkAmt = 10 * WAD;
-            uint256 ZRXIlkAmt = 10 * WAD;
+            uint256 BATIlkAmt = 2000 * WAD;
+            uint256 ZRXIlkAmt = 2000 * WAD;
 
             giveTokens(BAT, BATIlkAmt * 3);
             giveTokens(ZRX, ZRXIlkAmt);
