@@ -1763,7 +1763,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 8 * MILLION);
     }
 
-    function liquidateIlk(bytes32 ilk, DSTokenAbstract token, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip, uint256 ilkAmt) internal {
+    function checkIlkClipperFunctionality(bytes32 ilk, DSTokenAbstract token, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip, uint256 ilkAmt) internal {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
@@ -1860,10 +1860,37 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.dai(address(this)), 0);
         assertEq(vat.gem(ilk, address(this)), ilkAmt); // What was purchased + returned back as it is the owner of the vault
         }
+
+        // clipperMom is an authority-based contract, so here we set the Chieftain's hat
+        //  to the current contract to simulate governance authority.
+        hevm.store(
+            address(chief),
+            bytes32(uint256(12)),
+            bytes32(uint256(address(this)))
+        );
+
+        assertEq(clipper.stopped(), 0);
+        clipMom.setBreaker(address(clipper), 1, 0);
+        assertEq(clipper.stopped(), 1);
+        clipMom.setBreaker(address(clipper), 2, 0);
+        assertEq(clipper.stopped(), 2);
+        clipMom.setBreaker(address(clipper), 3, 0);
+        assertEq(clipper.stopped(), 3);
+        clipMom.setBreaker(address(clipper), 0, 0);
+        assertEq(clipper.stopped(), 0);
+
+        // Hacking nxt price to 0x123 (and making it valid)
+        bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
+
+        hevm.store(address(pip), bytes32(uint256(4)), hackedValue);
+        assertEq(clipMom.tolerance(address(clipper)), (RAY / 2)); // (RAY / 2) for 50%
+        // Price is hacked, anyone can trip the breaker
+        clipMom.tripBreaker(address(clipper));
+        assertEq(clipper.stopped(), 2);
     }
 
     function testSpellIsCast_BAT_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "BAT-A",
             DSTokenAbstract(addr.addr("BAT")),
             GemJoinAbstract(addr.addr("MCD_JOIN_BAT_A")),
@@ -1876,7 +1903,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_ZRX_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "ZRX-A",
             DSTokenAbstract(addr.addr("ZRX")),
             GemJoinAbstract(addr.addr("MCD_JOIN_ZRX_A")),
@@ -1889,7 +1916,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_KNC_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "KNC-A",
             DSTokenAbstract(addr.addr("KNC")),
             GemJoinAbstract(addr.addr("MCD_JOIN_KNC_A")),
@@ -1902,7 +1929,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_MANA_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "MANA-A",
             DSTokenAbstract(addr.addr("MANA")),
             GemJoinAbstract(addr.addr("MCD_JOIN_MANA_A")),
@@ -1915,7 +1942,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_COMP_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "COMP-A",
             DSTokenAbstract(addr.addr("COMP")),
             GemJoinAbstract(addr.addr("MCD_JOIN_COMP_A")),
@@ -1928,7 +1955,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_LRC_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "LRC-A",
             DSTokenAbstract(addr.addr("LRC")),
             GemJoinAbstract(addr.addr("MCD_JOIN_LRC_A")),
@@ -1941,7 +1968,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_BAL_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "BAL-A",
             DSTokenAbstract(addr.addr("BAL")),
             GemJoinAbstract(addr.addr("MCD_JOIN_BAL_A")),
@@ -1954,7 +1981,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_UNI_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "UNI-A",
             DSTokenAbstract(addr.addr("UNI")),
             GemJoinAbstract(addr.addr("MCD_JOIN_UNI_A")),
@@ -1967,7 +1994,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_RENBTC_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "RENBTC-A",
             DSTokenAbstract(addr.addr("RENBTC")),
             GemJoinAbstract(addr.addr("MCD_JOIN_RENBTC_A")),
@@ -1980,7 +2007,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_AAVE_A_clip() public {
-        liquidateIlk(
+        checkIlkClipperFunctionality(
             "AAVE-A",
             DSTokenAbstract(addr.addr("AAVE")),
             GemJoinAbstract(addr.addr("MCD_JOIN_AAVE_A")),
@@ -1990,65 +2017,6 @@ contract DssSpellTest is DSTest, DSMath {
             OsmAbstract(addr.addr("PIP_AAVE")),
             10 * WAD
         );
-    }
-
-    function testClipperMomSetBreaker() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        // clipperMom is an authority-based contract, so here we set the Chieftain's hat
-        //  to the current contract to simulate governance authority.
-        hevm.store(
-            address(chief),
-            bytes32(uint256(12)),
-            bytes32(uint256(address(this)))
-        );
-
-        ClipAbstract clipBATA = ClipAbstract(addr.addr("MCD_CLIP_BAT_A"));
-        assertEq(clipBATA.stopped(), 0);
-        clipMom.setBreaker(address(clipBATA), 1, 0);
-        assertEq(clipBATA.stopped(), 1);
-        clipMom.setBreaker(address(clipBATA), 2, 0);
-        assertEq(clipBATA.stopped(), 2);
-        clipMom.setBreaker(address(clipBATA), 3, 0);
-        assertEq(clipBATA.stopped(), 3);
-        clipMom.setBreaker(address(clipBATA), 0, 0);
-        assertEq(clipBATA.stopped(), 0);
-
-        ClipAbstract clipZRXA = ClipAbstract(addr.addr("MCD_CLIP_ZRX_A"));
-        assertEq(clipZRXA.stopped(), 0);
-        clipMom.setBreaker(address(clipZRXA), 1, 0);
-        assertEq(clipZRXA.stopped(), 1);
-        clipMom.setBreaker(address(clipZRXA), 2, 0);
-        assertEq(clipZRXA.stopped(), 2);
-        clipMom.setBreaker(address(clipZRXA), 3, 0);
-        assertEq(clipZRXA.stopped(), 3);
-        clipMom.setBreaker(address(clipZRXA), 0, 0);
-        assertEq(clipZRXA.stopped(), 0);
-    }
-
-    function testClipperMomTripBreaker() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        // Hacking nxt price to 0x123 (and making it valid)
-        bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
-
-        ClipAbstract clipBATA = ClipAbstract(addr.addr("MCD_CLIP_BAT_A"));
-        hevm.store(address(addr.addr("PIP_BAT")), bytes32(uint256(4)), hackedValue);
-        assertEq(clipMom.tolerance(address(clipBATA)), (RAY / 2)); // (RAY / 2) for 50%
-        // Price is hacked, anyone can trip the breaker
-        clipMom.tripBreaker(address(clipBATA));
-        assertEq(clipBATA.stopped(), 2);
-
-        ClipAbstract clipZRXA = ClipAbstract(addr.addr("MCD_CLIP_ZRX_A"));
-        hevm.store(address(addr.addr("PIP_ZRX")), bytes32(uint256(4)), hackedValue);
-        assertEq(clipMom.tolerance(address(clipZRXA)), (RAY / 2)); // (RAY / 2) for 50%
-        // Price is hacked, anyone can trip the breaker
-        clipMom.tripBreaker(address(clipZRXA));
-        assertEq(clipZRXA.stopped(), 2);
     }
 
     function testSpellIsCast_End() public {
