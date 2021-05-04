@@ -19,6 +19,10 @@ interface SpellLike {
     function cast() external;
 }
 
+interface AuthLike {
+    function wards(address) external view returns (uint256);
+}
+
 contract DssSpellTest is DSTest, DSMath {
 
     struct SpellValues {
@@ -1400,6 +1404,40 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(false);
     }
 
+    function giveAuth(address _base, address target) internal {
+        AuthLike base = AuthLike(_base);
+
+        // Edge case - ward is already set
+        if (base.wards(target) == 1) return;
+
+        for (int i = 0; i < 100; i++) {
+            // Scan the storage for the ward storage slot
+            bytes32 prevValue = hevm.load(
+                address(base),
+                keccak256(abi.encode(target, uint256(i)))
+            );
+            hevm.store(
+                address(base),
+                keccak256(abi.encode(target, uint256(i))),
+                bytes32(uint256(1))
+            );
+            if (base.wards(target) == 1) {
+                // Found it
+                return;
+            } else {
+                // Keep going after restoring the original value
+                hevm.store(
+                    address(base),
+                    keccak256(abi.encode(target, uint256(i))),
+                    prevValue
+                );
+            }
+        }
+
+        // We have failed if we reach here
+        assertTrue(false);
+    }
+
 	function checkIlkIntegration(
         bytes32 _ilk,
         GemJoinAbstract join,
@@ -1927,11 +1965,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(clipper.kicks(), 2);
 
         // Give authority to cage the system
-        hevm.store(
-            address(end),
-            keccak256(abi.encode(address(this), uint256(0))),
-            bytes32(uint256(1))
-        );
+        giveAuth(address(end), address(this));
         assertEq(end.wards(address(this)), 1);
 
         end.cage();

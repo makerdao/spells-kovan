@@ -21,7 +21,6 @@ import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
 import "dss-interfaces/dss/ClipAbstract.sol";
 import "dss-interfaces/dss/ClipperMomAbstract.sol";
-import "dss-interfaces/dss/VowAbstract.sol";
 
 struct Collateral {
     bytes32 ilk;
@@ -475,9 +474,8 @@ contract DssSpellAction is DssAction {
         }));
 
         // --------------------------------- Fix wrong PSM keys (only for kovan) ---------------------------------
-        address flipperPSM = DssExecLib.getChangelogAddress("MCD_FLIP_USDC_PSM");
         DssExecLib.setChangelogAddress("MCD_JOIN_PSM_USDC_A", DssExecLib.getChangelogAddress("MCD_JOIN_USDC_PSM"));
-        DssExecLib.setChangelogAddress("MCD_FLIP_PSM_USDC_A", flipperPSM);
+        DssExecLib.setChangelogAddress("MCD_FLIP_PSM_USDC_A", DssExecLib.getChangelogAddress("MCD_FLIP_USDC_PSM"));
         DssExecLib.setChangelogAddress("MCD_PSM_USDC_A", DssExecLib.getChangelogAddress("MCD_PSM_USDC_PSM"));
         ChainlogLike(DssExecLib.LOG).removeAddress("MCD_JOIN_USDC_PSM");
         ChainlogLike(DssExecLib.LOG).removeAddress("MCD_FLIP_USDC_PSM");
