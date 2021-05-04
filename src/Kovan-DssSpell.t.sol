@@ -555,24 +555,24 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100,
             pct:          800,
             mat:          15000,
-            liqType:      "clip",
+            liqType:      "flip",
             liqOn:        true,
             chop:         1300,
-            cat_dunk:     0,
-            flip_beg:     0,
-            flip_ttl:     0,
-            flip_tau:     0,
-            flipper_mom:  0,
-            dog_hole:     5 * THOUSAND,
-            clip_buf:     13000,
-            clip_tail:    140 minutes,
-            clip_cusp:    4000,
-            clip_chip:    10,
+            cat_dunk:     500,
+            flip_beg:     300,
+            flip_ttl:     1 hours,
+            flip_tau:     1 hours,
+            flipper_mom:  1,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
             clip_tip:     0,
-            clipper_mom:  1,
+            clipper_mom:  0,
             calc_tau:     0,
-            calc_step:    90,
-            calc_cut:     9900
+            calc_step:    0,
+            calc_cut:     0
         });
         afterSpell.collaterals["PAXUSD-A"] = CollateralValues({
             aL_enabled:   false,
@@ -1760,10 +1760,10 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
         emit log_named_uint("totalGas", totalGas);
         // Fail if cast is too expensive
-        assertTrue(totalGas <= 8 * MILLION);
+        assertTrue(totalGas <= 10 * MILLION);
     }
 
-    function checkIlkClipperFunctionality(bytes32 ilk, DSTokenAbstract token, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip, uint256 ilkAmt) internal {
+    function checkIlkClipper(bytes32 ilk, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip, uint256 ilkAmt) internal {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
@@ -1795,22 +1795,35 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(pip.bud(address(clipper)), 1);
         assertEq(pip.bud(address(clipMom)), 1);
 
-        // Force max debt ceiling for BAT-A
+        // Force max Hole
+        hevm.store(
+            address(dog),
+            bytes32(uint256(4)),
+            bytes32(uint256(-1))
+        );
+
+        // Force max debt ceiling for ilk
         hevm.store(
             address(vat),
             bytes32(uint256(keccak256(abi.encode(bytes32(ilk), uint256(2)))) + 3),
             bytes32(uint256(-1))
         );
 
-        giveTokens(token, ilkAmt);
-        assertEq(token.balanceOf(address(this)), ilkAmt);
+        // ----------------------- Check Clipper works and bids can be made -----------------------
+
+        {
+        DSTokenAbstract token = DSTokenAbstract(join.gem());
+        uint256 divider =  10 ** (18 - join.dec());
+        giveTokens(token, ilkAmt / divider);
+        assertEq(token.balanceOf(address(this)), ilkAmt / divider);
 
         // Join to adapter
         assertEq(vat.gem(ilk, address(this)), 0);
-        token.approve(address(join), ilkAmt);
-        join.join(address(this), ilkAmt);
+        token.approve(address(join), ilkAmt / divider);
+        join.join(address(this), ilkAmt / divider);
         assertEq(token.balanceOf(address(this)), 0);
         assertEq(vat.gem(ilk, address(this)), ilkAmt);
+        }
 
         {
         // Generate new DAI to force a liquidation
@@ -1861,6 +1874,8 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(vat.gem(ilk, address(this)), ilkAmt); // What was purchased + returned back as it is the owner of the vault
         }
 
+        // ----------------------- Check ClipperMom works in both modalities -----------------------
+
         // clipperMom is an authority-based contract, so here we set the Chieftain's hat
         //  to the current contract to simulate governance authority.
         hevm.store(
@@ -1879,6 +1894,8 @@ contract DssSpellTest is DSTest, DSMath {
         clipMom.setBreaker(address(clipper), 0, 0);
         assertEq(clipper.stopped(), 0);
 
+        hevm.warp(clipMom.locked(address(clipper)) + 1);
+
         // Hacking nxt price to 0x123 (and making it valid)
         bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
 
@@ -1887,12 +1904,75 @@ contract DssSpellTest is DSTest, DSMath {
         // Price is hacked, anyone can trip the breaker
         clipMom.tripBreaker(address(clipper));
         assertEq(clipper.stopped(), 2);
+
+        clipMom.setBreaker(address(clipper), 0, 0);
+        assertEq(clipper.stopped(), 0);
+
+        // ----------------------- Check End works with the Clipper -----------------------
+
+        {
+        uint256 rate;
+        int256 art;
+        {
+        uint256 spot;
+        (,rate, spot,,) = vat.ilks(ilk);
+        art = int256(mul(ilkAmt, spot) / rate);
+        }
+
+        vat.frob(ilk, address(this), address(this), address(this), int256(ilkAmt), art);
+        hevm.warp(block.timestamp + 1);
+        jug.drip(ilk);
+
+        dog.bark(ilk, address(this), address(this));
+        assertEq(clipper.kicks(), 2);
+
+        // Give authority to cage the system
+        hevm.store(
+            address(end),
+            keccak256(abi.encode(address(this), uint256(0))),
+            bytes32(uint256(1))
+        );
+        assertEq(end.wards(address(this)), 1);
+
+        end.cage();
+        end.cage(ilk);
+
+        (,,, address usr,,) = clipper.sales(2);
+        assertTrue(usr != address(0));
+
+        end.snip(ilk, 2);
+        (,,, usr,,) = clipper.sales(2);
+        assertTrue(usr == address(0));
+
+        end.skim(ilk, address(this));
+        end.free(ilk);
+
+        hevm.warp(block.timestamp + end.wait());
+        vow.heal(min(vat.dai(address(vow)), sub(sub(vat.sin(address(vow)), vow.Sin()), vow.Ash())));
+
+        // Removing the surplus to allow continuing the execution.
+        hevm.store(
+            address(vat),
+            keccak256(abi.encode(address(vow), uint256(5))),
+            bytes32(uint256(0))
+        );
+
+        end.thaw();
+        end.flow(ilk);
+
+        uint256 daiToRedeem = vat.dai(address(this)) / RAY;
+        assertTrue(daiToRedeem > 0);
+
+        vat.hope(address(end));
+        end.pack(daiToRedeem);
+
+        end.cash(ilk, daiToRedeem);
+        }
     }
 
     function testSpellIsCast_BAT_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "BAT-A",
-            DSTokenAbstract(addr.addr("BAT")),
             GemJoinAbstract(addr.addr("MCD_JOIN_BAT_A")),
             FlipAbstract(addr.addr("MCD_FLIP_BAT_A")),
             ClipAbstract(addr.addr("MCD_CLIP_BAT_A")),
@@ -1903,9 +1983,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_ZRX_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "ZRX-A",
-            DSTokenAbstract(addr.addr("ZRX")),
             GemJoinAbstract(addr.addr("MCD_JOIN_ZRX_A")),
             FlipAbstract(addr.addr("MCD_FLIP_ZRX_A")),
             ClipAbstract(addr.addr("MCD_CLIP_ZRX_A")),
@@ -1916,9 +1995,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_KNC_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "KNC-A",
-            DSTokenAbstract(addr.addr("KNC")),
             GemJoinAbstract(addr.addr("MCD_JOIN_KNC_A")),
             FlipAbstract(addr.addr("MCD_FLIP_KNC_A")),
             ClipAbstract(addr.addr("MCD_CLIP_KNC_A")),
@@ -1929,9 +2007,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_MANA_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "MANA-A",
-            DSTokenAbstract(addr.addr("MANA")),
             GemJoinAbstract(addr.addr("MCD_JOIN_MANA_A")),
             FlipAbstract(addr.addr("MCD_FLIP_MANA_A")),
             ClipAbstract(addr.addr("MCD_CLIP_MANA_A")),
@@ -1942,9 +2019,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_COMP_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "COMP-A",
-            DSTokenAbstract(addr.addr("COMP")),
             GemJoinAbstract(addr.addr("MCD_JOIN_COMP_A")),
             FlipAbstract(addr.addr("MCD_FLIP_COMP_A")),
             ClipAbstract(addr.addr("MCD_CLIP_COMP_A")),
@@ -1955,9 +2031,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_LRC_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "LRC-A",
-            DSTokenAbstract(addr.addr("LRC")),
             GemJoinAbstract(addr.addr("MCD_JOIN_LRC_A")),
             FlipAbstract(addr.addr("MCD_FLIP_LRC_A")),
             ClipAbstract(addr.addr("MCD_CLIP_LRC_A")),
@@ -1968,9 +2043,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_BAL_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "BAL-A",
-            DSTokenAbstract(addr.addr("BAL")),
             GemJoinAbstract(addr.addr("MCD_JOIN_BAL_A")),
             FlipAbstract(addr.addr("MCD_FLIP_BAL_A")),
             ClipAbstract(addr.addr("MCD_CLIP_BAL_A")),
@@ -1981,9 +2055,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_UNI_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "UNI-A",
-            DSTokenAbstract(addr.addr("UNI")),
             GemJoinAbstract(addr.addr("MCD_JOIN_UNI_A")),
             FlipAbstract(addr.addr("MCD_FLIP_UNI_A")),
             ClipAbstract(addr.addr("MCD_CLIP_UNI_A")),
@@ -1994,9 +2067,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_RENBTC_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "RENBTC-A",
-            DSTokenAbstract(addr.addr("RENBTC")),
             GemJoinAbstract(addr.addr("MCD_JOIN_RENBTC_A")),
             FlipAbstract(addr.addr("MCD_FLIP_RENBTC_A")),
             ClipAbstract(addr.addr("MCD_CLIP_RENBTC_A")),
@@ -2007,9 +2079,8 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function testSpellIsCast_AAVE_A_clip() public {
-        checkIlkClipperFunctionality(
+        checkIlkClipper(
             "AAVE-A",
-            DSTokenAbstract(addr.addr("AAVE")),
             GemJoinAbstract(addr.addr("MCD_JOIN_AAVE_A")),
             FlipAbstract(addr.addr("MCD_FLIP_AAVE_A")),
             ClipAbstract(addr.addr("MCD_CLIP_AAVE_A")),
@@ -2017,135 +2088,5 @@ contract DssSpellTest is DSTest, DSMath {
             OsmAbstract(addr.addr("PIP_AAVE")),
             10 * WAD
         );
-    }
-
-    function testSpellIsCast_End() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        DSTokenAbstract BAT = DSTokenAbstract(addr.addr("BAT"));
-        GemJoinAbstract joinBATA = GemJoinAbstract(addr.addr("MCD_JOIN_BAT_A"));
-        ClipAbstract clipBATA = ClipAbstract(addr.addr("MCD_CLIP_BAT_A"));
-
-        DSTokenAbstract ZRX = DSTokenAbstract(addr.addr("ZRX"));
-        GemJoinAbstract joinZRXA = GemJoinAbstract(addr.addr("MCD_JOIN_ZRX_A"));
-        ClipAbstract clipZRXA = ClipAbstract(addr.addr("MCD_CLIP_ZRX_A"));
-
-        // Force max debt ceiling for collaterals
-        hevm.store(
-            address(vat),
-            bytes32(uint256(keccak256(abi.encode(bytes32("BAT-A"), uint256(2)))) + 3),
-            bytes32(uint256(-1))
-        );
-        hevm.store(
-            address(vat),
-            bytes32(uint256(keccak256(abi.encode(bytes32("ZRX-B"), uint256(2)))) + 3),
-            bytes32(uint256(-1))
-        );
-
-        {
-            uint256 BATIlkAmt = 2000 * WAD;
-            uint256 ZRXIlkAmt = 2000 * WAD;
-
-            giveTokens(BAT, BATIlkAmt * 3);
-            giveTokens(ZRX, ZRXIlkAmt);
-
-            BAT.approve(address(joinBATA), BATIlkAmt);
-            joinBATA.join(address(this), BATIlkAmt);
-
-            ZRX.approve(address(joinZRXA), ZRXIlkAmt);
-            joinZRXA.join(address(this), ZRXIlkAmt);
-
-            (,uint256 rate, uint256 spot,,) = vat.ilks("BAT-A");
-            vat.frob("BAT-A", address(this), address(this), address(this), int256(BATIlkAmt), int256(mul(BATIlkAmt, spot) / rate));
-
-            (, rate, spot,,) = vat.ilks("ZRX-A");
-            vat.frob("ZRX-A", address(this), address(this), address(this), int256(ZRXIlkAmt), int256(mul(ZRXIlkAmt, spot) / rate));
-        }
-
-        hevm.warp(block.timestamp + 1);
-        jug.drip("BAT-A");
-        jug.drip("ZRX-A");
-
-        uint256 auctionIdBATA = clipBATA.kicks() + 1;
-        uint256 auctionIdZRXA = clipZRXA.kicks() + 1;
-
-        dog.bark("BAT-A", address(this), address(this));
-        dog.bark("ZRX-A", address(this), address(this));
-
-        assertEq(clipBATA.kicks(), auctionIdBATA);
-        assertEq(clipZRXA.kicks(), auctionIdZRXA);
-
-        hevm.store(
-            address(end),
-            keccak256(abi.encode(address(this), uint256(0))),
-            bytes32(uint256(1))
-        );
-        assertEq(end.wards(address(this)), 1);
-
-        end.cage();
-        end.cage("BAT-A");
-        end.cage("ZRX-A");
-
-        (,,, address usr,,) = clipBATA.sales(auctionIdBATA);
-        assertTrue(usr != address(0));
-
-        (,,, usr,,) = clipZRXA.sales(auctionIdZRXA);
-        assertTrue(usr != address(0));
-
-        end.snip("BAT-A", auctionIdBATA);
-        (,,, usr,,) = clipBATA.sales(auctionIdBATA);
-        assertTrue(usr == address(0));
-
-        end.snip("ZRX-A", auctionIdZRXA);
-        (,,, usr,,) = clipZRXA.sales(auctionIdZRXA);
-        assertTrue(usr == address(0));
-
-        end.skim("BAT-A", address(this));
-        end.skim("ZRX-A", address(this));
-
-        end.free("BAT-A");
-        end.free("ZRX-A");
-
-        hevm.warp(block.timestamp + end.wait());
-
-        vow.heal(min(vat.dai(address(vow)), sub(sub(vat.sin(address(vow)), vow.Sin()), vow.Ash())));
-
-        // Removing the surplus to allow continuing the execution.
-        // (not needed if enough vaults skimmed)
-        // hevm.store(
-        //     address(vat),
-        //     keccak256(abi.encode(address(vow), uint256(5))),
-        //     bytes32(uint256(0))
-        // );
-
-        end.thaw();
-
-        end.flow("BAT-A");
-        end.flow("ZRX-A");
-
-        vat.hope(address(end));
-
-        uint256 daiToRedeem = vat.dai(address(this)) / RAY;
-        assertTrue(daiToRedeem > 0);
-
-        end.pack(daiToRedeem);
-
-        // Force a lot of collateral available to pay in end.cash
-        hevm.store(
-            address(vat),
-            keccak256(abi.encode(address(end), keccak256(abi.encode(bytes32("BAT-A"), uint256(4))))),
-            bytes32(uint256(1 * MILLION * WAD))
-        );
-        hevm.store(
-            address(vat),
-            keccak256(abi.encode(address(end), keccak256(abi.encode(bytes32("ZRX-A"), uint256(4))))),
-            bytes32(uint256(1 * MILLION * WAD))
-        );
-
-
-        end.cash("BAT-A", daiToRedeem);
-        end.cash("ZRX-A", daiToRedeem);
     }
 }
