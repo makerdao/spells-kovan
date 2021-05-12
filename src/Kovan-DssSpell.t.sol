@@ -1758,6 +1758,12 @@ contract DssSpellTest is DSTest, DSMath {
         try MedianAbstract(lpPip.orb1()).bud(address(lpPip)) returns (uint256 kissed) {
             assertEq(kissed, 1); // Only if a Median
         } catch {}
+        try MedianAbstract(oldLpPip.orb0()).bud(address(oldLpPip)) returns (uint256 kissed) {
+            assertEq(kissed, 0); // Only if a Median
+        } catch {}
+        try MedianAbstract(oldLpPip.orb1()).bud(address(oldLpPip)) returns (uint256 kissed) {
+            assertEq(kissed, 0); // Only if a Median
+        } catch {}
 
         // Give reading access to test
         hevm.store(
