@@ -205,7 +205,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 0x340c1a06a2E6FB5918460b7177fd20091B6f8982,        // populate with deployed spell if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
             deployed_spell_created:         1620160680,                 // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
@@ -1376,7 +1376,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Edge case - balance is already set for some reason
         if (token.balanceOf(address(this)) == amount) return;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 200; i++) {
             // Scan the storage for the balance storage slot
             bytes32 prevValue = hevm.load(
                 address(token),
@@ -1671,80 +1671,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
 
-        assertEq(chainLog.getAddress("MCD_CLIP_BAT_A"), addr.addr("MCD_CLIP_BAT_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_BAT_A"), addr.addr("MCD_CLIP_CALC_BAT_A"));
-        try chainLog.getAddress("MCD_FLIP_BAT_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_ZRX_A"), addr.addr("MCD_CLIP_ZRX_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_ZRX_A"), addr.addr("MCD_CLIP_CALC_ZRX_A"));
-        try chainLog.getAddress("MCD_FLIP_ZRX_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_KNC_A"), addr.addr("MCD_CLIP_KNC_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_KNC_A"), addr.addr("MCD_CLIP_CALC_KNC_A"));
-        try chainLog.getAddress("MCD_FLIP_KNC_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_MANA_A"), addr.addr("MCD_CLIP_MANA_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_MANA_A"), addr.addr("MCD_CLIP_CALC_MANA_A"));
-        try chainLog.getAddress("MCD_FLIP_MANA_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-
-        assertEq(chainLog.getAddress("MCD_CLIP_COMP_A"), addr.addr("MCD_CLIP_COMP_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_COMP_A"), addr.addr("MCD_CLIP_CALC_COMP_A"));
-        try chainLog.getAddress("MCD_FLIP_COMP_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_LRC_A"), addr.addr("MCD_CLIP_LRC_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_LRC_A"), addr.addr("MCD_CLIP_CALC_LRC_A"));
-        try chainLog.getAddress("MCD_FLIP_LRC_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_BAL_A"), addr.addr("MCD_CLIP_BAL_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_BAL_A"), addr.addr("MCD_CLIP_CALC_BAL_A"));
-        try chainLog.getAddress("MCD_FLIP_BAL_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_UNI_A"), addr.addr("MCD_CLIP_UNI_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_UNI_A"), addr.addr("MCD_CLIP_CALC_UNI_A"));
-        try chainLog.getAddress("MCD_FLIP_UNI_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_RENBTC_A"), addr.addr("MCD_CLIP_RENBTC_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_RENBTC_A"), addr.addr("MCD_CLIP_CALC_RENBTC_A"));
-        try chainLog.getAddress("MCD_FLIP_RENBTC_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_AAVE_A"), addr.addr("MCD_CLIP_AAVE_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_AAVE_A"), addr.addr("MCD_CLIP_CALC_AAVE_A"));
-        try chainLog.getAddress("MCD_FLIP_AAVE_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        // This is only for kovan as we are checking keys that were wrong before only in this environment
-        assertEq(chainLog.getAddress("MCD_JOIN_PSM_USDC_A"), addr.addr("MCD_JOIN_PSM_USDC_A"));
-        try chainLog.getAddress("MCD_JOIN_USDC_PSM") returns (address) {
-            assertTrue(false);
-        } catch {}
-        assertEq(chainLog.getAddress("MCD_PSM_USDC_A"), addr.addr("MCD_PSM_USDC_A"));
-        try chainLog.getAddress("MCD_PSM_USDC_PSM") returns (address) {
-            assertTrue(false);
-        } catch {}
-        assertEq(chainLog.getAddress("MCD_FLIP_PSM_USDC_A"), addr.addr("MCD_FLIP_PSM_USDC_A"));
-        try chainLog.getAddress("MCD_FLIP_USDC_PSM") returns (address) {
-            assertTrue(false);
-        } catch {}
+        assertEq(chainLog.getAddress("PIP_UNIV2DAIETH"), addr.addr("PIP_UNIV2DAIETH"));
         //
     }
 
@@ -1801,326 +1728,277 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 10 * MILLION);
     }
 
-    function checkIlkClipper(bytes32 ilk, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip, uint256 ilkAmt) internal {
+    function check_UNIV2_replacement(bytes32 ilk, LPOsmAbstract lpPip, LPOsmAbstract oldLpPip) internal {
+        hevm.warp(block.timestamp + 3601);
+        oldLpPip.poke();
+        hevm.warp(block.timestamp + 3601);
+        oldLpPip.poke();
+
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
 
-        // Contracts set
-        assertEq(dog.vat(), address(vat));
-        assertEq(dog.vow(), address(vow));
-        {
-        (address clip,,,) = dog.ilks(ilk);
-        assertEq(clip, address(clipper));
-        }
-        assertEq(clipper.ilk(), ilk);
-        assertEq(clipper.vat(), address(vat));
-        assertEq(clipper.vow(), address(vow));
-        assertEq(clipper.dog(), address(dog));
-        assertEq(clipper.spotter(), address(spotter));
-        assertEq(clipper.calc(), calc);
+        lpPip.poke();
+        hevm.warp(block.timestamp + 3601);
+        lpPip.poke();
+        spotter.poke(ilk);
+
+        // Check median matches pip.src()
+        assertEq(lpPip.src(),  oldLpPip.src());
+        assertEq(lpPip.orb0(), oldLpPip.orb0());
+        assertEq(lpPip.orb1(), oldLpPip.orb1());
 
         // Authorization
-        assertEq(flipper.wards(address(cat))    , 0);
-        assertEq(flipper.wards(address(flipMom)), 0);
-        assertEq(vat.wards(address(clipper))    , 1);
-        assertEq(dog.wards(address(clipper))    , 1);
-        assertEq(clipper.wards(address(dog))    , 1);
-        assertEq(clipper.wards(address(end))    , 1);
-        assertEq(clipper.wards(address(clipMom)), 1);
-        assertEq(clipper.wards(address(esm)), 1);
+        assertEq(lpPip.wards(address(osmMom)), 1);
+        assertEq(lpPip.bud(address(spotter)), 1);
+        assertEq(lpPip.bud(address(end)), 1);
+        try MedianAbstract(lpPip.orb0()).bud(address(lpPip)) returns (uint256 kissed) {
+            assertEq(kissed, 1); // Only if a Median
+        } catch {}
+        try MedianAbstract(lpPip.orb1()).bud(address(lpPip)) returns (uint256 kissed) {
+            assertEq(kissed, 1); // Only if a Median
+        } catch {}
 
-        assertEq(pip.bud(address(clipper)), 1);
-        assertEq(pip.bud(address(clipMom)), 1);
-
-        // Force max Hole
+        // Give reading access to test
         hevm.store(
-            address(dog),
-            bytes32(uint256(4)),
-            bytes32(uint256(-1))
+            address(lpPip),
+            keccak256(abi.encode(address(this), uint256(2))),
+            bytes32(uint256(1))
         );
-
-        // Force max debt ceiling for ilk
         hevm.store(
-            address(vat),
-            bytes32(uint256(keccak256(abi.encode(bytes32(ilk), uint256(2)))) + 3),
-            bytes32(uint256(-1))
+            address(oldLpPip),
+            keccak256(abi.encode(address(this), uint256(2))),
+            bytes32(uint256(1))
         );
 
-        // ----------------------- Check Clipper works and bids can be made -----------------------
-
-        {
-        DSTokenAbstract token = DSTokenAbstract(join.gem());
-        uint256 divider =  10 ** (18 - join.dec());
-        giveTokens(token, ilkAmt / divider);
-        assertEq(token.balanceOf(address(this)), ilkAmt / divider);
-
-        // Join to adapter
-        assertEq(vat.gem(ilk, address(this)), 0);
-        token.approve(address(join), ilkAmt / divider);
-        join.join(address(this), ilkAmt / divider);
-        assertEq(token.balanceOf(address(this)), 0);
-        assertEq(vat.gem(ilk, address(this)), ilkAmt);
-        }
-
-        {
-        // Generate new DAI to force a liquidation
-        uint256 rate;
-        int256 art;
-        {
-        uint256 spot;
-        (,rate, spot,,) = vat.ilks(ilk);
-        art = int256(mul(ilkAmt, spot) / rate);
-        }
-
-        // dart max amount of DAI
-        vat.frob(ilk, address(this), address(this), address(this), int256(ilkAmt), art);
-        hevm.warp(block.timestamp + 1);
-        jug.drip(ilk);
-        assertEq(clipper.kicks(), 0);
-        dog.bark(ilk, address(this), address(this));
-        assertEq(clipper.kicks(), 1);
-
-        (, rate,,,) = vat.ilks(ilk);
-        uint256 debt = mul(mul(rate, uint256(art)), dog.chop(ilk)) / WAD;
-        hevm.store(
-            address(vat),
-            keccak256(abi.encode(address(this), uint256(5))),
-            bytes32(debt)
-        );
-        assertEq(vat.dai(address(this)), debt);
-        assertEq(vat.gem(ilk, address(this)), 0);
-
-        hevm.warp(block.timestamp + 20 minutes);
-        (, uint256 tab, uint256 lot, address usr,, uint256 top) = clipper.sales(1);
-
-        assertEq(usr, address(this));
-        assertEq(tab, debt);
-        assertEq(lot, ilkAmt);
-        assertTrue(mul(lot, top) > tab); // There is enough collateral to cover the debt at current price
-
-        vat.hope(address(clipper));
-        clipper.take(1, lot, top, address(this), bytes(""));
-        }
-
-        {
-        (, uint256 tab, uint256 lot, address usr,,) = clipper.sales(1);
-        assertEq(usr, address(0));
-        assertEq(tab, 0);
-        assertEq(lot, 0);
-        assertEq(vat.dai(address(this)), 0);
-        assertEq(vat.gem(ilk, address(this)), ilkAmt); // What was purchased + returned back as it is the owner of the vault
-        }
-
-        // ----------------------- Check ClipperMom works in both modalities -----------------------
-
-        // clipperMom is an authority-based contract, so here we set the Chieftain's hat
-        //  to the current contract to simulate governance authority.
-        hevm.store(
-            address(chief),
-            bytes32(uint256(12)),
-            bytes32(uint256(address(this)))
-        );
-
-        assertEq(clipper.stopped(), 0);
-        clipMom.setBreaker(address(clipper), 1, 0);
-        assertEq(clipper.stopped(), 1);
-        clipMom.setBreaker(address(clipper), 2, 0);
-        assertEq(clipper.stopped(), 2);
-        clipMom.setBreaker(address(clipper), 3, 0);
-        assertEq(clipper.stopped(), 3);
-        clipMom.setBreaker(address(clipper), 0, 0);
-        assertEq(clipper.stopped(), 0);
-
-        hevm.warp(clipMom.locked(address(clipper)) + 1);
-
-        // Hacking nxt price to 0x123 (and making it valid)
-        bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
-
-        hevm.store(address(pip), bytes32(uint256(4)), hackedValue);
-        assertEq(clipMom.tolerance(address(clipper)), (RAY / 2)); // (RAY / 2) for 50%
-        // Price is hacked, anyone can trip the breaker
-        clipMom.tripBreaker(address(clipper));
-        assertEq(clipper.stopped(), 2);
-
-        clipMom.setBreaker(address(clipper), 0, 0);
-        assertEq(clipper.stopped(), 0);
-
-        // ----------------------- Check End works with the Clipper -----------------------
-
-        {
-        uint256 rate;
-        int256 art;
-        {
-        uint256 spot;
-        (,rate, spot,,) = vat.ilks(ilk);
-        art = int256(mul(ilkAmt, spot) / rate);
-        }
-
-        vat.frob(ilk, address(this), address(this), address(this), int256(ilkAmt), art);
-        hevm.warp(block.timestamp + 1);
-        jug.drip(ilk);
-
-        dog.bark(ilk, address(this), address(this));
-        assertEq(clipper.kicks(), 2);
-
-        // Give authority to cage the system
-        giveAuth(address(end), address(this));
-        assertEq(end.wards(address(this)), 1);
-
-        end.cage();
-        end.cage(ilk);
-
-        (,,, address usr,,) = clipper.sales(2);
-        assertTrue(usr != address(0));
-
-        end.snip(ilk, 2);
-        (,,, usr,,) = clipper.sales(2);
-        assertTrue(usr == address(0));
-
-        end.skim(ilk, address(this));
-        end.free(ilk);
-
-        hevm.warp(block.timestamp + end.wait());
-        vow.heal(min(vat.dai(address(vow)), sub(sub(vat.sin(address(vow)), vow.Sin()), vow.Ash())));
-
-        // Removing the surplus to allow continuing the execution.
-        hevm.store(
-            address(vat),
-            keccak256(abi.encode(address(vow), uint256(5))),
-            bytes32(uint256(0))
-        );
-
-        end.thaw();
-        end.flow(ilk);
-
-        uint256 daiToRedeem = vat.dai(address(this)) / RAY;
-        assertTrue(daiToRedeem > 0);
-
-        vat.hope(address(end));
-        end.pack(daiToRedeem);
-
-        end.cash(ilk, daiToRedeem);
-        }
+        (bytes32 price1, bool ok1) = lpPip.peek();
+        (bytes32 price2, bool ok2) = oldLpPip.peek();
+        // As the new LP oracles manage a different rounding we just check that they aprox the same
+        assertTrue(uint256(price1) < add(uint256(price2), 5) && uint256(price1) > sub(uint256(price2), 5));
+        assertTrue(ok1);
+        assertTrue(ok2);
     }
 
-    function testSpellIsCast_BAT_A_clip() public {
-        checkIlkClipper(
-            "BAT-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_BAT_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_BAT_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_BAT_A")),
-            addr.addr("MCD_CLIP_CALC_BAT_A"),
-            OsmAbstract(addr.addr("PIP_BAT")),
-            2000 * WAD
+    function testSpellIsCast_UNIV2DAIETH_PIP_replacement() public {
+        check_UNIV2_replacement(
+            "UNIV2DAIETH-A",
+            LPOsmAbstract(addr.addr("PIP_UNIV2DAIETH")),
+            LPOsmAbstract(0x1AE7D6891a5fdAafAd2FE6D894bffEa48F8b2454)
         );
     }
 
-    function testSpellIsCast_ZRX_A_clip() public {
-        checkIlkClipper(
-            "ZRX-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_ZRX_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_ZRX_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_ZRX_A")),
-            addr.addr("MCD_CLIP_CALC_ZRX_A"),
-            OsmAbstract(addr.addr("PIP_ZRX")),
-            2000 * WAD
-        );
-    }
+    // function checkIlkClipper(bytes32 ilk, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip, uint256 ilkAmt) internal {
+    //     vote(address(spell));
+    //     scheduleWaitAndCast(address(spell));
+    //     assertTrue(spell.done());
 
-    function testSpellIsCast_KNC_A_clip() public {
-        checkIlkClipper(
-            "KNC-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_KNC_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_KNC_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_KNC_A")),
-            addr.addr("MCD_CLIP_CALC_KNC_A"),
-            OsmAbstract(addr.addr("PIP_KNC")),
-            1000 * WAD
-        );
-    }
+    //     // Contracts set
+    //     assertEq(dog.vat(), address(vat));
+    //     assertEq(dog.vow(), address(vow));
+    //     {
+    //     (address clip,,,) = dog.ilks(ilk);
+    //     assertEq(clip, address(clipper));
+    //     }
+    //     assertEq(clipper.ilk(), ilk);
+    //     assertEq(clipper.vat(), address(vat));
+    //     assertEq(clipper.vow(), address(vow));
+    //     assertEq(clipper.dog(), address(dog));
+    //     assertEq(clipper.spotter(), address(spotter));
+    //     assertEq(clipper.calc(), calc);
 
-    function testSpellIsCast_MANA_A_clip() public {
-        checkIlkClipper(
-            "MANA-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_MANA_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_MANA_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_MANA_A")),
-            addr.addr("MCD_CLIP_CALC_MANA_A"),
-            OsmAbstract(addr.addr("PIP_MANA")),
-            2000 * WAD
-        );
-    }
+    //     // Authorization
+    //     assertEq(flipper.wards(address(cat))    , 0);
+    //     assertEq(flipper.wards(address(flipMom)), 0);
+    //     assertEq(vat.wards(address(clipper))    , 1);
+    //     assertEq(dog.wards(address(clipper))    , 1);
+    //     assertEq(clipper.wards(address(dog))    , 1);
+    //     assertEq(clipper.wards(address(end))    , 1);
+    //     assertEq(clipper.wards(address(clipMom)), 1);
+    //     assertEq(clipper.wards(address(esm)), 1);
 
-    function testSpellIsCast_COMP_A_clip() public {
-        checkIlkClipper(
-            "COMP-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_COMP_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_COMP_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_COMP_A")),
-            addr.addr("MCD_CLIP_CALC_COMP_A"),
-            OsmAbstract(addr.addr("PIP_COMP")),
-            4 * WAD
-        );
-    }
+    //     assertEq(pip.bud(address(clipper)), 1);
+    //     assertEq(pip.bud(address(clipMom)), 1);
 
-    function testSpellIsCast_LRC_A_clip() public {
-        checkIlkClipper(
-            "LRC-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_LRC_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_LRC_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_LRC_A")),
-            addr.addr("MCD_CLIP_CALC_LRC_A"),
-            OsmAbstract(addr.addr("PIP_LRC")),
-            4000 * WAD
-        );
-    }
+    //     // Force max Hole
+    //     hevm.store(
+    //         address(dog),
+    //         bytes32(uint256(4)),
+    //         bytes32(uint256(-1))
+    //     );
 
-    function testSpellIsCast_BAL_A_clip() public {
-        checkIlkClipper(
-            "BAL-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_BAL_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_BAL_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_BAL_A")),
-            addr.addr("MCD_CLIP_CALC_BAL_A"),
-            OsmAbstract(addr.addr("PIP_BAL")),
-            50 * WAD
-        );
-    }
+    //     // Force max debt ceiling for ilk
+    //     hevm.store(
+    //         address(vat),
+    //         bytes32(uint256(keccak256(abi.encode(bytes32(ilk), uint256(2)))) + 3),
+    //         bytes32(uint256(-1))
+    //     );
 
-    function testSpellIsCast_UNI_A_clip() public {
-        checkIlkClipper(
-            "UNI-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_UNI_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_UNI_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_UNI_A")),
-            addr.addr("MCD_CLIP_CALC_UNI_A"),
-            OsmAbstract(addr.addr("PIP_UNI")),
-            100 * WAD
-        );
-    }
+    //     // ----------------------- Check Clipper works and bids can be made -----------------------
 
-    function testSpellIsCast_RENBTC_A_clip() public {
-        checkIlkClipper(
-            "RENBTC-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_RENBTC_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_RENBTC_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_RENBTC_A")),
-            addr.addr("MCD_CLIP_CALC_RENBTC_A"),
-            OsmAbstract(addr.addr("PIP_RENBTC")),
-            0.05 * 10 ** 18
-        );
-    }
+    //     {
+    //     DSTokenAbstract token = DSTokenAbstract(join.gem());
+    //     uint256 tknAmt =  ilkAmt / 10 ** (18 - join.dec());
+    //     giveTokens(token, tknAmt);
+    //     assertEq(token.balanceOf(address(this)), tknAmt);
 
-    function testSpellIsCast_AAVE_A_clip() public {
-        checkIlkClipper(
-            "AAVE-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_AAVE_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_AAVE_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_AAVE_A")),
-            addr.addr("MCD_CLIP_CALC_AAVE_A"),
-            OsmAbstract(addr.addr("PIP_AAVE")),
-            10 * WAD
-        );
-    }
+    //     // Join to adapter
+    //     assertEq(vat.gem(ilk, address(this)), 0);
+    //     token.approve(address(join), tknAmt);
+    //     join.join(address(this), tknAmt);
+    //     assertEq(token.balanceOf(address(this)), 0);
+    //     assertEq(vat.gem(ilk, address(this)), ilkAmt);
+    //     }
+
+    //     {
+    //     // Generate new DAI to force a liquidation
+    //     uint256 rate;
+    //     int256 art;
+    //     {
+    //     uint256 spot;
+    //     (,rate, spot,,) = vat.ilks(ilk);
+    //     art = int256(mul(ilkAmt, spot) / rate);
+    //     }
+
+    //     // dart max amount of DAI
+    //     vat.frob(ilk, address(this), address(this), address(this), int256(ilkAmt), art);
+    //     hevm.warp(block.timestamp + 1);
+    //     jug.drip(ilk);
+    //     assertEq(clipper.kicks(), 0);
+    //     dog.bark(ilk, address(this), address(this));
+    //     assertEq(clipper.kicks(), 1);
+
+    //     (, rate,,,) = vat.ilks(ilk);
+    //     uint256 debt = mul(mul(rate, uint256(art)), dog.chop(ilk)) / WAD;
+    //     hevm.store(
+    //         address(vat),
+    //         keccak256(abi.encode(address(this), uint256(5))),
+    //         bytes32(debt)
+    //     );
+    //     assertEq(vat.dai(address(this)), debt);
+    //     assertEq(vat.gem(ilk, address(this)), 0);
+
+    //     hevm.warp(block.timestamp + 20 minutes);
+    //     (, uint256 tab, uint256 lot, address usr,, uint256 top) = clipper.sales(1);
+
+    //     assertEq(usr, address(this));
+    //     assertEq(tab, debt);
+    //     assertEq(lot, ilkAmt);
+    //     assertTrue(mul(lot, top) > tab); // There is enough collateral to cover the debt at current price
+
+    //     vat.hope(address(clipper));
+    //     clipper.take(1, lot, top, address(this), bytes(""));
+    //     }
+
+    //     {
+    //     (, uint256 tab, uint256 lot, address usr,,) = clipper.sales(1);
+    //     assertEq(usr, address(0));
+    //     assertEq(tab, 0);
+    //     assertEq(lot, 0);
+    //     assertEq(vat.dai(address(this)), 0);
+    //     assertEq(vat.gem(ilk, address(this)), ilkAmt); // What was purchased + returned back as it is the owner of the vault
+    //     }
+
+    //     // ----------------------- Check ClipperMom works in both modalities -----------------------
+
+    //     // clipperMom is an authority-based contract, so here we set the Chieftain's hat
+    //     //  to the current contract to simulate governance authority.
+    //     hevm.store(
+    //         address(chief),
+    //         bytes32(uint256(12)),
+    //         bytes32(uint256(address(this)))
+    //     );
+
+    //     assertEq(clipper.stopped(), 0);
+    //     clipMom.setBreaker(address(clipper), 1, 0);
+    //     assertEq(clipper.stopped(), 1);
+    //     clipMom.setBreaker(address(clipper), 2, 0);
+    //     assertEq(clipper.stopped(), 2);
+    //     clipMom.setBreaker(address(clipper), 3, 0);
+    //     assertEq(clipper.stopped(), 3);
+    //     clipMom.setBreaker(address(clipper), 0, 0);
+    //     assertEq(clipper.stopped(), 0);
+
+    //     hevm.warp(clipMom.locked(address(clipper)) + 1);
+
+    //     // Hacking nxt price to 0x123 (and making it valid)
+    //     bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
+
+    //     hevm.store(address(pip), bytes32(uint256(4)), hackedValue);
+    //     assertEq(clipMom.tolerance(address(clipper)), (RAY / 2)); // (RAY / 2) for 50%
+    //     // Price is hacked, anyone can trip the breaker
+    //     clipMom.tripBreaker(address(clipper));
+    //     assertEq(clipper.stopped(), 2);
+
+    //     clipMom.setBreaker(address(clipper), 0, 0);
+    //     assertEq(clipper.stopped(), 0);
+
+    //     // ----------------------- Check End works with the Clipper -----------------------
+
+    //     {
+    //     uint256 rate;
+    //     int256 art;
+    //     {
+    //     uint256 spot;
+    //     (,rate, spot,,) = vat.ilks(ilk);
+    //     art = int256(mul(ilkAmt, spot) / rate);
+    //     }
+
+    //     vat.frob(ilk, address(this), address(this), address(this), int256(ilkAmt), art);
+    //     hevm.warp(block.timestamp + 1);
+    //     jug.drip(ilk);
+
+    //     dog.bark(ilk, address(this), address(this));
+    //     assertEq(clipper.kicks(), 2);
+
+    //     // Give authority to cage the system
+    //     giveAuth(address(end), address(this));
+    //     assertEq(end.wards(address(this)), 1);
+
+    //     end.cage();
+    //     end.cage(ilk);
+
+    //     (,,, address usr,,) = clipper.sales(2);
+    //     assertTrue(usr != address(0));
+
+    //     end.snip(ilk, 2);
+    //     (,,, usr,,) = clipper.sales(2);
+    //     assertTrue(usr == address(0));
+
+    //     end.skim(ilk, address(this));
+    //     end.free(ilk);
+
+    //     hevm.warp(block.timestamp + end.wait());
+    //     vow.heal(min(vat.dai(address(vow)), sub(sub(vat.sin(address(vow)), vow.Sin()), vow.Ash())));
+
+    //     // Removing the surplus to allow continuing the execution.
+    //     hevm.store(
+    //         address(vat),
+    //         keccak256(abi.encode(address(vow), uint256(5))),
+    //         bytes32(uint256(0))
+    //     );
+
+    //     end.thaw();
+    //     end.flow(ilk);
+
+    //     uint256 daiToRedeem = vat.dai(address(this)) / RAY;
+    //     assertTrue(daiToRedeem > 0);
+
+    //     vat.hope(address(end));
+    //     end.pack(daiToRedeem);
+
+    //     end.cash(ilk, daiToRedeem);
+    //     }
+    // }
+
+    // function testSpellIsCast_BAT_A_clip() public {
+    //     checkIlkClipper(
+    //         "BAT-A",
+    //         GemJoinAbstract(addr.addr("MCD_JOIN_BAT_A")),
+    //         FlipAbstract(addr.addr("MCD_FLIP_BAT_A")),
+    //         ClipAbstract(addr.addr("MCD_CLIP_BAT_A")),
+    //         addr.addr("MCD_CLIP_CALC_BAT_A"),
+    //         OsmAbstract(addr.addr("PIP_BAT")),
+    //         2000 * WAD
+    //     );
+    // }
 }
