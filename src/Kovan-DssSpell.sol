@@ -69,19 +69,18 @@ contract DssSpellAction is DssAction {
         address MCD_SPOT = DssExecLib.spotter();
         address MCD_END  = DssExecLib.end();
         address OSM_MOM  = DssExecLib.osmMom();
-        address PIP_UNIV2DAIETH_OLD = DssExecLib.getChangelogAddress("PIP_UNIV2DAIETH");
 
+        // --------------------------------- UNIV2DAIETH-A ---------------------------------
         DssExecLib.setContract(MCD_SPOT, "UNIV2DAIETH-A", "pip", PIP_UNIV2DAIETH);
-
         DssExecLib.authorize(PIP_UNIV2DAIETH, OSM_MOM);
         DssExecLib.addReaderToMedianWhitelist(LPOsmAbstract(PIP_UNIV2DAIETH).orb1(), PIP_UNIV2DAIETH);
-        DssExecLib.removeReaderFromMedianWhitelist(LPOsmAbstract(PIP_UNIV2DAIETH).orb1(), PIP_UNIV2DAIETH_OLD);
+        DssExecLib.removeReaderFromMedianWhitelist(LPOsmAbstract(PIP_UNIV2DAIETH).orb1(), DssExecLib.getChangelogAddress("PIP_UNIV2DAIETH"));
         DssExecLib.addReaderToOSMWhitelist(PIP_UNIV2DAIETH, MCD_SPOT);
         DssExecLib.addReaderToOSMWhitelist(PIP_UNIV2DAIETH, MCD_END);
         DssExecLib.allowOSMFreeze(PIP_UNIV2DAIETH, "UNIV2DAIETH-A");
-
         DssExecLib.setChangelogAddress("PIP_UNIV2DAIETH", PIP_UNIV2DAIETH);
 
+        // ---------------------------- Update Chainlog version ----------------------------
         DssExecLib.setChangelogVersion("1.7.0");
     }
 }

@@ -1729,6 +1729,13 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     function check_UNIV2_replacement(bytes32 ilk, LPOsmAbstract lpPip, LPOsmAbstract oldLpPip) internal {
+        try MedianAbstract(oldLpPip.orb0()).bud(address(oldLpPip)) returns (uint256 kissed) {
+            assertEq(kissed, 1); // Only if a Median
+        } catch {}
+        try MedianAbstract(oldLpPip.orb1()).bud(address(oldLpPip)) returns (uint256 kissed) {
+            assertEq(kissed, 1); // Only if a Median
+        } catch {}
+
         hevm.warp(block.timestamp + 3601);
         oldLpPip.poke();
         hevm.warp(block.timestamp + 3601);
