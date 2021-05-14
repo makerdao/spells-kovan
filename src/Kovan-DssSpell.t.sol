@@ -1755,6 +1755,10 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(lpPip.orb0(), oldLpPip.orb0());
         assertEq(lpPip.orb1(), oldLpPip.orb1());
 
+        assertEq(osmMom.osms(ilk), address(lpPip));
+        (address spotterPip,) = spotter.ilks(ilk);
+        assertEq(spotterPip, address(lpPip));
+
         // Authorization
         assertEq(lpPip.wards(address(osmMom)), 1);
         assertEq(lpPip.bud(address(spotter)), 1);
