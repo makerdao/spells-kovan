@@ -16,41 +16,9 @@
 
 pragma solidity 0.6.12;
 
-import {Fileable, ChainlogLike} from "dss-exec-lib/DssExecLib.sol";
 import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
 import "dss-interfaces/dss/LPOsmAbstract.sol";
-
-struct Collateral {
-    bytes32 ilk;
-    address vat;
-    address vow;
-    address spotter;
-    address cat;
-    address dog;
-    address end;
-    address esm;
-    address flipperMom;
-    address clipperMom;
-    address ilkRegistry;
-    address pip;
-    address clipper;
-    address flipper;
-    address calc;
-    uint256 hole;
-    uint256 chop;
-    uint256 buf;
-    uint256 tail;
-    uint256 cusp;
-    uint256 chip;
-    uint256 tip;
-    uint256 cut;
-    uint256 step;
-    uint256 tolerance;
-    bytes32 clipKey;
-    bytes32 calcKey;
-    bytes32 flipKey;
-}
 
 contract DssSpellAction is DssAction {
 
