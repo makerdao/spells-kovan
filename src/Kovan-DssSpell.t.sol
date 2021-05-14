@@ -1736,9 +1736,9 @@ contract DssSpellTest is DSTest, DSMath {
             assertEq(kissed, 1); // Only if a Median
         } catch {}
 
-        hevm.warp(block.timestamp + 3601);
+        hevm.warp(block.timestamp + 1 hours);
         oldLpPip.poke();
-        hevm.warp(block.timestamp + 3601);
+        hevm.warp(block.timestamp + 1 hours);
         oldLpPip.poke();
 
         vote(address(spell));
@@ -1746,7 +1746,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(spell.done());
 
         lpPip.poke();
-        hevm.warp(block.timestamp + 3601);
+        hevm.warp(block.timestamp + 1 hours);
         lpPip.poke();
         spotter.poke(ilk);
 
