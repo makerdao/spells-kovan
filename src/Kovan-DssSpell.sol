@@ -31,7 +31,7 @@ contract DssSpellAction is DssAction {
 
     // TODO: It's a temporary address for testing the spell, needs to be replaced
     // by the definitive one
-    address constant PIP_UNIV2DAIETH = 0xb43Ca4395Bf6Ef7774C20C1AF75360eE8a42f515;
+    address constant PIP_UNIV2DAIETH = 0xED9201cd545F1d2457D2D48981E7832C754959e9;
 
     function replaceOracle(
         bytes32 ilk,
