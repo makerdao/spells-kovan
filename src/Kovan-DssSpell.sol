@@ -39,10 +39,15 @@ contract DssSpellAction is DssAction {
         address OSM_MOM  = DssExecLib.osmMom();
 
         // --------------------------------- UNIV2DAIETH-A ---------------------------------
+        address oldLP = DssExecLib.getChangelogAddress("PIP_UNIV2DAIETH");
+        require(LPOsmAbstract(PIP_UNIV2DAIETH).wat() == LPOsmAbstract(oldLP).wat(), "DssSpell/not-matching-wat");
+        require(LPOsmAbstract(PIP_UNIV2DAIETH).src() == LPOsmAbstract(oldLP).src(), "DssSpell/not-matching-src");
+        require(LPOsmAbstract(PIP_UNIV2DAIETH).orb0() == LPOsmAbstract(oldLP).orb0(), "DssSpell/not-matching-orb0");
+        require(LPOsmAbstract(PIP_UNIV2DAIETH).orb1() == LPOsmAbstract(oldLP).orb1(), "DssSpell/not-matching-orb1");
         DssExecLib.setContract(MCD_SPOT, "UNIV2DAIETH-A", "pip", PIP_UNIV2DAIETH);
         DssExecLib.authorize(PIP_UNIV2DAIETH, OSM_MOM);
         DssExecLib.addReaderToMedianWhitelist(LPOsmAbstract(PIP_UNIV2DAIETH).orb1(), PIP_UNIV2DAIETH);
-        DssExecLib.removeReaderFromMedianWhitelist(LPOsmAbstract(PIP_UNIV2DAIETH).orb1(), DssExecLib.getChangelogAddress("PIP_UNIV2DAIETH"));
+        DssExecLib.removeReaderFromMedianWhitelist(LPOsmAbstract(oldLP).orb1(), oldLP);
         DssExecLib.addReaderToOSMWhitelist(PIP_UNIV2DAIETH, MCD_SPOT);
         DssExecLib.addReaderToOSMWhitelist(PIP_UNIV2DAIETH, MCD_END);
         DssExecLib.allowOSMFreeze(PIP_UNIV2DAIETH, "UNIV2DAIETH-A");
