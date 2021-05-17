@@ -58,6 +58,7 @@ contract DssSpellTest is DSTest, DSMath {
         uint256 clip_chip;
         uint256 clip_tip;
         uint256 clipper_mom;
+        uint256 cm_tolerance;
         uint256 calc_tau;
         uint256 calc_step;
         uint256 calc_cut;
@@ -205,7 +206,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0x7147829DE455f82eB7dE2d762B14cE77c356B104),        // populate with deployed spell if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
             deployed_spell_created:         1621034172,                 // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
@@ -266,6 +267,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -294,6 +296,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -322,6 +325,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -350,6 +354,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -378,6 +383,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -406,6 +412,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -434,6 +441,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -462,6 +470,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -490,6 +499,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -518,6 +528,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -546,6 +557,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -574,6 +586,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -602,6 +615,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -630,6 +644,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -658,6 +673,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -686,6 +702,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -714,6 +731,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -742,6 +760,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -770,6 +789,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -798,6 +818,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -826,6 +847,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -854,6 +876,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    10,
             clip_tip:     0,
             clipper_mom:  1,
+            cm_tolerance: 5000,
             calc_tau:     0,
             calc_step:    90,
             calc_cut:     9900
@@ -867,24 +890,25 @@ contract DssSpellTest is DSTest, DSMath {
             dust:         100,
             pct:          100,
             mat:          12500,
-            liqType:      "flip",
+            liqType:      "clip",
             liqOn:        true,
             chop:         1300,
-            cat_dunk:     500,
-            flip_beg:     300,
-            flip_ttl:     1 hours,
-            flip_tau:     1 hours,
-            flipper_mom:  1,
-            dog_hole:     0,
-            clip_buf:     0,
-            clip_tail:    0,
-            clip_cusp:    0,
-            clip_chip:    0,
+            cat_dunk:     0,
+            flip_beg:     0,
+            flip_ttl:     0,
+            flip_tau:     0,
+            flipper_mom:  0,
+            dog_hole:     5 * THOUSAND,
+            clip_buf:     11500,
+            clip_tail:    215 minutes,
+            clip_cusp:    6000,
+            clip_chip:    10,
             clip_tip:     0,
-            clipper_mom:  0,
+            clipper_mom:  1,
+            cm_tolerance: 7000,
             calc_tau:     0,
-            calc_step:    0,
-            calc_cut:     0
+            calc_step:    125,
+            calc_cut:     9950
         });
         afterSpell.collaterals["PSM-USDC-A"] = CollateralValues({
             aL_enabled:   false,
@@ -910,6 +934,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -938,6 +963,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -966,6 +992,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -994,6 +1021,7 @@ contract DssSpellTest is DSTest, DSMath {
             clip_chip:    0,
             clip_tip:     0,
             clipper_mom:  0,
+            cm_tolerance: 0,
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
@@ -1304,6 +1332,8 @@ contract DssSpellTest is DSTest, DSMath {
                 assertTrue(clip.tip() == 0 || clip.tip() >= RAD && clip.tip() <= 100 * RAD);
 
                 assertEq(clip.wards(address(clipMom)), values.collaterals[ilk].clipper_mom);
+
+                assertEq(clipMom.tolerance(address(clip)), values.collaterals[ilk].cm_tolerance * RAY / 10000);
 
                 if (values.collaterals[ilk].liqOn) {
                     assertEq(clip.stopped(), 0);
@@ -1671,7 +1701,11 @@ contract DssSpellTest is DSTest, DSMath {
 
         ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
 
-        assertEq(chainLog.getAddress("PIP_UNIV2DAIETH"), addr.addr("PIP_UNIV2DAIETH"));
+        assertEq(chainLog.getAddress("MCD_CLIP_UNIV2DAIETH_A"), addr.addr("MCD_CLIP_UNIV2DAIETH_A"));
+        assertEq(chainLog.getAddress("MCD_CLIP_CALC_UNIV2DAIETH_A"), addr.addr("MCD_CLIP_CALC_UNIV2DAIETH_A"));
+        try chainLog.getAddress("MCD_FLIP_UNIV2DAIETH_A") returns (address) {
+            assertTrue(false);
+        } catch {}
         //
     }
 
@@ -1726,82 +1760,6 @@ contract DssSpellTest is DSTest, DSMath {
         emit log_named_uint("totalGas", totalGas);
         // Fail if cast is too expensive
         assertTrue(totalGas <= 10 * MILLION);
-    }
-
-    function check_UNIV2_replacement(bytes32 ilk, LPOsmAbstract lpPip, LPOsmAbstract oldLpPip) internal {
-        try MedianAbstract(oldLpPip.orb0()).bud(address(oldLpPip)) returns (uint256 kissed) {
-            assertEq(kissed, 1); // Only if a Median
-        } catch {}
-        try MedianAbstract(oldLpPip.orb1()).bud(address(oldLpPip)) returns (uint256 kissed) {
-            assertEq(kissed, 1); // Only if a Median
-        } catch {}
-
-        hevm.warp(block.timestamp + 1 hours);
-        oldLpPip.poke();
-        hevm.warp(block.timestamp + 1 hours);
-        oldLpPip.poke();
-
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        lpPip.poke();
-        hevm.warp(block.timestamp + 1 hours);
-        lpPip.poke();
-        spotter.poke(ilk);
-
-        assertEq(lpPip.wat(),  oldLpPip.wat());
-        assertEq(lpPip.src(),  oldLpPip.src());
-        assertEq(lpPip.orb0(), oldLpPip.orb0());
-        assertEq(lpPip.orb1(), oldLpPip.orb1());
-
-        assertEq(osmMom.osms(ilk), address(lpPip));
-        (address spotterPip,) = spotter.ilks(ilk);
-        assertEq(spotterPip, address(lpPip));
-
-        // Authorization
-        assertEq(lpPip.wards(address(osmMom)), 1);
-        assertEq(lpPip.bud(address(spotter)), 1);
-        assertEq(lpPip.bud(address(end)), 1);
-        try MedianAbstract(lpPip.orb0()).bud(address(lpPip)) returns (uint256 kissed) {
-            assertEq(kissed, 1); // Only if a Median
-        } catch {}
-        try MedianAbstract(lpPip.orb1()).bud(address(lpPip)) returns (uint256 kissed) {
-            assertEq(kissed, 1); // Only if a Median
-        } catch {}
-        try MedianAbstract(oldLpPip.orb0()).bud(address(oldLpPip)) returns (uint256 kissed) {
-            assertEq(kissed, 0); // Only if a Median
-        } catch {}
-        try MedianAbstract(oldLpPip.orb1()).bud(address(oldLpPip)) returns (uint256 kissed) {
-            assertEq(kissed, 0); // Only if a Median
-        } catch {}
-
-        // Give reading access to test
-        hevm.store(
-            address(lpPip),
-            keccak256(abi.encode(address(this), uint256(2))),
-            bytes32(uint256(1))
-        );
-        hevm.store(
-            address(oldLpPip),
-            keccak256(abi.encode(address(this), uint256(2))),
-            bytes32(uint256(1))
-        );
-
-        (bytes32 price1, bool ok1) = lpPip.peek();
-        (bytes32 price2, bool ok2) = oldLpPip.peek();
-        // As the new LP oracles manage a different rounding we just check that they aprox the same
-        assertTrue(uint256(price1) <= add(uint256(price2), uint256(price2) / 1000) && uint256(price1) >= sub(uint256(price2), uint256(price2) / 1000));
-        assertTrue(ok1);
-        assertTrue(ok2);
-    }
-
-    function testSpellIsCast_UNIV2DAIETH_PIP_replacement() public {
-        check_UNIV2_replacement(
-            "UNIV2DAIETH-A",
-            LPOsmAbstract(addr.addr("PIP_UNIV2DAIETH")),
-            LPOsmAbstract(0x1AE7D6891a5fdAafAd2FE6D894bffEa48F8b2454)
-        );
     }
 
     function checkIlkClipper(bytes32 ilk, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip, uint256 ilkAmt) internal {
@@ -1941,7 +1899,6 @@ contract DssSpellTest is DSTest, DSMath {
         bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
 
         hevm.store(address(pip), bytes32(uint256(4)), hackedValue);
-        assertEq(clipMom.tolerance(address(clipper)), (RAY / 2)); // (RAY / 2) for 50%
         // Price is hacked, anyone can trip the breaker
         clipMom.tripBreaker(address(clipper));
         assertEq(clipper.stopped(), 2);
@@ -2007,15 +1964,15 @@ contract DssSpellTest is DSTest, DSMath {
         }
     }
 
-    // function testSpellIsCast_BAT_A_clip() public {
-    //     checkIlkClipper(
-    //         "BAT-A",
-    //         GemJoinAbstract(addr.addr("MCD_JOIN_BAT_A")),
-    //         FlipAbstract(addr.addr("MCD_FLIP_BAT_A")),
-    //         ClipAbstract(addr.addr("MCD_CLIP_BAT_A")),
-    //         addr.addr("MCD_CLIP_CALC_BAT_A"),
-    //         OsmAbstract(addr.addr("PIP_BAT")),
-    //         2000 * WAD
-    //     );
-    // }
+    function testSpellIsCast_UNIV2DAIETH_A_clip() public {
+        checkIlkClipper(
+            "UNIV2DAIETH-A",
+            GemJoinAbstract(addr.addr("MCD_JOIN_UNIV2DAIETH_A")),
+            FlipAbstract(addr.addr("MCD_FLIP_UNIV2DAIETH_A")),
+            ClipAbstract(addr.addr("MCD_CLIP_UNIV2DAIETH_A")),
+            addr.addr("MCD_CLIP_CALC_UNIV2DAIETH_A"),
+            OsmAbstract(addr.addr("PIP_UNIV2DAIETH")),
+            2 * WAD
+        );
+    }
 }
