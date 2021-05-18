@@ -1762,7 +1762,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 10 * MILLION);
     }
 
-    function checkIlkClipper(bytes32 ilk, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip, uint256 ilkAmt) internal {
+    function checkIlkClipper(bytes32 ilk, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip) internal {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
@@ -1809,6 +1809,19 @@ contract DssSpellTest is DSTest, DSMath {
         );
 
         // ----------------------- Check Clipper works and bids can be made -----------------------
+        uint256 ilkAmt;
+
+        {
+        // Generate new DAI to force a liquidation
+        uint256 rate;
+        int256 art;
+        {
+        uint256 spot;
+        uint256 dust;
+        (,rate, spot,, dust) = vat.ilks(ilk);
+        art = int256(dust * 2 / rate);
+        ilkAmt = dust * 2 / spot + 1;
+        }
 
         {
         DSTokenAbstract token = DSTokenAbstract(join.gem());
@@ -1822,16 +1835,6 @@ contract DssSpellTest is DSTest, DSMath {
         join.join(address(this), tknAmt);
         assertEq(token.balanceOf(address(this)), 0);
         assertEq(vat.gem(ilk, address(this)), ilkAmt);
-        }
-
-        {
-        // Generate new DAI to force a liquidation
-        uint256 rate;
-        int256 art;
-        {
-        uint256 spot;
-        (,rate, spot,,) = vat.ilks(ilk);
-        art = int256(mul(ilkAmt, spot) / rate);
         }
 
         // dart max amount of DAI
@@ -1971,8 +1974,7 @@ contract DssSpellTest is DSTest, DSMath {
             FlipAbstract(addr.addr("MCD_FLIP_UNIV2DAIETH_A")),
             ClipAbstract(addr.addr("MCD_CLIP_UNIV2DAIETH_A")),
             addr.addr("MCD_CLIP_CALC_UNIV2DAIETH_A"),
-            OsmAbstract(addr.addr("PIP_UNIV2DAIETH")),
-            2 * WAD
+            OsmAbstract(addr.addr("PIP_UNIV2DAIETH"))
         );
     }
 }
