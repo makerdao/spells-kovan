@@ -23,11 +23,71 @@ interface AuthLike {
     function wards(address) external view returns (uint256);
 }
 
-// Specific for this spell
-interface TokenCompatibleUSDT {
-    function approve(address, uint256) external;
+interface FlashLike {
+    function vat() external view returns (address);
+    function daiJoin() external view returns (address);
+    function dai() external view returns (address);
+    function vow() external view returns (address);
+    function line() external view returns (uint256);
+    function toll() external view returns (uint256);
+    function locked() external view returns (uint256);
+    function maxFlashLoan(address) external view returns (uint256);
+    function flashFee(address, uint256) external view returns (uint256);
+    function flashLoan(address, address, uint256, bytes calldata) external view returns (bool);
+    function vatDaiFlashLoan(address, uint256, bytes calldata) external view returns (bool);
 }
-//
+
+contract TestRepayFlashLoan {
+
+    uint256 constant MILLION    = 10 ** 6;
+    uint256 constant WAD        = 10 ** 18;
+    uint256 constant RAD        = 10 ** 45;
+
+    VatAbstract vat;
+    DaiJoinAbstract daiJoin;
+    DaiAbstract dai;
+
+    constructor(VatAbstract _vat, DaiJoinAbstract _daiJoin, DaiAbstract _dai) public {
+        vat = _vat;
+        daiJoin = _daiJoin;
+        dai = _dai;
+    }
+
+    function onFlashLoan(
+        address initiator,
+        address token,
+        uint256 amount,
+        uint256 fee,
+        bytes calldata
+    ) external returns (bytes32) {
+        require(initiator == address(this));   
+        require(token == address(dai));
+        require(amount == 1 * MILLION * WAD);
+        require(fee == 500 * WAD);
+
+        dai.approve(msg.sender, 1_000_500 * WAD);
+
+        return keccak256("ERC3156FlashBorrower.onFlashLoan");
+    }
+
+    function onVatDaiFlashLoan(
+        address initiator,
+        uint256 amount,
+        uint256 fee,
+        bytes calldata
+    ) external returns (bytes32) {
+        require(initiator == address(this));   
+        require(amount == 1 * MILLION * RAD);
+        require(fee == 500 * WAD);
+
+        dai.approve(address(daiJoin), 500 * WAD);
+        daiJoin.join(address(this), 500 * WAD);
+        vat.move(address(this), msg.sender, 1_000_500 * RAD);
+
+        return keccak256("VatDaiFlashBorrower.onVatDaiFlashLoan");
+    }
+
+}
 
 contract DssSpellTest is DSTest, DSMath {
 
@@ -212,7 +272,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0xDB91E5B7f99BE92c14ADB649Bf384024f1Ea6B43),        // populate with deployed spell if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
             deployed_spell_created:         1622665616,                 // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
@@ -1716,47 +1776,7 @@ contract DssSpellTest is DSTest, DSMath {
 
         ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
 
-        assertEq(chainLog.getAddress("MCD_CLIP_USDC_A"), addr.addr("MCD_CLIP_USDC_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_USDC_A"), addr.addr("MCD_CLIP_CALC_USDC_A"));
-        try chainLog.getAddress("MCD_FLIP_USDC_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_USDC_B"), addr.addr("MCD_CLIP_USDC_B"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_USDC_B"), addr.addr("MCD_CLIP_CALC_USDC_B"));
-        try chainLog.getAddress("MCD_FLIP_USDC_B") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_TUSD_A"), addr.addr("MCD_CLIP_TUSD_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_TUSD_A"), addr.addr("MCD_CLIP_CALC_TUSD_A"));
-        try chainLog.getAddress("MCD_FLIP_TUSD_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_USDT_A"), addr.addr("MCD_CLIP_USDT_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_USDT_A"), addr.addr("MCD_CLIP_CALC_USDT_A"));
-        try chainLog.getAddress("MCD_FLIP_USDT_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_PAXUSD_A"), addr.addr("MCD_CLIP_PAXUSD_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_PAXUSD_A"), addr.addr("MCD_CLIP_CALC_PAXUSD_A"));
-        try chainLog.getAddress("MCD_FLIP_PAXUSD_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_GUSD_A"), addr.addr("MCD_CLIP_GUSD_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_GUSD_A"), addr.addr("MCD_CLIP_CALC_GUSD_A"));
-        try chainLog.getAddress("MCD_FLIP_GUSD_A") returns (address) {
-            assertTrue(false);
-        } catch {}
-
-        assertEq(chainLog.getAddress("MCD_CLIP_PSM_USDC_A"), addr.addr("MCD_CLIP_PSM_USDC_A"));
-        assertEq(chainLog.getAddress("MCD_CLIP_CALC_PSM_USDC_A"), addr.addr("MCD_CLIP_CALC_PSM_USDC_A"));
-        try chainLog.getAddress("MCD_FLIP_PSM_USDC_A") returns (address) {
-            assertTrue(false);
-        } catch {}
+        assertEq(chainLog.getAddress("MCD_FLASH"), addr.addr("MCD_FLASH"));
     }
 
     function testFailWrongDay() public {
@@ -1812,296 +1832,27 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 10 * MILLION);
     }
 
-    function checkIlkClipper(bytes32 ilk, GemJoinAbstract join, FlipAbstract flipper, ClipAbstract clipper, address calc, OsmAbstract pip) internal {
+    function testFlash() public {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
 
-        // Contracts set
-        assertEq(dog.vat(), address(vat));
-        assertEq(dog.vow(), address(vow));
-        {
-        (address clip,,,) = dog.ilks(ilk);
-        assertEq(clip, address(clipper));
-        }
-        assertEq(clipper.ilk(), ilk);
-        assertEq(clipper.vat(), address(vat));
-        assertEq(clipper.vow(), address(vow));
-        assertEq(clipper.dog(), address(dog));
-        assertEq(clipper.spotter(), address(spotter));
-        assertEq(clipper.calc(), calc);
+        TestRepayFlashLoan receiver = new TestRepayFlashLoan(vat, daiJoin, dai);
 
-        // Authorization
-        assertEq(flipper.wards(address(cat))    , 0);
-        assertEq(flipper.wards(address(flipMom)), 0);
-        assertEq(vat.wards(address(clipper))    , 1);
-        assertEq(dog.wards(address(clipper))    , 1);
-        assertEq(clipper.wards(address(dog))    , 1);
-        assertEq(clipper.wards(address(end))    , 1);
-        // assertEq(clipper.wards(address(clipMom)), 1); // This is actually checked in the GENERAL test
-        assertEq(clipper.wards(address(esm)), 1);
+        // Give ourselves tokens for repayment in the callbacks
+        giveTokens(DSTokenAbstract(address(dai)), 1_000 * WAD);
+        dai.transfer(address(receiver), 1_000 * WAD);
 
-        try pip.bud(address(clipMom)) returns (uint256 bud) {
-            assertEq(bud, 1);
-        } catch {}
-        try pip.bud(address(clipper)) returns (uint256 bud) {
-            assertEq(bud, 1);
-        } catch {}
-
-        // Force max Hole
-        hevm.store(
-            address(dog),
-            bytes32(uint256(4)),
-            bytes32(uint256(-1))
-        );
-
-        // Force max debt ceiling for ilk
-        hevm.store(
-            address(vat),
-            bytes32(uint256(keccak256(abi.encode(bytes32(ilk), uint256(2)))) + 3),
-            bytes32(uint256(-1))
-        );
-
-        if (ilk != "PSM-USDC-A") {
-            // ----------------------- Check Clipper can't actually be triggered -----------------------
-            uint256 ilkAmt;
-
-            {
-            // Generate new DAI to force a liquidation
-            uint256 rate;
-            int256 art;
-            {
-            uint256 spot;
-            uint256 dust;
-            (,rate, spot,, dust) = vat.ilks(ilk);
-            art = int256(dust * 2 / rate);
-            ilkAmt = dust * 2 / spot;
-            }
-
-            {
-            DSTokenAbstract token = DSTokenAbstract(join.gem());
-            uint256 tknAmt =  ilkAmt / 10 ** (18 - join.dec()) + 1;
-            ilkAmt = tknAmt * 10 ** (18 - join.dec());
-            giveTokens(token, tknAmt);
-            assertEq(token.balanceOf(address(this)), tknAmt);
-
-            // Join to adapter
-            assertEq(vat.gem(ilk, address(this)), 0);
-            TokenCompatibleUSDT(address(token)).approve(address(join), tknAmt);
-            join.join(address(this), tknAmt);
-            assertEq(token.balanceOf(address(this)), 0);
-            assertEq(vat.gem(ilk, address(this)), ilkAmt);
-            }
-
-            // dart max amount of DAI
-            vat.frob(ilk, address(this), address(this), address(this), int256(ilkAmt), art);
-            hevm.warp(block.timestamp + 1);
-            jug.drip(ilk);
-            assertEq(clipper.kicks(), 0);
-            try dog.bark(ilk, address(this), address(this)) { assertTrue(false, "Liq 2.0 should be disabled"); } catch {}
-            // assertEq(clipper.kicks(), 1);
-            assertEq(clipper.kicks(), 0);
-        }
-
-        // (, rate,,,) = vat.ilks(ilk);
-        // uint256 debt = mul(mul(rate, uint256(art)), dog.chop(ilk)) / WAD;
-        // hevm.store(
-        //     address(vat),
-        //     keccak256(abi.encode(address(this), uint256(5))),
-        //     bytes32(debt)
-        // );
-        // assertEq(vat.dai(address(this)), debt);
-        // assertEq(vat.gem(ilk, address(this)), 0);
-
-        // hevm.warp(block.timestamp + 20 minutes);
-        // (, uint256 tab, uint256 lot, address usr,, uint256 top) = clipper.sales(1);
-
-        // assertEq(usr, address(this));
-        // assertEq(tab, debt);
-        // assertEq(lot, ilkAmt);
-        // assertTrue(mul(lot, top) > tab); // There is enough collateral to cover the debt at current price
-
-        // vat.hope(address(clipper));
-        // clipper.take(1, lot, top, address(this), bytes(""));
-        }
-
-        // {
-        // (, uint256 tab, uint256 lot, address usr,,) = clipper.sales(1);
-        // assertEq(usr, address(0));
-        // assertEq(tab, 0);
-        // assertEq(lot, 0);
-        // assertEq(vat.dai(address(this)), 0);
-        // assertEq(vat.gem(ilk, address(this)), ilkAmt); // What was purchased + returned back as it is the owner of the vault
-        // }
-
-        // ----------------------- Check ClipperMom doens't work -----------------------
-
-        // clipperMom is an authority-based contract, so here we set the Chieftain's hat
-        //  to the current contract to simulate governance authority.
-        hevm.store(
-            address(chief),
-            bytes32(uint256(12)),
-            bytes32(uint256(address(this)))
-        );
-
-        assertEq(clipper.stopped(), 3);
-        try clipMom.setBreaker(address(clipper), 0, 0) { assertTrue(false, "ClipperMom shouldn't be available for this ilk"); } catch {}
-
-        // assertEq(clipper.stopped(), 0);
-        // clipMom.setBreaker(address(clipper), 1, 0);
-        // assertEq(clipper.stopped(), 1);
-        // clipMom.setBreaker(address(clipper), 2, 0);
-        // assertEq(clipper.stopped(), 2);
-        // clipMom.setBreaker(address(clipper), 3, 0);
-        // assertEq(clipper.stopped(), 3);
-        // clipMom.setBreaker(address(clipper), 0, 0);
-        // assertEq(clipper.stopped(), 0);
-
-        // hevm.warp(clipMom.locked(address(clipper)) + 1);
-
-        // // Hacking nxt price to 0x123 (and making it valid)
-        // bytes32 hackedValue = 0x0000000000000000000000000000000100000000000000000000000000000123;
-
-        // hevm.store(address(pip), bytes32(uint256(4)), hackedValue);
-        // // Price is hacked, anyone can trip the breaker
-        // clipMom.tripBreaker(address(clipper));
-        // assertEq(clipper.stopped(), 2);
-
-        // clipMom.setBreaker(address(clipper), 0, 0);
-        // assertEq(clipper.stopped(), 0);
-
-        // // ----------------------- Check End works with the Clipper -----------------------
-
-        // {
-        // uint256 rate;
-        // int256 art;
-        // {
-        // uint256 spot;
-        // (,rate, spot,,) = vat.ilks(ilk);
-        // art = int256(mul(ilkAmt, spot) / rate);
-        // }
-
-        // vat.frob(ilk, address(this), address(this), address(this), int256(ilkAmt), art);
-        // hevm.warp(block.timestamp + 1);
-        // jug.drip(ilk);
-
-        // dog.bark(ilk, address(this), address(this));
-        // assertEq(clipper.kicks(), 2);
-
-        // // Give authority to cage the system
-        // giveAuth(address(end), address(this));
-        // assertEq(end.wards(address(this)), 1);
-
-        // end.cage();
-        // end.cage(ilk);
-
-        // (,,, address usr,,) = clipper.sales(2);
-        // assertTrue(usr != address(0));
-
-        // end.snip(ilk, 2);
-        // (,,, usr,,) = clipper.sales(2);
-        // assertTrue(usr == address(0));
-
-        // end.skim(ilk, address(this));
-        // end.free(ilk);
-
-        // hevm.warp(block.timestamp + end.wait());
-        // vow.heal(min(vat.dai(address(vow)), sub(sub(vat.sin(address(vow)), vow.Sin()), vow.Ash())));
-
-        // // Removing the surplus to allow continuing the execution.
-        // hevm.store(
-        //     address(vat),
-        //     keccak256(abi.encode(address(vow), uint256(5))),
-        //     bytes32(uint256(0))
-        // );
-
-        // end.thaw();
-        // end.flow(ilk);
-
-        // uint256 daiToRedeem = vat.dai(address(this)) / RAY;
-        // assertTrue(daiToRedeem > 0);
-
-        // vat.hope(address(end));
-        // end.pack(daiToRedeem);
-
-        // end.cash(ilk, daiToRedeem);
-        // }
-    }
-
-    function testSpellIsCast_USDC_A_clip() public {
-        checkIlkClipper(
-            "USDC-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_USDC_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_USDC_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_USDC_A")),
-            addr.addr("MCD_CLIP_CALC_USDC_A"),
-            OsmAbstract(addr.addr("PIP_USDC"))
-        );
-    }
-
-    function testSpellIsCast_USDC_B_clip() public {
-        checkIlkClipper(
-            "USDC-B",
-            GemJoinAbstract(addr.addr("MCD_JOIN_USDC_B")),
-            FlipAbstract(addr.addr("MCD_FLIP_USDC_B")),
-            ClipAbstract(addr.addr("MCD_CLIP_USDC_B")),
-            addr.addr("MCD_CLIP_CALC_USDC_B"),
-            OsmAbstract(addr.addr("PIP_USDC"))
-        );
-    }
-
-    function testSpellIsCast_TUSD_A_clip() public {
-        checkIlkClipper(
-            "TUSD-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_TUSD_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_TUSD_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_TUSD_A")),
-            addr.addr("MCD_CLIP_CALC_TUSD_A"),
-            OsmAbstract(addr.addr("PIP_TUSD"))
-        );
-    }
-
-    function testSpellIsCast_USDT_A_clip() public {
-        checkIlkClipper(
-            "USDT-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_USDT_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_USDT_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_USDT_A")),
-            addr.addr("MCD_CLIP_CALC_USDT_A"),
-            OsmAbstract(addr.addr("PIP_USDT"))
-        );
-    }
-
-    function testSpellIsCast_PAXUSD_A_clip() public {
-        checkIlkClipper(
-            "PAXUSD-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_PAXUSD_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_PAXUSD_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_PAXUSD_A")),
-            addr.addr("MCD_CLIP_CALC_PAXUSD_A"),
-            OsmAbstract(addr.addr("PIP_PAXUSD"))
-        );
-    }
-
-    function testSpellIsCast_GUSD_A_clip() public {
-        checkIlkClipper(
-            "GUSD-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_GUSD_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_GUSD_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_GUSD_A")),
-            addr.addr("MCD_CLIP_CALC_GUSD_A"),
-            OsmAbstract(addr.addr("PIP_GUSD"))
-        );
-    }
-
-    function testSpellIsCast_PSM_USDC_A_clip() public {
-        checkIlkClipper(
-            "PSM-USDC-A",
-            GemJoinAbstract(addr.addr("MCD_JOIN_PSM_USDC_A")),
-            FlipAbstract(addr.addr("MCD_FLIP_PSM_USDC_A")),
-            ClipAbstract(addr.addr("MCD_CLIP_PSM_USDC_A")),
-            addr.addr("MCD_CLIP_CALC_PSM_USDC_A"),
-            OsmAbstract(addr.addr("PIP_USDC"))
-        );
+        FlashLike flash = FlashLike(addr.addr("MCD_FLASH"));
+        assertEq(flash.vat(), address(vat));
+        assertEq(flash.daiJoin(), address(daiJoin));
+        assertEq(flash.dai(), address(dai));
+        assertEq(flash.vow(), address(vow));
+        assertEq(flash.line(), 500 * MILLION * WAD);
+        assertEq(flash.toll(), 5 * WAD / 10000);
+        assertEq(flash.maxFlashLoan(address(dai)), 500 * MILLION * WAD);
+        assertEq(flash.flashFee(address(dai), 1 * MILLION * WAD), 500 * WAD); // 500 DAI fee on a 1M loan
+        flash.flashLoan(address(receiver), address(dai), 1 * MILLION * WAD, "");
+        flash.vatDaiFlashLoan(address(receiver), 1 * MILLION * RAD, "");
     }
 }
