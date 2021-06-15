@@ -44,7 +44,7 @@ contract DssSpellAction is DssAction {
         DssExecLib.setChangelogAddress("MCD_FLASH", MCD_FLASH);
 
         // ---------------------------- Update Chainlog version ----------------------------
-        DssExecLib.setChangelogVersion("1.10.0");
+        DssExecLib.setChangelogVersion("1.9.1");
     }
 }
 
