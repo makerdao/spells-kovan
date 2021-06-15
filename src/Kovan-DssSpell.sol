@@ -33,12 +33,12 @@ contract DssSpellAction is DssAction {
     uint256 constant RAY = 10**27;
     uint256 constant RAD = 10**45;
 
-    address constant MCD_FLASH = 0x9f89B2f479Db350825740093412283f065467edb;
+    address constant MCD_FLASH = 0x5aA1323f61D679E52a90120DFDA2ed1A76E4475A;
 
     function actions() public override {
         // ---------------------------- Add MCD_FLASH ----------------------------
         address MCD_VAT = DssExecLib.vat();
-        Fileable(MCD_FLASH).file("line", 500_000_000 * WAD);
+        Fileable(MCD_FLASH).file("max", 500_000_000 * WAD);
         Fileable(MCD_FLASH).file("toll", 5 * WAD / 10000);
         DssExecLib.authorize(MCD_VAT, MCD_FLASH);
         DssExecLib.setChangelogAddress("MCD_FLASH", MCD_FLASH);

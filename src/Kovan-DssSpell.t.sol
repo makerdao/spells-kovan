@@ -28,7 +28,7 @@ interface FlashLike {
     function daiJoin() external view returns (address);
     function dai() external view returns (address);
     function vow() external view returns (address);
-    function line() external view returns (uint256);
+    function max() external view returns (uint256);
     function toll() external view returns (uint256);
     function locked() external view returns (uint256);
     function maxFlashLoan(address) external view returns (uint256);
@@ -1797,7 +1797,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flash.daiJoin(), address(daiJoin));
         assertEq(flash.dai(), address(dai));
         assertEq(flash.vow(), address(vow));
-        assertEq(flash.line(), 500 * MILLION * WAD);
+        assertEq(flash.max(), 500 * MILLION * WAD);
         assertEq(flash.toll(), 5 * WAD / 10000);
         assertEq(flash.maxFlashLoan(address(dai)), 500 * MILLION * WAD);
         assertEq(flash.flashFee(address(dai), 1 * MILLION * WAD), 500 * WAD); // 500 DAI fee on a 1M loan
