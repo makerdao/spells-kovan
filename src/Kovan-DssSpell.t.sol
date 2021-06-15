@@ -33,60 +33,8 @@ interface FlashLike {
     function locked() external view returns (uint256);
     function maxFlashLoan(address) external view returns (uint256);
     function flashFee(address, uint256) external view returns (uint256);
-    function flashLoan(address, address, uint256, bytes calldata) external view returns (bool);
-    function vatDaiFlashLoan(address, uint256, bytes calldata) external view returns (bool);
-}
-
-contract TestRepayFlashLoan {
-
-    uint256 constant MILLION    = 10 ** 6;
-    uint256 constant WAD        = 10 ** 18;
-    uint256 constant RAD        = 10 ** 45;
-
-    VatAbstract vat;
-    DaiJoinAbstract daiJoin;
-    DaiAbstract dai;
-
-    constructor(VatAbstract _vat, DaiJoinAbstract _daiJoin, DaiAbstract _dai) public {
-        vat = _vat;
-        daiJoin = _daiJoin;
-        dai = _dai;
-    }
-
-    function onFlashLoan(
-        address initiator,
-        address token,
-        uint256 amount,
-        uint256 fee,
-        bytes calldata
-    ) external returns (bytes32) {
-        require(initiator == address(this));   
-        require(token == address(dai));
-        require(amount == 1 * MILLION * WAD);
-        require(fee == 500 * WAD);
-
-        dai.approve(msg.sender, 1_000_500 * WAD);
-
-        return keccak256("ERC3156FlashBorrower.onFlashLoan");
-    }
-
-    function onVatDaiFlashLoan(
-        address initiator,
-        uint256 amount,
-        uint256 fee,
-        bytes calldata
-    ) external returns (bytes32) {
-        require(initiator == address(this));   
-        require(amount == 1 * MILLION * RAD);
-        require(fee == 500 * WAD);
-
-        dai.approve(address(daiJoin), 500 * WAD);
-        daiJoin.join(address(this), 500 * WAD);
-        vat.move(address(this), msg.sender, 1_000_500 * RAD);
-
-        return keccak256("VatDaiFlashBorrower.onVatDaiFlashLoan");
-    }
-
+    function flashLoan(address, address, uint256, bytes calldata) external returns (bool);
+    function vatDaiFlashLoan(address, uint256, bytes calldata) external returns (bool);
 }
 
 contract DssSpellTest is DSTest, DSMath {
@@ -1837,11 +1785,8 @@ contract DssSpellTest is DSTest, DSMath {
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
 
-        TestRepayFlashLoan receiver = new TestRepayFlashLoan(vat, daiJoin, dai);
-
         // Give ourselves tokens for repayment in the callbacks
         giveTokens(DSTokenAbstract(address(dai)), 1_000 * WAD);
-        dai.transfer(address(receiver), 1_000 * WAD);
 
         FlashLike flash = FlashLike(addr.addr("MCD_FLASH"));
         assertEq(flash.vat(), address(vat));
@@ -1852,7 +1797,41 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flash.toll(), 5 * WAD / 10000);
         assertEq(flash.maxFlashLoan(address(dai)), 500 * MILLION * WAD);
         assertEq(flash.flashFee(address(dai), 1 * MILLION * WAD), 500 * WAD); // 500 DAI fee on a 1M loan
-        flash.flashLoan(address(receiver), address(dai), 1 * MILLION * WAD, "");
-        flash.vatDaiFlashLoan(address(receiver), 1 * MILLION * RAD, "");
+        flash.flashLoan(address(this), address(dai), 1 * MILLION * WAD, "");
+        flash.vatDaiFlashLoan(address(this), 1 * MILLION * RAD, "");
+    }
+
+    function onFlashLoan(
+        address initiator,
+        address token,
+        uint256 amount,
+        uint256 fee,
+        bytes calldata
+    ) external returns (bytes32) {
+        assertEq(initiator, address(this));   
+        assertEq(token, address(dai));
+        assertEq(amount, 1 * MILLION * WAD);
+        assertEq(fee, 500 * WAD);
+
+        dai.approve(msg.sender, 1_000_500 * WAD);
+
+        return keccak256("ERC3156FlashBorrower.onFlashLoan");
+    }
+
+    function onVatDaiFlashLoan(
+        address initiator,
+        uint256 amount,
+        uint256 fee,
+        bytes calldata
+    ) external returns (bytes32) {
+        assertEq(initiator, address(this));   
+        assertEq(amount, 1 * MILLION * RAD);
+        assertEq(fee, 500 * RAD);
+
+        dai.approve(address(daiJoin), 500 * WAD);
+        daiJoin.join(address(this), 500 * WAD);
+        vat.move(address(this), msg.sender, 1_000_500 * RAD);
+
+        return keccak256("VatDaiFlashBorrower.onVatDaiFlashLoan");
     }
 }
