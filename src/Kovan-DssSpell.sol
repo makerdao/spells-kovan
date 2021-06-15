@@ -33,7 +33,7 @@ contract DssSpellAction is DssAction {
     uint256 constant RAY = 10**27;
     uint256 constant RAD = 10**45;
 
-    address constant MCD_FLASH = 0xF62d4d4E1A5c6018beaA18398A637a474884a625;
+    address constant MCD_FLASH = 0x9f89B2f479Db350825740093412283f065467edb;
 
     function actions() public override {
         // ---------------------------- Add MCD_FLASH ----------------------------

@@ -35,6 +35,8 @@ interface FlashLike {
     function flashFee(address, uint256) external view returns (uint256);
     function flashLoan(address, address, uint256, bytes calldata) external returns (bool);
     function vatDaiFlashLoan(address, uint256, bytes calldata) external returns (bool);
+    function convert() external;
+    function accrue() external;
 }
 
 contract DssSpellTest is DSTest, DSMath {
@@ -1785,6 +1787,8 @@ contract DssSpellTest is DSTest, DSMath {
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
 
+        uint256 vowDai = vat.dai(address(vow));
+
         // Give ourselves tokens for repayment in the callbacks
         giveTokens(DSTokenAbstract(address(dai)), 1_000 * WAD);
 
@@ -1799,6 +1803,11 @@ contract DssSpellTest is DSTest, DSMath {
         assertEq(flash.flashFee(address(dai), 1 * MILLION * WAD), 500 * WAD); // 500 DAI fee on a 1M loan
         flash.flashLoan(address(this), address(dai), 1 * MILLION * WAD, "");
         flash.vatDaiFlashLoan(address(this), 1 * MILLION * RAD, "");
+        assertEq(vat.sin(address(flash)), 0);
+        assertEq(vat.dai(address(flash)), 1000 * RAD);
+        flash.accrue();
+        assertEq(vat.dai(address(flash)), 0);
+        assertEq(vat.dai(address(vow)), vowDai + 1000 * RAD);
     }
 
     function onFlashLoan(
