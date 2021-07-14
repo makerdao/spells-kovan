@@ -7,7 +7,6 @@ import "./test/rates.sol";
 import "./test/addresses_kovan.sol";
 
 import {DssSpell} from "./Kovan-DssSpell.sol";
-import "./CentrifugeCollateralValues.sol";
 
 interface Hevm {
     function warp(uint) external;
@@ -231,10 +230,10 @@ contract DssSpellTest is DSTest, DSMath {
         //
         spellValues = SpellValues({
             deployed_spell:                 address(0x9fbeA12afC3A8b431D41A98943E8E0e0D226aD8d),        // populate with deployed spell if deployed
-            deployed_spell_created:         1623784720,                 // use get-created-timestamp.sh if deployed
+            deployed_spell_created:         1623784720,        // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
-            previous_spell_execution_time:  1614790361,                 // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
-            office_hours_enabled:           false,              // true if officehours is expected to be enabled in the spell
+            previous_spell_execution_time:  1614790361,        // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
+            office_hours_enabled:           false,             // true if officehours is expected to be enabled in the spell
             expiration_threshold:           weekly_expiration  // (weekly_expiration,monthly_expiration) if weekly or monthly spell
         });
         spell = spellValues.deployed_spell != address(0) ?
@@ -1051,36 +1050,37 @@ contract DssSpellTest is DSTest, DSMath {
             calc_cut:     0
         });
 
-        centrifugeCollaterals["RWA003"] = CentrifugeCollateralValues({
-            ROOT: 0x792164b3e10a3CE1efafF7728961aD506c433c18,
-            DROP: 0x931C3Ff1F5aC377137d3AaFD80F601BD76cE106e,
-            MGR: 0x45e17E350279a2f28243983053B634897BA03b64,
-            MEMBERLIST: 0xb7ee04cb62bFD87862e56E2E880b9EeB87aDf20F,
-            COORDINATOR: 0xb9575aD050263cC0A9E65B8bd6041DbF5e02bf1F, 
-            SENIOR_OPERATOR: 0xDeb6eEEF90bbb5be6A771250eb9bA8d0804c3F5D,
-            TRANCHE: 0x3bCe1712d1AaC8C9597Bc65F1c1630aF32F918B0,
-            MCD_JOIN: 0x4CCc7fED3912A32B6Cf7Db2FdA1554a9FF574099,
-            GEM: 0xDBC559F5058E593981C48f4f09fA34323df42d51,
-            OPERATOR: 0x45e17E350279a2f28243983053B634897BA03b64,
-            INPUT_CONDUIT: 0x45e17E350279a2f28243983053B634897BA03b64,
-            OUTPUT_CONDUIT: 0x45e17E350279a2f28243983053B634897BA03b64,
-            URN:  0x993c239179D6858769996bcAb5989ab2DF75913F,
-            LIQ: 0x2881c5dF65A8D81e38f7636122aFb456514804CC,
-            gemID: "RWA003",
-            joinID: "MCD_JOIN_RWA003_A",
-            urnID: "RWA003_A_URN",
-            inputConduitID: "RWA003_A_INPUT_CONDUIT",
-            outputConduitID: "RWA003_A_OUTPUT_CONDUIT",
-            pipID: "PIP_RWA003",
-            ilk: "RWA003-A",
-            ilkRegistryName: "RWA003-A: Centrifuge: ConsolFreight",
-            RATE: SEVEN_PCT,
-            CEIL: 2 * MILLION,
-            PRICE: 2_247_200 * WAD,
-            MAT: 10_500,
-            TAU: 0,
-            DOC: ""
+        centrifugeCollaterals["RWA003-A"] = CentrifugeCollateralValues({
+            aL_enabled:   false,
+            aL_line:      0 * MILLION,
+            aL_gap:       0 * MILLION,
+            aL_ttl:       0,
+            line:         2 * MILLION,
+            dust:         0,
+            pct:          700,
+            mat:          10500,
+            liqType:      "",
+            liqOn:        false,
+            chop:         0,
+            cat_dunk:     0,
+            flip_beg:     0,
+            flip_ttl:     0,
+            flip_tau:     0,
+            flipper_mom:  0,
+            dog_hole:     0,
+            clip_buf:     0,
+            clip_tail:    0,
+            clip_cusp:    0,
+            clip_chip:    0,
+            clip_tip:     1,
+            clipper_mom:  0,
+            cm_tolerance: 0,
+            calc_tau:     0,
+            calc_step:    0,
+            calc_cut:     0
         });
+
+        //ilkRegistryName: "RWA003-A: Centrifuge: ConsolFreight",
     }
 
     function scheduleWaitAndCastFailDay() public {
