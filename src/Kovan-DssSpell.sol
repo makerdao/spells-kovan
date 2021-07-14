@@ -69,17 +69,17 @@ contract DssSpellAction is DssAction {
     uint256 constant RAD      = 10 ** 45;
 
     // Collaterals
-    struct TinlakeAddresses {
-        address ROOT;
-        address DROP;
-        address MGR;
-        address MEMBERLIST;
-        address COORDINATOR; 
-        address SENIOR_OPERATOR;
-        address TRANCHE;
-    }
+    struct CentrifugeCollateralValues {
+        // tinlake addresses
+        // address ROOT;
+        // address DROP;
+        // address MGR;
+        // address MEMBERLIST;
+        // address COORDINATOR; 
+        // address SENIOR_OPERATOR;
+        // address TRANCHE;
 
-    struct MIP21Addresses {
+        // mip21 addresses
         address MCD_JOIN;
         address GEM;
         address OPERATOR; // MGR
@@ -87,21 +87,16 @@ contract DssSpellAction is DssAction {
         address OUTPUT_CONDUIT; // MGR
         address URN;
         address LIQ; // MIP21-LIQ-ORACLE
-    }
 
-    struct ChangelogIDs{
+        // changelog ids
         bytes32 gemID;
         bytes32 joinID;
         bytes32 urnID;
         bytes32 inputConduitID;
         bytes32 outputConduitID;
         bytes32 pipID;
-    }
 
-    struct CentrifugeCollateralValues {
-        TinlakeAddresses tinlakeAddresses;
-        MIP21Addresses mip21Addresses;
-        ChangelogIDs changelogIDs;
+        // misc
         bytes32 ilk;
         string ilkRegistryName;
         uint256 RATE;
@@ -112,55 +107,39 @@ contract DssSpellAction is DssAction {
         string DOC;
     }
 
-    // TODO: needs to be constant
-    CentrifugeCollateralValues RWA003 = CentrifugeCollateralValues({
-        tinlakeAddresses: TinlakeAddresses({
-            ROOT: 0x792164b3e10a3CE1efafF7728961aD506c433c18,
-            DROP: 0x931C3Ff1F5aC377137d3AaFD80F601BD76cE106e,
-            MGR: 0x45e17E350279a2f28243983053B634897BA03b64,
-            MEMBERLIST: 0xb7ee04cb62bFD87862e56E2E880b9EeB87aDf20F,
-            COORDINATOR: 0xb9575aD050263cC0A9E65B8bd6041DbF5e02bf1F, 
-            SENIOR_OPERATOR: 0xDeb6eEEF90bbb5be6A771250eb9bA8d0804c3F5D,
-            TRANCHE: 0x3bCe1712d1AaC8C9597Bc65F1c1630aF32F918B0
-        }),
-        mip21Addresses: MIP21Addresses({
+    // Maker changelog 
+    address public constant MAKER_CHANGELOG = 0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F;
+
+    function actions() public override {
+        CentrifugeCollateralValues memory RWA003 = CentrifugeCollateralValues({
             MCD_JOIN: 0x4CCc7fED3912A32B6Cf7Db2FdA1554a9FF574099,
             GEM: 0xDBC559F5058E593981C48f4f09fA34323df42d51,
             OPERATOR: 0x45e17E350279a2f28243983053B634897BA03b64,
             INPUT_CONDUIT: 0x45e17E350279a2f28243983053B634897BA03b64,
             OUTPUT_CONDUIT: 0x45e17E350279a2f28243983053B634897BA03b64,
             URN:  0x993c239179D6858769996bcAb5989ab2DF75913F,
-            LIQ: 0x2881c5dF65A8D81e38f7636122aFb456514804CC
-        }),
-        changelogIDs: ChangelogIDs({
+            LIQ: 0x2881c5dF65A8D81e38f7636122aFb456514804CC,
             gemID: "RWA003",
             joinID: "MCD_JOIN_RWA003_A",
             urnID: "RWA003_A_URN",
             inputConduitID: "RWA003_A_INPUT_CONDUIT",
             outputConduitID: "RWA003_A_OUTPUT_CONDUIT",
-            pipID: "PIP_RWA003"
-        }),
-        ilk: "RWA003-A",
-        ilkRegistryName: "RWA003-A: Centrifuge: ConsolFreight",
-        RATE: SEVEN_PCT,
-        CEIL: 2 * MILLION,
-        PRICE: 2_247_200 * WAD,
-        MAT: 10_500,
-        TAU: 0,
-        DOC: ""
-    });
-    // CentrifugeCollateralValues public constant RWA004;
-    // CentrifugeCollateralValues public constant RWA005;
-    // CentrifugeCollateralValues public constant RWA006;
+            pipID: "PIP_RWA003",
+            ilk: "RWA003-A",
+            ilkRegistryName: "RWA003-A: Centrifuge: ConsolFreight",
+            RATE: SEVEN_PCT,
+            CEIL: 2 * MILLION,
+            PRICE: 2_247_200 * WAD,
+            MAT: 10_500,
+            TAU: 0,
+            DOC: ""
+        });
 
-    // Maker changelog 
-    address public constant MAKER_CHANGELOG = 0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F;
+        CentrifugeCollateralValues[1] memory collaterals = [RWA003];
 
-    function actions() public override {
-        integrateCentrifugeCollateral(RWA003);
-        // integrateCentrifugeCollateral(RWA004);
-        // integrateCentrifugeCollateral(RWA005);
-        // integrateCentrifugeCollateral(RWA006);
+        for (uint i = 0; i < collaterals.length; i++) {
+            integrateCentrifugeCollateral(collaterals[i]);
+        }
 
         // bump changelog version
         DssExecLib.setChangelogVersion("1.1.x");
@@ -173,10 +152,10 @@ contract DssSpellAction is DssAction {
         address vat = DssExecLib.vat();
 
         // Sanity checks
-        require(GemJoinAbstract(collateral.mip21Addresses.MCD_JOIN).vat() == vat, "join-vat-not-match");
-        require(GemJoinAbstract(collateral.mip21Addresses.MCD_JOIN).ilk() == collateral.ilk, "join-ilk-not-match");
-        require(GemJoinAbstract(collateral.mip21Addresses.MCD_JOIN).gem() == collateral.mip21Addresses.GEM, "join-gem-not-match");
-        require(GemJoinAbstract(collateral.mip21Addresses.MCD_JOIN).dec() == DSTokenAbstract(collateral.mip21Addresses.GEM).decimals(), "join-dec-not-match");
+        require(GemJoinAbstract(collateral.MCD_JOIN).vat() == vat, "join-vat-not-match");
+        require(GemJoinAbstract(collateral.MCD_JOIN).ilk() == collateral.ilk, "join-ilk-not-match");
+        require(GemJoinAbstract(collateral.MCD_JOIN).gem() == collateral.GEM, "join-gem-not-match");
+        require(GemJoinAbstract(collateral.MCD_JOIN).dec() == DSTokenAbstract(collateral.GEM).decimals(), "join-dec-not-match");
 
         RwaLiquidationLike(MIP21_LIQUIDATION_ORACLE).init(
             collateral.ilk, collateral.PRICE, collateral.DOC, collateral.TAU
@@ -193,7 +172,7 @@ contract DssSpellAction is DssAction {
         Initializable(DssExecLib.jug()).init(collateral.ilk);
 
         // Allow RWA-00x Join to modify Vat registry
-        DssExecLib.authorize(vat, collateral.mip21Addresses.MCD_JOIN);
+        DssExecLib.authorize(vat, collateral.MCD_JOIN);
 
         // Allow RwaLiquidationOracle to modify Vat registry
         // DssExecLib.authorize(vat, MIP21_LIQUIDATION_ORACLE);
@@ -216,38 +195,38 @@ contract DssSpellAction is DssAction {
         DssExecLib.updateCollateralPrice(collateral.ilk);
 
         // give the urn permissions on the join adapter
-        // DssExecLib.authorize(collateral.mip21Addresses.MCD_JOIN, collateral.mip21Addresses.URN);
+        // DssExecLib.authorize(collateral.MCD_JOIN, collateral.URN);
 
         // set up the urn
-        Hopeable(collateral.mip21Addresses.URN).hope(collateral.mip21Addresses.OPERATOR);
+        Hopeable(collateral.URN).hope(collateral.OPERATOR);
 
         // set up output conduit
-        // Hopeable(collateral.mip21Addresses.OUTPUT_CONDUIT).hope(collateral.mip21Addresses.OPERATOR));
+        // Hopeable(collateral.OUTPUT_CONDUIT).hope(collateral.OPERATOR));
 
         // Authorize the SC Domain team deployer address on the output conduit
         // during introductory phase. This allows the SC team to assist in the
         // testing of a complete circuit. Once a broker dealer arrangement is
         // established the deployer address should be `deny`ed on the conduit.
-        // Kissable(collateral.mip21Addresses.OUTPUT_CONDUIT).kiss(SC_DOMAIN_DEPLOYER_07);
+        // Kissable(collateral.OUTPUT_CONDUIT).kiss(SC_DOMAIN_DEPLOYER_07);
 
         // add RWA-00x contract to the changelog
-        DssExecLib.setChangelogAddress(collateral.changelogIDs.gemID, collateral.mip21Addresses.GEM);
-        DssExecLib.setChangelogAddress(collateral.changelogIDs.pipID, pip);
-        DssExecLib.setChangelogAddress(collateral.changelogIDs.joinID, collateral.mip21Addresses.MCD_JOIN);
-        DssExecLib.setChangelogAddress(collateral.changelogIDs.urnID, collateral.mip21Addresses.URN);
+        DssExecLib.setChangelogAddress(collateral.gemID, collateral.GEM);
+        DssExecLib.setChangelogAddress(collateral.pipID, pip);
+        DssExecLib.setChangelogAddress(collateral.joinID, collateral.MCD_JOIN);
+        DssExecLib.setChangelogAddress(collateral.urnID, collateral.URN);
         DssExecLib.setChangelogAddress(
-            collateral.changelogIDs.inputConduitID, collateral.mip21Addresses.INPUT_CONDUIT
+            collateral.inputConduitID, collateral.INPUT_CONDUIT
         );
         DssExecLib.setChangelogAddress(
-            collateral.changelogIDs.outputConduitID, collateral.mip21Addresses.OUTPUT_CONDUIT
+            collateral.outputConduitID, collateral.OUTPUT_CONDUIT
         );
 
         address ILK_REGISTRY = DssExecLib.getChangelogAddress("ILK_REGISTRY");
         IlkRegistryAbstract(ILK_REGISTRY).put(
             collateral.ilk,
-            collateral.mip21Addresses.MCD_JOIN,
-            collateral.mip21Addresses.GEM,
-            DSTokenAbstract(collateral.mip21Addresses.GEM).decimals(),
+            collateral.MCD_JOIN,
+            collateral.GEM,
+            DSTokenAbstract(collateral.GEM).decimals(),
             3,
             pip,
             address(0),
