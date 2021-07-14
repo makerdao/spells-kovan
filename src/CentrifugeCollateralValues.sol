@@ -1,15 +1,6 @@
 pragma solidity 0.6.12;
 
 struct CentrifugeCollateralValues {
-    // tinlake addresses
-    address ROOT;
-    address DROP;
-    address MGR;
-    address MEMBERLIST;
-    address COORDINATOR; 
-    address SENIOR_OPERATOR;
-    address TRANCHE;
-
     // mip21 addresses
     address MCD_JOIN;
     address GEM;
