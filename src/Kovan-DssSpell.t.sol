@@ -7,6 +7,7 @@ import "./test/rates.sol";
 import "./test/addresses_kovan.sol";
 
 import {DssSpell} from "./Kovan-DssSpell.sol";
+import "./CentrifugeCollateralValues.sol";
 
 interface Hevm {
     function warp(uint) external;
@@ -109,6 +110,8 @@ contract DssSpellTest is DSTest, DSMath {
     Rates     rates = new Rates();
     Addresses addr  = new Addresses();
 
+    mapping (bytes32 => CentrifugeCollateralValues) centrifugeCollaterals;
+    
     // KOVAN ADDRESSES
     DSPauseAbstract        pause = DSPauseAbstract(    addr.addr("MCD_PAUSE"));
     address           pauseProxy =                     addr.addr("MCD_PAUSE_PROXY");
@@ -147,6 +150,11 @@ contract DssSpellTest is DSTest, DSMath {
     uint256 constant MILLION    = 10 ** 6;
     uint256 constant BILLION    = 10 ** 9;
     uint256 constant RAD        = 10 ** 45;
+
+    uint256 constant TWO_PCT            = 1000000000627937192491029810;
+    uint256 constant FOUR_PT_FIVE_PCT   = 1000000001395766281313196627;
+    uint256 constant SIX_PCT            = 1000000001847694957439350562;
+    uint256 constant SEVEN_PCT          = 1000000002145441671308778766;
 
     uint256 constant monthly_expiration = 4 days;
     uint256 constant weekly_expiration = 30 days;
@@ -1041,6 +1049,37 @@ contract DssSpellTest is DSTest, DSMath {
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
+        });
+
+        centrifugeCollaterals["RWA003"] = CentrifugeCollateralValues({
+            ROOT: 0x792164b3e10a3CE1efafF7728961aD506c433c18,
+            DROP: 0x931C3Ff1F5aC377137d3AaFD80F601BD76cE106e,
+            MGR: 0x45e17E350279a2f28243983053B634897BA03b64,
+            MEMBERLIST: 0xb7ee04cb62bFD87862e56E2E880b9EeB87aDf20F,
+            COORDINATOR: 0xb9575aD050263cC0A9E65B8bd6041DbF5e02bf1F, 
+            SENIOR_OPERATOR: 0xDeb6eEEF90bbb5be6A771250eb9bA8d0804c3F5D,
+            TRANCHE: 0x3bCe1712d1AaC8C9597Bc65F1c1630aF32F918B0,
+            MCD_JOIN: 0x4CCc7fED3912A32B6Cf7Db2FdA1554a9FF574099,
+            GEM: 0xDBC559F5058E593981C48f4f09fA34323df42d51,
+            OPERATOR: 0x45e17E350279a2f28243983053B634897BA03b64,
+            INPUT_CONDUIT: 0x45e17E350279a2f28243983053B634897BA03b64,
+            OUTPUT_CONDUIT: 0x45e17E350279a2f28243983053B634897BA03b64,
+            URN:  0x993c239179D6858769996bcAb5989ab2DF75913F,
+            LIQ: 0x2881c5dF65A8D81e38f7636122aFb456514804CC,
+            gemID: "RWA003",
+            joinID: "MCD_JOIN_RWA003_A",
+            urnID: "RWA003_A_URN",
+            inputConduitID: "RWA003_A_INPUT_CONDUIT",
+            outputConduitID: "RWA003_A_OUTPUT_CONDUIT",
+            pipID: "PIP_RWA003",
+            ilk: "RWA003-A",
+            ilkRegistryName: "RWA003-A: Centrifuge: ConsolFreight",
+            RATE: SEVEN_PCT,
+            CEIL: 2 * MILLION,
+            PRICE: 2_247_200 * WAD,
+            MAT: 10_500,
+            TAU: 0,
+            DOC: ""
         });
     }
 

@@ -21,6 +21,7 @@ import "dss-exec-lib/DssAction.sol";
 import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
+import "./CentrifugeCollateralValues.sol";
 
 interface Initializable {
     function init(bytes32) external;
@@ -68,50 +69,18 @@ contract DssSpellAction is DssAction {
     uint256 constant RAY      = 10 ** 27;
     uint256 constant RAD      = 10 ** 45;
 
-    // Collaterals
-    struct CentrifugeCollateralValues {
-        // tinlake addresses
-        // address ROOT;
-        // address DROP;
-        // address MGR;
-        // address MEMBERLIST;
-        // address COORDINATOR; 
-        // address SENIOR_OPERATOR;
-        // address TRANCHE;
-
-        // mip21 addresses
-        address MCD_JOIN;
-        address GEM;
-        address OPERATOR; // MGR
-        address INPUT_CONDUIT; // MGR
-        address OUTPUT_CONDUIT; // MGR
-        address URN;
-        address LIQ; // MIP21-LIQ-ORACLE
-
-        // changelog ids
-        bytes32 gemID;
-        bytes32 joinID;
-        bytes32 urnID;
-        bytes32 inputConduitID;
-        bytes32 outputConduitID;
-        bytes32 pipID;
-
-        // misc
-        bytes32 ilk;
-        string ilkRegistryName;
-        uint256 RATE;
-        uint256 CEIL;
-        uint256 PRICE;
-        uint256 MAT;
-        uint48 TAU;
-        string DOC;
-    }
-
     // Maker changelog 
     address public constant MAKER_CHANGELOG = 0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F;
 
     function actions() public override {
         CentrifugeCollateralValues memory RWA003 = CentrifugeCollateralValues({
+            ROOT: 0x792164b3e10a3CE1efafF7728961aD506c433c18,
+            DROP: 0x931C3Ff1F5aC377137d3AaFD80F601BD76cE106e,
+            MGR: 0x45e17E350279a2f28243983053B634897BA03b64,
+            MEMBERLIST: 0xb7ee04cb62bFD87862e56E2E880b9EeB87aDf20F,
+            COORDINATOR: 0xb9575aD050263cC0A9E65B8bd6041DbF5e02bf1F, 
+            SENIOR_OPERATOR: 0xDeb6eEEF90bbb5be6A771250eb9bA8d0804c3F5D,
+            TRANCHE: 0x3bCe1712d1AaC8C9597Bc65F1c1630aF32F918B0,
             MCD_JOIN: 0x4CCc7fED3912A32B6Cf7Db2FdA1554a9FF574099,
             GEM: 0xDBC559F5058E593981C48f4f09fA34323df42d51,
             OPERATOR: 0x45e17E350279a2f28243983053B634897BA03b64,
