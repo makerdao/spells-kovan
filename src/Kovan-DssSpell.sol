@@ -171,9 +171,14 @@ contract DssSpellAction is DssAction {
 
         CentrifugeCollateralValues[4] memory collaterals = [RWA003, RWA004, RWA005, RWA006];
 
+        // integrate rwa003-006
         for (uint i = 0; i < collaterals.length; i++) {
             integrateCentrifugeCollateral(collaterals[i]);
         }
+
+        // increase debt ceiling of RWA002 from 5M to 20M
+        DssExecLib.increaseGlobalDebtCeiling(15 * MILLION);
+        DssExecLib.setIlkDebtCeiling("RWA002-A", 20 * MILLION);
 
         // bump changelog version
         DssExecLib.setChangelogVersion("1.1.x");
