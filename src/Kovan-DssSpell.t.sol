@@ -239,10 +239,10 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0),         // populate with deployed spell if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
             deployed_spell_created:         1623784720,        // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
-            office_hours_enabled:           false,             // true if officehours is expected to be enabled in the spell
+            office_hours_enabled:           true,              // true if officehours is expected to be enabled in the spell
             expiration_threshold:           weekly_expiration  // (weekly_expiration,monthly_expiration) if weekly or monthly spell
         });
         spell = spellValues.deployed_spell != address(0) ?
@@ -1267,7 +1267,6 @@ contract DssSpellTest is DSTest, DSMath {
 
     function scheduleWaitAndCast(address spell_) public {
         DssSpell(spell_).schedule();
-
         hevm.warp(DssSpell(spell_).nextCastTime());
 
         DssSpell(spell_).cast();
