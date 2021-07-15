@@ -239,7 +239,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0x9fbeA12afC3A8b431D41A98943E8E0e0D226aD8d),        // populate with deployed spell if deployed
+            deployed_spell:                 address(0),         // populate with deployed spell if deployed
             deployed_spell_created:         1623784720,        // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             office_hours_enabled:           false,             // true if officehours is expected to be enabled in the spell
@@ -252,7 +252,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all system configuration changes
         //
         afterSpell = SystemValues({
-            line_offset:           500 * MILLION,        // Offset between the global line against the sum of local lines
+            line_offset:           500 * MILLION,       // Offset between the global line against the sum of local lines
             pot_dsr:               0,                   // In basis points
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
@@ -1689,68 +1689,68 @@ function checkCollateralValues(SystemValues storage values) internal {
         checkCollateralValues(afterSpell);
     }
 
-    function testNewChainlogValues() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
+    // function testNewChainlogValues() public {
+    //     vote(address(spell));
+    //     scheduleWaitAndCast(address(spell));
+    //     assertTrue(spell.done());
 
-        ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
+    //     ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
 
-        assertEq(chainLog.getAddress("MCD_FLASH"), addr.addr("MCD_FLASH"));
-    }
+    //     assertEq(chainLog.getAddress("MCD_FLASH"), addr.addr("MCD_FLASH"));
+    // }
 
-    function testFailWrongDay() public {
-        require(spell.officeHours() == spellValues.office_hours_enabled);
-        if (spell.officeHours()) {
-            vote(address(spell));
-            scheduleWaitAndCastFailDay();
-        } else {
-            revert("Office Hours Disabled");
-        }
-    }
+    // function testFailWrongDay() public {
+    //     require(spell.officeHours() == spellValues.office_hours_enabled);
+    //     if (spell.officeHours()) {
+    //         vote(address(spell));
+    //         scheduleWaitAndCastFailDay();
+    //     } else {
+    //         revert("Office Hours Disabled");
+    //     }
+    // }
 
-    function testFailTooEarly() public {
-        require(spell.officeHours() == spellValues.office_hours_enabled);
-        if (spell.officeHours()) {
-            vote(address(spell));
-            scheduleWaitAndCastFailEarly();
-        } else {
-            revert("Office Hours Disabled");
-        }
-    }
+    // function testFailTooEarly() public {
+    //     require(spell.officeHours() == spellValues.office_hours_enabled);
+    //     if (spell.officeHours()) {
+    //         vote(address(spell));
+    //         scheduleWaitAndCastFailEarly();
+    //     } else {
+    //         revert("Office Hours Disabled");
+    //     }
+    // }
 
-    function testFailTooLate() public {
-        require(spell.officeHours() == spellValues.office_hours_enabled);
-        if (spell.officeHours()) {
-            vote(address(spell));
-            scheduleWaitAndCastFailLate();
-        } else {
-            revert("Office Hours Disabled");
-        }
-    }
+    // function testFailTooLate() public {
+    //     require(spell.officeHours() == spellValues.office_hours_enabled);
+    //     if (spell.officeHours()) {
+    //         vote(address(spell));
+    //         scheduleWaitAndCastFailLate();
+    //     } else {
+    //         revert("Office Hours Disabled");
+    //     }
+    // }
 
-    function testOnTime() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-    }
+    // function testOnTime() public {
+    //     vote(address(spell));
+    //     scheduleWaitAndCast(address(spell));
+    // }
 
-    function testCastCost() public {
-        vote(address(spell));
-        spell.schedule();
+    // function testCastCost() public {
+    //     vote(address(spell));
+    //     spell.schedule();
 
-        castPreviousSpell();
+    //     castPreviousSpell();
 
-        hevm.warp(spell.nextCastTime());
-        uint256 startGas = gasleft();
-        spell.cast();
-        uint256 endGas = gasleft();
-        uint256 totalGas = startGas - endGas;
+    //     hevm.warp(spell.nextCastTime());
+    //     uint256 startGas = gasleft();
+    //     spell.cast();
+    //     uint256 endGas = gasleft();
+    //     uint256 totalGas = startGas - endGas;
 
-        assertTrue(spell.done());
-        emit log_named_uint("totalGas", totalGas);
-        // Fail if cast is too expensive
-        assertTrue(totalGas <= 10 * MILLION);
-    }
+    //     assertTrue(spell.done());
+    //     emit log_named_uint("totalGas", totalGas);
+    //     // Fail if cast is too expensive
+    //     assertTrue(totalGas <= 10 * MILLION);
+    // }
 
     // from mainnet spell
     // function test_nextCastTime() public {
