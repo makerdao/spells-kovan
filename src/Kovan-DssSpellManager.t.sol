@@ -41,6 +41,9 @@ interface TinlakeManagerLike {
 
 contract KovanManagerRPC is DssSpellTest {
 
+    uint constant initialSpellDaiBalance = 10000 ether;
+    uint constant initialSpellDropBalance = 1000 ether;
+
     CentrifugeCollateralTestValues[] collaterals;
 
     function setUp() public override {
@@ -92,8 +95,8 @@ contract KovanManagerRPC is DssSpellTest {
         }));
 
         // give this address 10000 dai
-        hevm.store(address(dai), keccak256(abi.encode(address(this), uint(2))), bytes32(uint(10000 ether)));
-        assertEq(dai.balanceOf(address(this)), 10000 ether);
+        hevm.store(address(dai), keccak256(abi.encode(address(this), uint(2))), bytes32(uint(initialSpellDaiBalance)));
+        assertEq(dai.balanceOf(address(this)), initialSpellDaiBalance);
 
         // setup each collateral
         for (uint i = 0; i < collaterals.length; i++) {
@@ -133,12 +136,12 @@ contract KovanManagerRPC is DssSpellTest {
         FileLike(collateral.MGR).file("liq", collateral.LIQ);
         FileLike(collateral.MGR).file("urn", collateral.URN);
 
-        // give this address 1000 drop
+        // give the spell 1000 drop
         hevm.store(collateral.DROP, keccak256(abi.encode(address(this), uint(0))), bytes32(uint(1)));
-        ERC20Like(collateral.DROP).mint(address(this), 1000 ether);
+        ERC20Like(collateral.DROP).mint(address(this), initialSpellDropBalance);
 
         assertEq(mgr.wards(address(this)), 1);
-        assertEq(drop.balanceOf(address(this)), 1000 ether);
+        assertEq(drop.balanceOf(address(this)), initialSpellDropBalance);
 
         // approve the managers
         drop.approve(collateral.MGR, type(uint256).max);
@@ -161,15 +164,16 @@ contract KovanManagerRPC is DssSpellTest {
         TinlakeManagerLike mgr = TinlakeManagerLike(collateral.MGR);
         DSTokenAbstract drop = DSTokenAbstract(address(mgr.gem()));
 
-        uint preBal = drop.balanceOf(collateral.MGR);
-        assertEq(dai.balanceOf(address(this)), 1500 ether);
-        assertEq(drop.balanceOf(address(this)), 1000 ether);
+        uint preSpellDaiBalance = dai.balanceOf(address(this));
+        uint preMgrDropBalance = drop.balanceOf(collateral.MGR);
+        assertEq(drop.balanceOf(address(this)), initialSpellDropBalance);
 
         mgr.join(400 ether);
         mgr.draw(200 ether);
-        assertEq(dai.balanceOf(address(this)), 1700 ether);
-        assertEq(drop.balanceOf(address(this)), 600 ether);
-        assertEq(drop.balanceOf(address(mgr)), preBal + 400 ether);
+
+        assertEq(dai.balanceOf(address(this)), preSpellDaiBalance + 200 ether);
+        assertEq(drop.balanceOf(address(this)), initialSpellDropBalance - 400 ether);
+        assertEq(drop.balanceOf(address(mgr)), preMgrDropBalance + 400 ether);
     }
 
     function testWipeAndExit() public {
@@ -184,10 +188,14 @@ contract KovanManagerRPC is DssSpellTest {
         TinlakeManagerLike mgr = TinlakeManagerLike(collateral.MGR);
         DSTokenAbstract drop = DSTokenAbstract(address(mgr.gem()));
 
+        uint preSpellDaiBalance = dai.balanceOf(address(this));
+        uint preSpellDropBalance = drop.balanceOf(address(this));
+
         mgr.wipe(10 ether);
         mgr.exit(10 ether);
-        assertEq(dai.balanceOf(address(this)), 1690 ether);
-        assertEq(drop.balanceOf(address(this)), 610 ether);
+
+        assertEq(dai.balanceOf(address(this)), preSpellDaiBalance - 10 ether);
+        assertEq(drop.balanceOf(address(this)), preSpellDropBalance + 10 ether);
     }
 
 }

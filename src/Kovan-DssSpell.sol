@@ -202,8 +202,7 @@ contract DssSpellAction is DssAction {
         (,address pip,,) = RwaLiquidationLike(MIP21_LIQUIDATION_ORACLE).ilks(collateral.ilk);
 
         // Set price feed for RWA003
-        // TODO: re-add
-        // DssExecLib.setContract(DssExecLib.spotter(), collateral.ilk, "pip", pip);
+        DssExecLib.setContract(DssExecLib.spotter(), collateral.ilk, "pip", pip);
 
         // Init RWA-00x in Vat
         Initializable(vat).init(collateral.ilk);
@@ -225,7 +224,7 @@ contract DssSpellAction is DssAction {
         // DssExecLib.setIlkMinVaultAmount(collateral.ilk, 0);
 
         // stability fee
-        DssExecLib.setIlkStabilityFee(collateral.ilk, SEVEN_PCT, false);
+        DssExecLib.setIlkStabilityFee(collateral.ilk, collateral.RATE, false);
 
         // collateralization ratio
         DssExecLib.setIlkLiquidationRatio(collateral.ilk, collateral.MAT);
