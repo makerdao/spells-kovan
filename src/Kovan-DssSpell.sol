@@ -74,13 +74,6 @@ contract DssSpellAction is DssAction {
 
     function actions() public override {
         CentrifugeCollateralValues memory RWA003 = CentrifugeCollateralValues({
-            ROOT: 0x792164b3e10a3CE1efafF7728961aD506c433c18,
-            DROP: 0x931C3Ff1F5aC377137d3AaFD80F601BD76cE106e,
-            MGR: 0x45e17E350279a2f28243983053B634897BA03b64,
-            MEMBERLIST: 0xb7ee04cb62bFD87862e56E2E880b9EeB87aDf20F,
-            COORDINATOR: 0xb9575aD050263cC0A9E65B8bd6041DbF5e02bf1F, 
-            SENIOR_OPERATOR: 0xDeb6eEEF90bbb5be6A771250eb9bA8d0804c3F5D,
-            TRANCHE: 0x3bCe1712d1AaC8C9597Bc65F1c1630aF32F918B0,
             MCD_JOIN: 0x4CCc7fED3912A32B6Cf7Db2FdA1554a9FF574099,
             GEM: 0xDBC559F5058E593981C48f4f09fA34323df42d51,
             OPERATOR: 0x45e17E350279a2f28243983053B634897BA03b64,
@@ -96,7 +89,7 @@ contract DssSpellAction is DssAction {
             pipID: "PIP_RWA003",
             ilk: "RWA003-A",
             ilkRegistryName: "RWA003-A: Centrifuge: ConsolFreight",
-            RATE: SEVEN_PCT,
+            RATE: SIX_PCT,
             CEIL: 2 * MILLION,
             PRICE: 2_247_200 * WAD,
             MAT: 10_500,
@@ -104,11 +97,88 @@ contract DssSpellAction is DssAction {
             DOC: ""
         });
 
-        CentrifugeCollateralValues[1] memory collaterals = [RWA003];
+        CentrifugeCollateralValues memory RWA004 = CentrifugeCollateralValues({
+            MCD_JOIN: 0xa92D4082BabF785Ba02f9C419509B7d08f2ef271,
+            GEM: 0x146b0abaB80a60Bfa3b4fDDb5056bBcFa4f1fec1,
+            OPERATOR: 0x303dFE04Be5731207c5213FbB54488B3aD9B9FE3,
+            INPUT_CONDUIT: 0x303dFE04Be5731207c5213FbB54488B3aD9B9FE3,
+            OUTPUT_CONDUIT: 0x303dFE04Be5731207c5213FbB54488B3aD9B9FE3,
+            URN:  0xf22C7F5A2AecE1E85263e3cec522BDCD3e392B59,
+            LIQ: 0x2881c5dF65A8D81e38f7636122aFb456514804CC,
+            gemID: "RWA004",
+            joinID: "MCD_JOIN_RWA004_A",
+            urnID: "RWA004_A_URN",
+            inputConduitID: "RWA004_A_INPUT_CONDUIT",
+            outputConduitID: "RWA004_A_OUTPUT_CONDUIT",
+            pipID: "PIP_RWA004",
+            ilk: "RWA004-A",
+            ilkRegistryName: "RWA004-A: Centrifuge: Harbor Trade Credit",
+            RATE: SEVEN_PCT,
+            CEIL: 7 * MILLION,
+            PRICE: 8_014_300 * WAD,
+            MAT: 11_000,
+            TAU: 0,
+            DOC: ""
+        });
 
+        CentrifugeCollateralValues memory RWA005 = CentrifugeCollateralValues({
+            MCD_JOIN: 0x1233d0DBb55A4Bb41D711d4B584f8DDB15A2Ff88,
+            GEM: 0xcB2A48D26970eE7193d66BAc6F1b3090f2E8f82B,
+            OPERATOR: 0x17E5954Cdd3611Dd84e444F0ed555CC3a06cB319,
+            INPUT_CONDUIT: 0x17E5954Cdd3611Dd84e444F0ed555CC3a06cB319,
+            OUTPUT_CONDUIT: 0x17E5954Cdd3611Dd84e444F0ed555CC3a06cB319,
+            URN:  0xdB9f0700EbBac596CCeF5b14D5e23664Db2A184f,
+            LIQ: 0x2881c5dF65A8D81e38f7636122aFb456514804CC,
+            gemID: "RWA005",
+            joinID: "MCD_JOIN_RWA005_A",
+            urnID: "RWA005_A_URN",
+            inputConduitID: "RWA005_A_INPUT_CONDUIT",
+            outputConduitID: "RWA005_A_OUTPUT_CONDUIT",
+            pipID: "PIP_RWA005",
+            ilk: "RWA005-A",
+            ilkRegistryName: "RWA005-A: Centrifuge: Fortunafi",
+            RATE: FOUR_PT_FIVE_PCT,
+            CEIL: 15 * MILLION,
+            PRICE: 16_380_375 * WAD,
+            MAT: 10_500,
+            TAU: 0,
+            DOC: ""
+        });
+
+        CentrifugeCollateralValues memory RWA006 = CentrifugeCollateralValues({
+            MCD_JOIN: 0x039B74bD0Adc35046B67E88509900D41b9D95430,
+            GEM: 0x4E65F06574F1630B4fF756C898Fe02f276D53E86,
+            OPERATOR: 0x652A3B3b91459504A8D1d785B0c923A34D638218,
+            INPUT_CONDUIT: 0x652A3B3b91459504A8D1d785B0c923A34D638218,
+            OUTPUT_CONDUIT: 0x652A3B3b91459504A8D1d785B0c923A34D638218,
+            URN:  0x6fa6F9C11f5F129f6ECA4B391D9d32038A9666cD,
+            LIQ: 0x2881c5dF65A8D81e38f7636122aFb456514804CC,
+            gemID: "RWA006",
+            joinID: "MCD_JOIN_RWA006_A",
+            urnID: "RWA006_A_URN",
+            inputConduitID: "RWA006_A_INPUT_CONDUIT",
+            outputConduitID: "RWA006_A_OUTPUT_CONDUIT",
+            pipID: "PIP_RWA006",
+            ilk: "RWA006-A",
+            ilkRegistryName: "RWA006-A: Centrifuge: Peoples Company",
+            RATE: TWO_PCT,
+            CEIL: 20 * MILLION,
+            PRICE: 20_808_000 * WAD,
+            MAT: 10_000,
+            TAU: 0,
+            DOC: ""
+        });
+
+        CentrifugeCollateralValues[4] memory collaterals = [RWA003, RWA004, RWA005, RWA006];
+
+        // integrate rwa003-006
         for (uint i = 0; i < collaterals.length; i++) {
             integrateCentrifugeCollateral(collaterals[i]);
         }
+
+        // increase debt ceiling of RWA002 from 5M to 20M
+        DssExecLib.increaseGlobalDebtCeiling(15 * MILLION);
+        DssExecLib.setIlkDebtCeiling("RWA002-A", 20 * MILLION);
 
         // bump changelog version
         DssExecLib.setChangelogVersion("1.1.x");
