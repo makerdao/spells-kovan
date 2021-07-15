@@ -170,7 +170,7 @@ contract DssSpellAction is DssAction {
 
         CentrifugeCollateralValues[4] memory collaterals = [RWA003, RWA004, RWA005, RWA006];
 
-        // integrate rwa003-006
+        // integrate RWA003-006
         for (uint i = 0; i < collaterals.length; i++) {
             integrateCentrifugeCollateral(collaterals[i]);
         }

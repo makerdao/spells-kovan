@@ -42,6 +42,10 @@ interface FlashLike {
     function accrue() external;
 }
 
+interface RwaLiquidationLike {
+    function ilks(bytes32) external returns (string memory,address,uint48,uint48);
+}
+
 contract DssSpellTest is DSTest, DSMath {
 
     struct SpellValues {
@@ -1695,6 +1699,55 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertEq(chainlog.getAddress("RWA006_A_OUTPUT_CONDUIT"), addr.addr("RWA006_A_OUTPUT_CONDUIT"));
 
         assertEq(chainlog.getAddress("MIP21_LIQUIDATION_ORACLE"), addr.addr("MIP21_LIQUIDATION_ORACLE"));
+    }
+
+    function testNewIlkRegistryValues() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        IlkRegistryAbstract ilkRegistry = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
+        RwaLiqOracle = RwaLiquidationLike(addr.addr("MIP21_LIQUIDATION_ORACLE"));
+
+        assertEq(ilkRegistry.join("RWA003-A"), addr.addr("MCD_JOIN_RWA003_A"));
+        assertEq(ilkRegistry.gem("RWA003-A"), addr.addr("RWA003"));
+        assertEq(ilkRegistry.dec("RWA003-A"), DSTokenAbstract(addr.addr("RWA003")).decimals());
+        assertEq(ilkRegistry.class("RWA003-A"), 3);
+        (,address pip,,) = RwaLiqOracle.ilks("RWA003-A");
+        assertEq(ilkRegistry.pip("RWA003-A"), pip);
+        assertEq(ilkRegistry.xlip("RWA003-A"), address(0));
+        assertEq(ilkRegistry.name("RWA003-A"), "RWA003-A: Centrifuge: ConsolFreight");
+        assertEq(ilkRegistry.symbol("RWA003-A"), bytes32ToStr("RWA003-A"));
+
+        assertEq(ilkRegistry.join("RWA004-A"), addr.addr("RWA004"));
+        assertEq(ilkRegistry.gem("RWA004-A"), addr.addr("MCD_JOIN_RWA004_A"));
+        assertEq(ilkRegistry.dec("RWA004-A"), DSTokenAbstract(addr.addr("RWA004")).decimals());
+        assertEq(ilkRegistry.class("RWA004-A"), 3);
+        (,pip,,) = RwaLiqOracle.ilks("RWA004-A");
+        assertEq(ilkRegistry.pip("RWA004-A"), pip);
+        assertEq(ilkRegistry.xlip("RWA004-A"), address(0));
+        assertEq(ilkRegistry.name("RWA004-A"), "RWA004-A: Centrifuge: Harbor Trade Credit");
+        assertEq(ilkRegistry.symbol("RWA004-A"), bytes32ToStr("RWA004-A"));
+
+        assertEq(ilkRegistry.join("RWA005-A"), addr.addr("RWA005"));
+        assertEq(ilkRegistry.gem("RWA005-A"), addr.addr("MCD_JOIN_RWA005_A"));
+        assertEq(ilkRegistry.dec("RWA005-A"), DSTokenAbstract(addr.addr("RWA005")).decimals());
+        assertEq(ilkRegistry.class("RWA005-A"), 3);
+        (,pip,,) = RwaLiqOracle.ilks("RWA005-A");
+        assertEq(ilkRegistry.pip("RWA005-A"), pip);
+        assertEq(ilkRegistry.xlip("RWA005-A"), address(0));
+        assertEq(ilkRegistry.name("RWA005-A"), "RWA005-A: Centrifuge: Fortunafi");
+        assertEq(ilkRegistry.symbol("RWA005-A"), bytes32ToStr("RWA005-A"));
+
+        assertEq(ilkRegistry.join("RWA006-A"), addr.addr("RWA006"));
+        assertEq(ilkRegistry.gem("RWA006-A"), addr.addr("MCD_JOIN_RWA006_A"));
+        assertEq(ilkRegistry.dec("RWA006-A"), DSTokenAbstract(addr.addr("RWA006")).decimals());
+        assertEq(ilkRegistry.class("RWA006-A"), 3);
+        (,pip,,) = RwaLiqOracle.ilks("RWA006-A");
+        assertEq(ilkRegistry.pip("RWA006-A"), pip);
+        assertEq(ilkRegistry.xlip("RWA006-A"), address(0));
+        assertEq(ilkRegistry.name("RWA006-A"), "RWA006-A: Centrifuge: Peoples Company");
+        assertEq(ilkRegistry.symbol("RWA006-A"), bytes32ToStr("RWA006-A"));
     }
 
     // function testFailWrongDay() public {
