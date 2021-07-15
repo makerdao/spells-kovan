@@ -1715,8 +1715,8 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertEq(ilkRegistry.name("RWA003-A"), "RWA003-A: Centrifuge: ConsolFreight");
         assertEq(ilkRegistry.symbol("RWA003-A"), bytes32ToStr("RWA003-A"));
 
-        assertEq(ilkRegistry.join("RWA004-A"), addr.addr("RWA004"));
-        assertEq(ilkRegistry.gem("RWA004-A"), addr.addr("MCD_JOIN_RWA004_A"));
+        assertEq(ilkRegistry.join("RWA004-A"), addr.addr("MCD_JOIN_RWA004_A"));
+        assertEq(ilkRegistry.gem("RWA004-A"), addr.addr("RWA004"));
         assertEq(ilkRegistry.dec("RWA004-A"), DSTokenAbstract(addr.addr("RWA004")).decimals());
         assertEq(ilkRegistry.class("RWA004-A"), 3);
         (,pip,,) = RwaLiqOracle.ilks("RWA004-A");
@@ -1725,8 +1725,8 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertEq(ilkRegistry.name("RWA004-A"), "RWA004-A: Centrifuge: Harbor Trade Credit");
         assertEq(ilkRegistry.symbol("RWA004-A"), bytes32ToStr("RWA004-A"));
 
-        assertEq(ilkRegistry.join("RWA005-A"), addr.addr("RWA005"));
-        assertEq(ilkRegistry.gem("RWA005-A"), addr.addr("MCD_JOIN_RWA005_A"));
+        assertEq(ilkRegistry.join("RWA005-A"), addr.addr("MCD_JOIN_RWA005_A"));
+        assertEq(ilkRegistry.gem("RWA005-A"), addr.addr("RWA005"));
         assertEq(ilkRegistry.dec("RWA005-A"), DSTokenAbstract(addr.addr("RWA005")).decimals());
         assertEq(ilkRegistry.class("RWA005-A"), 3);
         (,pip,,) = RwaLiqOracle.ilks("RWA005-A");
@@ -1735,8 +1735,8 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertEq(ilkRegistry.name("RWA005-A"), "RWA005-A: Centrifuge: Fortunafi");
         assertEq(ilkRegistry.symbol("RWA005-A"), bytes32ToStr("RWA005-A"));
 
-        assertEq(ilkRegistry.join("RWA006-A"), addr.addr("RWA006"));
-        assertEq(ilkRegistry.gem("RWA006-A"), addr.addr("MCD_JOIN_RWA006_A"));
+        assertEq(ilkRegistry.join("RWA006-A"), addr.addr("MCD_JOIN_RWA006_A"));
+        assertEq(ilkRegistry.gem("RWA006-A"), addr.addr("RWA006"));
         assertEq(ilkRegistry.dec("RWA006-A"), DSTokenAbstract(addr.addr("RWA006")).decimals());
         assertEq(ilkRegistry.class("RWA006-A"), 3);
         (,pip,,) = RwaLiqOracle.ilks("RWA006-A");
