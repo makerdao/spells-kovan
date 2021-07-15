@@ -223,7 +223,7 @@ contract DssSpellTest is DSTest, DSMath {
         }
     }
 
-    function setUp() public {
+    function setUp() public virtual {
         hevm = Hevm(address(CHEAT_CODE));
 
         //

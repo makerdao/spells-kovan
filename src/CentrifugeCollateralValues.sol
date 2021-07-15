@@ -28,3 +28,14 @@ struct CentrifugeCollateralValues {
     uint48 TAU;
     string DOC;
 }
+
+struct CentrifugeCollateralTestValues {
+    bytes32 ilk;
+    address LIQ;
+    address URN;
+    address ROOT;
+    address COORDINATOR;
+    address DROP;
+    address MEMBERLIST;
+    address MGR;
+}
