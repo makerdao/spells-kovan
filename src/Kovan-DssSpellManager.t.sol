@@ -39,7 +39,8 @@ interface TinlakeManagerLike {
     function exit(uint256 wad) external;
 }
 
-contract KovanManagerRPCRWA003 is DssSpellTest {
+contract KovanManagerRPC is DssSpellTest {
+    
     CentrifugeCollateralTestValues RWA003 = CentrifugeCollateralTestValues({
         ilk: "RWA003",
         LIQ: 0x2881c5dF65A8D81e38f7636122aFb456514804CC,
@@ -99,8 +100,10 @@ contract KovanManagerRPCRWA003 is DssSpellTest {
             setupCollateral(collaterals[i]);
         }
 
-        // spell is already executed on kovan
-        // executeSpell();
+        // execute spell and lock rwa token
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
 
         // lock each rwa token
         for (uint i = 0; i < collaterals.length; i++) {
