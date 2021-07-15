@@ -1428,7 +1428,6 @@ function checkCollateralValues(SystemValues storage values) internal {
 
                 (address flipper,,) = cat.ilks(ilk);
                 if (flipper != address(0)) {
-                    emit log_named_address("flipper", flipper);
                     FlipAbstract flip = FlipAbstract(flipper);
                     // Convert BP to system expected value
                     uint256 normalizedTestBeg = (values.collaterals[ilk].flip_beg + 10000)  * 10**14;
@@ -1521,10 +1520,6 @@ function checkCollateralValues(SystemValues storage values) internal {
                 }
             }
         }
-        // actual expected
-        emit log_named_uint("sub", sumlines);
-        emit log_named_uint("values.line_offset", values.line_offset * RAD);
-        emit log_named_uint("line", vat.Line());
         assertEq(sumlines + values.line_offset * RAD, vat.Line(), "TestError/vat-Line");
     }
 
@@ -1698,57 +1693,56 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertEq(chainlog.getAddress("MIP21_LIQUIDATION_ORACLE"), addr.addr("MIP21_LIQUIDATION_ORACLE"));
     }
 
-    // function testFailWrongDay() public {
-    //     require(spell.officeHours() == spellValues.office_hours_enabled);
-    //     if (spell.officeHours()) {
-    //         vote(address(spell));
-    //         scheduleWaitAndCastFailDay();
-    //     } else {
-    //         revert("Office Hours Disabled");
-    //     }
-    // }
+    function testFailWrongDay() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailDay();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
 
-    // function testFailTooEarly() public {
-    //     require(spell.officeHours() == spellValues.office_hours_enabled);
-    //     if (spell.officeHours()) {
-    //         vote(address(spell));
-    //         scheduleWaitAndCastFailEarly();
-    //     } else {
-    //         revert("Office Hours Disabled");
-    //     }
-    // }
+    function testFailTooEarly() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailEarly();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
 
-    // function testFailTooLate() public {
-    //     require(spell.officeHours() == spellValues.office_hours_enabled);
-    //     if (spell.officeHours()) {
-    //         vote(address(spell));
-    //         scheduleWaitAndCastFailLate();
-    //     } else {
-    //         revert("Office Hours Disabled");
-    //     }
-    // }
+    function testFailTooLate() public {
+        require(spell.officeHours() == spellValues.office_hours_enabled);
+        if (spell.officeHours()) {
+            vote(address(spell));
+            scheduleWaitAndCastFailLate();
+        } else {
+            revert("Office Hours Disabled");
+        }
+    }
 
-    // function testOnTime() public {
-    //     vote(address(spell));
-    //     scheduleWaitAndCast(address(spell));
-    // }
+    function testOnTime() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+    }
 
-    // function testCastCost() public {
-    //     vote(address(spell));
-    //     spell.schedule();
+    function testCastCost() public {
+        vote(address(spell));
+        spell.schedule();
 
-    //     castPreviousSpell();
+        castPreviousSpell();
 
-    //     hevm.warp(spell.nextCastTime());
-    //     uint256 startGas = gasleft();
-    //     spell.cast();
-    //     uint256 endGas = gasleft();
-    //     uint256 totalGas = startGas - endGas;
+        hevm.warp(spell.nextCastTime());
+        uint256 startGas = gasleft();
+        spell.cast();
+        uint256 endGas = gasleft();
+        uint256 totalGas = startGas - endGas;
 
-    //     assertTrue(spell.done());
-    //     emit log_named_uint("totalGas", totalGas);
-    //     // Fail if cast is too expensive
-    //     assertTrue(totalGas <= 10 * MILLION);
-    // }
+        assertTrue(spell.done());
+        // Fail if cast is too expensive
+        assertTrue(totalGas <= 10 * MILLION);
+    }
 
 }
