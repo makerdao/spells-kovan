@@ -1,8 +1,18 @@
 pragma solidity 0.6.12;
 
+import "ds-math/math.sol";
+import "ds-test/test.sol";
 import "dss-interfaces/Interfaces.sol";
-import "./Kovan-DssSpell.t.sol";
+import "./test/addresses_kovan.sol";
 import "./CentrifugeCollateralValues.sol";
+
+import {DssSpell} from "./Kovan-DssSpell.sol";
+
+interface Hevm {
+    function warp(uint) external;
+    function store(address,bytes32,bytes32) external;
+    function load(address,bytes32) external view returns (bytes32);
+}
 
 interface EpochCoordinatorLike {
     function closeEpoch() external;
@@ -39,16 +49,24 @@ interface TinlakeManagerLike {
     function exit(uint256 wad) external;
 }
 
-contract KovanManagerRPC is DssSpellTest {
+contract KovanManagerRPC is DSTest, DSMath {
+
+    Hevm hevm;
+    DssSpell spell;
+    Addresses addr  = new Addresses();
+
+    DSChiefAbstract chief = DSChiefAbstract(addr.addr("MCD_ADM"));
+    DaiAbstract dai = DaiAbstract(addr.addr("MCD_DAI"));
+    DSTokenAbstract gov = DSTokenAbstract(addr.addr("MCD_GOV"));
 
     uint constant initialSpellDaiBalance = 10000 ether;
     uint constant initialSpellDropBalance = 1000 ether;
 
     CentrifugeCollateralTestValues[] collaterals;
 
-    function setUp() public override {
-        super.setUp();
-        hevm = Hevm(address(CHEAT_CODE));
+    function setUp() public {
+        hevm = Hevm(HEVM_ADDRESS);
+        spell = new DssSpell();
 
         collaterals.push(CentrifugeCollateralTestValues({
             ilk: "RWA003",
@@ -112,7 +130,6 @@ contract KovanManagerRPC is DssSpellTest {
         for (uint i = 0; i < collaterals.length; i++) {
             lock(collaterals[i]);
         }
-
     }
 
     function setupCollateral(CentrifugeCollateralTestValues memory collateral) internal {
@@ -197,5 +214,35 @@ contract KovanManagerRPC is DssSpellTest {
         assertEq(dai.balanceOf(address(this)), preSpellDaiBalance - 10 ether);
         assertEq(drop.balanceOf(address(this)), preSpellDropBalance + 10 ether);
     }
+
+    function vote(address spell_) internal {
+        if (chief.hat() != spell_) {
+            hevm.store(
+                address(gov),
+                keccak256(abi.encode(address(this), uint256(1))),
+                bytes32(uint256(999999999999 ether))
+            );
+            gov.approve(address(chief), uint256(-1));
+            chief.lock(999999999999 ether);
+
+            address[] memory slate = new address[](1);
+
+            assertTrue(!DssSpell(spell_).done());
+
+            slate[0] = spell_;
+
+            chief.vote(slate);
+            chief.lift(spell_);
+        }
+        assertEq(chief.hat(), spell_);
+    }
+
+    function scheduleWaitAndCast(address spell_) internal {
+        DssSpell(spell_).schedule();
+        hevm.warp(DssSpell(spell_).nextCastTime());
+
+        DssSpell(spell_).cast();
+    }
+
 
 }
