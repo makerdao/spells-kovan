@@ -1664,6 +1664,40 @@ function checkCollateralValues(SystemValues storage values) internal {
         checkCollateralValues(afterSpell);
     }
 
+    function testNewChainlogValues() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        ChainlogAbstract chainlog = ChainlogAbstract(addr.addr("CHANGELOG"));
+
+        assertEq(chainlog.getAddress("RWA003"), addr.addr("RWA003"));
+        assertEq(chainlog.getAddress("MCD_JOIN_RWA003_A"), addr.addr("MCD_JOIN_RWA003_A"));
+        assertEq(chainlog.getAddress("RWA003_A_URN"), addr.addr("RWA003_A_URN"));
+        assertEq(chainlog.getAddress("RWA003_A_INPUT_CONDUIT"), addr.addr("RWA003_A_INPUT_CONDUIT"));
+        assertEq(chainlog.getAddress("RWA003_A_OUTPUT_CONDUIT"), addr.addr("RWA003_A_OUTPUT_CONDUIT"));
+
+        assertEq(chainlog.getAddress("RWA004"), addr.addr("RWA004"));
+        assertEq(chainlog.getAddress("MCD_JOIN_RWA004_A"), addr.addr("MCD_JOIN_RWA004_A"));
+        assertEq(chainlog.getAddress("RWA004_A_URN"), addr.addr("RWA004_A_URN"));
+        assertEq(chainlog.getAddress("RWA004_A_INPUT_CONDUIT"), addr.addr("RWA004_A_INPUT_CONDUIT"));
+        assertEq(chainlog.getAddress("RWA004_A_OUTPUT_CONDUIT"), addr.addr("RWA004_A_OUTPUT_CONDUIT"));
+
+        assertEq(chainlog.getAddress("RWA005"), addr.addr("RWA005"));
+        assertEq(chainlog.getAddress("MCD_JOIN_RWA005_A"), addr.addr("MCD_JOIN_RWA005_A"));
+        assertEq(chainlog.getAddress("RWA005_A_URN"), addr.addr("RWA005_A_URN"));
+        assertEq(chainlog.getAddress("RWA005_A_INPUT_CONDUIT"), addr.addr("RWA005_A_INPUT_CONDUIT"));
+        assertEq(chainlog.getAddress("RWA005_A_OUTPUT_CONDUIT"), addr.addr("RWA005_A_OUTPUT_CONDUIT"));
+
+        assertEq(chainlog.getAddress("RWA006"), addr.addr("RWA006"));
+        assertEq(chainlog.getAddress("MCD_JOIN_RWA006_A"), addr.addr("MCD_JOIN_RWA006_A"));
+        assertEq(chainlog.getAddress("RWA006_A_URN"), addr.addr("RWA006_A_URN"));
+        assertEq(chainlog.getAddress("RWA006_A_INPUT_CONDUIT"), addr.addr("RWA006_A_INPUT_CONDUIT"));
+        assertEq(chainlog.getAddress("RWA006_A_OUTPUT_CONDUIT"), addr.addr("RWA006_A_OUTPUT_CONDUIT"));
+
+        assertEq(chainlog.getAddress("MIP21_LIQUIDATION_ORACLE"), addr.addr("MIP21_LIQUIDATION_ORACLE"));
+    }
+
     // function testFailWrongDay() public {
     //     require(spell.officeHours() == spellValues.office_hours_enabled);
     //     if (spell.officeHours()) {
