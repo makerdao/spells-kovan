@@ -1703,7 +1703,7 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertTrue(spell.done());
 
         IlkRegistryAbstract ilkRegistry = IlkRegistryAbstract(addr.addr("ILK_REGISTRY"));
-        RwaLiqOracle = RwaLiquidationLike(addr.addr("MIP21_LIQUIDATION_ORACLE"));
+        RwaLiquidationLike RwaLiqOracle = RwaLiquidationLike(addr.addr("MIP21_LIQUIDATION_ORACLE"));
 
         assertEq(ilkRegistry.join("RWA003-A"), addr.addr("MCD_JOIN_RWA003_A"));
         assertEq(ilkRegistry.gem("RWA003-A"), addr.addr("RWA003"));
@@ -1745,7 +1745,7 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertEq(ilkRegistry.name("RWA006-A"), "RWA006-A: Centrifuge: Peoples Company");
         assertEq(ilkRegistry.symbol("RWA006-A"), bytes32ToStr("RWA006-A"));
     }
-    
+
     function testFailWrongDay() public {
         require(spell.officeHours() == spellValues.office_hours_enabled);
         if (spell.officeHours()) {
