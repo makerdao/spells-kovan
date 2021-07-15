@@ -5,6 +5,7 @@ import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
 import "./test/addresses_kovan.sol";
+import "./CentrifugeCollateralValues.sol";
 
 import {DssSpell} from "./Kovan-DssSpell.sol";
 
@@ -17,6 +18,8 @@ interface Hevm {
 interface SpellLike {
     function done() external view returns (bool);
     function cast() external;
+    function eta() external view returns (uint256);
+    function nextCastTime() external returns (uint256);
 }
 
 interface AuthLike {
@@ -249,6 +252,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all system configuration changes
         //
         afterSpell = SystemValues({
+            line_offset:           500 * MILLION,        // Offset between the global line against the sum of local lines
             pot_dsr:               0,                   // In basis points
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
@@ -1071,7 +1075,7 @@ contract DssSpellTest is DSTest, DSMath {
             calc_cut:     0
         });
 
-        centrifugeCollaterals["RWA003-A"] = CentrifugeCollateralValues({
+        afterSpell.collaterals["RWA003-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
             aL_gap:       0 * MILLION,
@@ -1102,7 +1106,7 @@ contract DssSpellTest is DSTest, DSMath {
         });
         //ilkRegistryName: "RWA003-A: Centrifuge: ConsolFreight",
 
-         centrifugeCollaterals["RWA004-A"] = CentrifugeCollateralValues({
+         afterSpell.collaterals["RWA004-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
             aL_gap:       0 * MILLION,
@@ -1134,7 +1138,7 @@ contract DssSpellTest is DSTest, DSMath {
         // ilkRegistryName: "RWA004-A: Centrifuge: Harbor Trade Credit",
         // PRICE: 8_014_300 * WAD,
 
-         centrifugeCollaterals["RWA005-A"] = CentrifugeCollateralValues({
+         afterSpell.collaterals["RWA005-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
             aL_gap:       0 * MILLION,
@@ -1166,7 +1170,7 @@ contract DssSpellTest is DSTest, DSMath {
         // ilkRegistryName: "RWA005-A: Centrifuge: Fortunafi",
         // PRICE: 16_380_375 * WAD,
 
-         centrifugeCollaterals["RWA006-A"] = CentrifugeCollateralValues({
+         afterSpell.collaterals["RWA006-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
             aL_gap:       0 * MILLION,
@@ -1748,6 +1752,7 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertTrue(totalGas <= 10 * MILLION);
     }
 
+    // from mainnet spell
     // function test_nextCastTime() public {
     //     hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
 
