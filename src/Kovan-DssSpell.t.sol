@@ -252,7 +252,7 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for all system configuration changes
         //
         afterSpell = SystemValues({
-            line_offset:           500 * MILLION,       // Offset between the global line against the sum of local lines
+            line_offset:           0,                   // Offset between the global line against the sum of local lines
             pot_dsr:               0,                   // In basis points
             pause_delay:           60,                  // In seconds
             vow_wait:              3600,                // In seconds
@@ -273,24 +273,6 @@ contract DssSpellTest is DSTest, DSMath {
             ilk_count:             31                   // Num expected in system
         });
 
-        // afterSpell = SystemValues({
-        //     pot_dsr:               0,                     // In basis points
-        //     vat_Line:              1887678025714652012761622719462012263810031275685188788, // current system values 
-        //     pause_delay:           60,                    // In seconds
-        //     vow_wait:              3600,                  // In seconds
-        //     vow_dump:              2,                     // In whole Dai units
-        //     vow_sump:              50,                    // In whole Dai units
-        //     vow_bump:              10,                    // In whole Dai units
-        //     vow_hump:              500102513227513227500000000000000000000000000000, // current system values
-        //     cat_box:               10 * THOUSAND,         // In whole Dai units
-        //     osm_mom_authority:     addr.addr("MCD_ADM"),  // OsmMom authority -> added addr.addr("MCD_ADM")
-        //     flipper_mom_authority: addr.addr("MCD_ADM"),  // FlipperMom authority -> added addr.addr("MCD_ADM")
-        //     ilk_count:             25                     // Num expected in system
-        // });
-
-        //
-        // Test for all collateral based changes here
-        //
         afterSpell.collaterals["ETH-A"] = CollateralValues({
             aL_enabled:   false,           // DssAutoLine is enabled?
             aL_line:      0 * MILLION,     // In whole Dai units
@@ -1021,7 +1003,7 @@ contract DssSpellTest is DSTest, DSMath {
             aL_line:      0 * MILLION,
             aL_gap:       0 * MILLION,
             aL_ttl:       0,
-            line:         5 * MILLION,
+            line:         20 * MILLION,
             dust:         0,
             pct:          350,
             mat:          10500,
@@ -1074,7 +1056,6 @@ contract DssSpellTest is DSTest, DSMath {
             calc_step:    0,
             calc_cut:     0
         });
-
         afterSpell.collaterals["RWA003-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
@@ -1104,9 +1085,7 @@ contract DssSpellTest is DSTest, DSMath {
             calc_step:    0,
             calc_cut:     0
         });
-        //ilkRegistryName: "RWA003-A: Centrifuge: ConsolFreight",
-
-         afterSpell.collaterals["RWA004-A"] = CollateralValues({
+        afterSpell.collaterals["RWA004-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
             aL_gap:       0 * MILLION,
@@ -1135,9 +1114,6 @@ contract DssSpellTest is DSTest, DSMath {
             calc_step:    0,
             calc_cut:     0
         });
-        // ilkRegistryName: "RWA004-A: Centrifuge: Harbor Trade Credit",
-        // PRICE: 8_014_300 * WAD,
-
          afterSpell.collaterals["RWA005-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
@@ -1167,9 +1143,6 @@ contract DssSpellTest is DSTest, DSMath {
             calc_step:    0,
             calc_cut:     0
         });
-        // ilkRegistryName: "RWA005-A: Centrifuge: Fortunafi",
-        // PRICE: 16_380_375 * WAD,
-
          afterSpell.collaterals["RWA006-A"] = CollateralValues({
             aL_enabled:   false,
             aL_line:      0 * MILLION,
@@ -1199,9 +1172,6 @@ contract DssSpellTest is DSTest, DSMath {
             calc_step:    0,
             calc_cut:     0
         });
-        // ilkRegistryName: "RWA006-A: Centrifuge: Peoples Company",
-        // PRICE: 20_808_000 * WAD,
-
     }
 
     function scheduleWaitAndCastFailDay() public {
@@ -1457,20 +1427,22 @@ function checkCollateralValues(SystemValues storage values) internal {
                 assertTrue(dunk >= RAD && dunk < MILLION * RAD, string(abi.encodePacked("TestError/cat-dunk-range-", ilk)));
 
                 (address flipper,,) = cat.ilks(ilk);
-                FlipAbstract flip = FlipAbstract(flipper);
-                // Convert BP to system expected value
-                uint256 normalizedTestBeg = (values.collaterals[ilk].flip_beg + 10000)  * 10**14;
-                assertEq(uint256(flip.beg()), normalizedTestBeg, string(abi.encodePacked("TestError/flip-beg-", ilk)));
-                assertTrue(flip.beg() >= WAD && flip.beg() <= 110 * WAD / 100, string(abi.encodePacked("TestError/flip-beg-range-", ilk))); // gte 0% and lte 10%
-                assertEq(uint256(flip.ttl()), values.collaterals[ilk].flip_ttl, string(abi.encodePacked("TestError/flip-ttl-", ilk)));
-                assertTrue(flip.ttl() >= 600 && flip.ttl() < 10 hours, string(abi.encodePacked("TestError/flip-ttl-range-", ilk)));         // gt eq 10 minutes and lt 10 hours
-                assertEq(uint256(flip.tau()), values.collaterals[ilk].flip_tau, string(abi.encodePacked("TestError/flip-tau-", ilk)));
-                assertTrue(flip.tau() >= 600 && flip.tau() <= 3 days, string(abi.encodePacked("TestError/flip-tau-range-", ilk)));          // gt eq 10 minutes and lt eq 3 days
+                if (flipper != address(0)) {
+                    FlipAbstract flip = FlipAbstract(flipper);
+                    // Convert BP to system expected value
+                    uint256 normalizedTestBeg = (values.collaterals[ilk].flip_beg + 10000)  * 10**14;
+                    assertEq(uint256(flip.beg()), normalizedTestBeg, string(abi.encodePacked("TestError/flip-beg-", ilk)));
+                    assertTrue(flip.beg() >= WAD && flip.beg() <= 110 * WAD / 100, string(abi.encodePacked("TestError/flip-beg-range-", ilk))); // gte 0% and lte 10%
+                    assertEq(uint256(flip.ttl()), values.collaterals[ilk].flip_ttl, string(abi.encodePacked("TestError/flip-ttl-", ilk)));
+                    assertTrue(flip.ttl() >= 600 && flip.ttl() < 10 hours, string(abi.encodePacked("TestError/flip-ttl-range-", ilk)));         // gt eq 10 minutes and lt 10 hours
+                    assertEq(uint256(flip.tau()), values.collaterals[ilk].flip_tau, string(abi.encodePacked("TestError/flip-tau-", ilk)));
+                    assertTrue(flip.tau() >= 600 && flip.tau() <= 3 days, string(abi.encodePacked("TestError/flip-tau-range-", ilk)));          // gt eq 10 minutes and lt eq 3 days
 
-                assertEq(flip.wards(address(flipMom)), values.collaterals[ilk].flipper_mom, string(abi.encodePacked("TestError/flip-flipperMom-auth-", ilk)));
+                    assertEq(flip.wards(address(flipMom)), values.collaterals[ilk].flipper_mom, string(abi.encodePacked("TestError/flip-flipperMom-auth-", ilk)));
 
-                assertEq(flip.wards(address(cat)), values.collaterals[ilk].liqOn ? 1 : 0, string(abi.encodePacked("TestError/flip-liqOn-", ilk)));
-                assertEq(flip.wards(address(pauseProxy)), 1, string(abi.encodePacked("TestError/flip-pause-proxy-auth-", ilk))); // Check pause_proxy ward
+                    assertEq(flip.wards(address(cat)), values.collaterals[ilk].liqOn ? 1 : 0, string(abi.encodePacked("TestError/flip-liqOn-", ilk)));
+                    assertEq(flip.wards(address(pauseProxy)), 1, string(abi.encodePacked("TestError/flip-pause-proxy-auth-", ilk))); // Check pause_proxy ward
+                }
                 }
             }
             if (values.collaterals[ilk].liqType == "clip") {
@@ -1548,7 +1520,10 @@ function checkCollateralValues(SystemValues storage values) internal {
                 }
             }
         }
-        //       actual    expected
+        // actual expected
+        emit log_named_uint("sub", sumlines);
+        emit log_named_uint("values.line_offset", values.line_offset * RAD);
+        emit log_named_uint("line", vat.Line());
         assertEq(sumlines + values.line_offset * RAD, vat.Line(), "TestError/vat-Line");
     }
 
@@ -1695,7 +1670,12 @@ function checkCollateralValues(SystemValues storage values) internal {
 
     //     ChainlogAbstract chainLog = ChainlogAbstract(addr.addr("CHANGELOG"));
 
-    //     assertEq(chainLog.getAddress("MCD_FLASH"), addr.addr("MCD_FLASH"));
+        // assertEq(chainlog.getAddress(gemID), addr.addr(gemID));
+        // assertEq(chainlog.getAddress(joinID), addr.addr(joinID));
+        // assertEq(chainlog.getAddress(urnID), addr.addr(urnID));
+        // assertEq(chainlog.getAddress(inputConduitID), addr.addr(inputConduitID));
+        // assertEq(chainlog.getAddress(outputConduitID), addr.addr(outputConduitID));
+        // assertEq(chainlog.getAddress("MIP21_LIQUIDATION_ORACLE"), addr.addr("MIP21_LIQUIDATION_ORACLE"));
     // }
 
     // function testFailWrongDay() public {
@@ -1750,74 +1730,5 @@ function checkCollateralValues(SystemValues storage values) internal {
     //     // Fail if cast is too expensive
     //     assertTrue(totalGas <= 10 * MILLION);
     // }
-
-    // from mainnet spell
-    // function test_nextCastTime() public {
-    //     hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
-
-    //     vote(address(spell));
-    //     spell.schedule();
-
-    //     uint256 monday_1400_UTC = 1606744800; // Nov 30, 2020
-    //     uint256 monday_2100_UTC = 1606770000; // Nov 30, 2020
-
-    //     // Day tests
-    //     hevm.warp(monday_1400_UTC);                                    // Monday,   14:00 UTC
-    //     assertEq(spell.nextCastTime(), monday_1400_UTC);               // Monday,   14:00 UTC
-
-    //     if (spell.officeHours()) {
-    //         hevm.warp(monday_1400_UTC - 1 days);                       // Sunday,   14:00 UTC
-    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
-
-    //         hevm.warp(monday_1400_UTC - 2 days);                       // Saturday, 14:00 UTC
-    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
-
-    //         hevm.warp(monday_1400_UTC - 3 days);                       // Friday,   14:00 UTC
-    //         assertEq(spell.nextCastTime(), monday_1400_UTC - 3 days);  // Able to cast
-
-    //         hevm.warp(monday_2100_UTC);                                // Monday,   21:00 UTC
-    //         assertEq(spell.nextCastTime(), monday_1400_UTC + 1 days);  // Tuesday,  14:00 UTC
-
-    //         hevm.warp(monday_2100_UTC - 1 days);                       // Sunday,   21:00 UTC
-    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
-
-    //         hevm.warp(monday_2100_UTC - 2 days);                       // Saturday, 21:00 UTC
-    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
-
-    //         hevm.warp(monday_2100_UTC - 3 days);                       // Friday,   21:00 UTC
-    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
-
-    //         // Time tests
-    //         uint256 castTime;
-
-    //         for(uint256 i = 0; i < 5; i++) {
-    //             castTime = monday_1400_UTC + i * 1 days; // Next day at 14:00 UTC
-    //             hevm.warp(castTime - 1 seconds); // 13:59:59 UTC
-    //             assertEq(spell.nextCastTime(), castTime);
-
-    //             hevm.warp(castTime + 7 hours + 1 seconds); // 21:00:01 UTC
-    //             if (i < 4) {
-    //                 assertEq(spell.nextCastTime(), monday_1400_UTC + (i + 1) * 1 days); // Next day at 14:00 UTC
-    //             } else {
-    //                 assertEq(spell.nextCastTime(), monday_1400_UTC + 7 days); // Next monday at 14:00 UTC (friday case)
-    //             }
-    //         }
-    //     }
-    // }
-
-    // function testFail_notScheduled() public view {
-    //     spell.nextCastTime();
-    // }
-
-    // function test_use_eta() public {
-    //     hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
-
-    //     vote(address(spell));
-    //     spell.schedule();
-
-    //     uint256 castTime = spell.nextCastTime();
-    //     assertEq(castTime, spell.eta());
-    // }
-
 
 }
