@@ -45,7 +45,6 @@ contract DssSpellTest is DSTest, DSMath {
         address deployed_spell;
         uint256 deployed_spell_created;
         address previous_spell;
-        uint256 previous_spell_execution_time;
         bool    office_hours_enabled;
         uint256 expiration_threshold;
     }
@@ -81,6 +80,7 @@ contract DssSpellTest is DSTest, DSMath {
     }
 
     struct SystemValues {
+        uint256 line_offset;
         uint256 pot_dsr;
         uint256 pause_delay;
         uint256 vow_wait;
@@ -108,8 +108,6 @@ contract DssSpellTest is DSTest, DSMath {
     Hevm hevm;
     Rates     rates = new Rates();
     Addresses addr  = new Addresses();
-
-    mapping (bytes32 => CentrifugeCollateralValues) centrifugeCollaterals;
     
     // KOVAN ADDRESSES
     DSPauseAbstract        pause = DSPauseAbstract(    addr.addr("MCD_PAUSE"));
@@ -135,9 +133,6 @@ contract DssSpellTest is DSTest, DSMath {
     ClipperMomAbstract   clipMom = ClipperMomAbstract( addr.addr("CLIPPER_MOM"));
     DssAutoLineAbstract autoLine = DssAutoLineAbstract(addr.addr("MCD_IAM_AUTO_LINE"));
 
-    // Faucet
-    FaucetAbstract        faucet = FaucetAbstract(     addr.addr("FAUCET"));
-
     DssSpell spell;
 
     // CHEAT_CODE = 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D
@@ -150,10 +145,6 @@ contract DssSpellTest is DSTest, DSMath {
     uint256 constant BILLION    = 10 ** 9;
     uint256 constant RAD        = 10 ** 45;
 
-    uint256 constant TWO_PCT            = 1000000000627937192491029810;
-    uint256 constant FOUR_PT_FIVE_PCT   = 1000000001395766281313196627;
-    uint256 constant SIX_PCT            = 1000000001847694957439350562;
-    uint256 constant SEVEN_PCT          = 1000000002145441671308778766;
 
     uint256 constant monthly_expiration = 4 days;
     uint256 constant weekly_expiration = 30 days;
@@ -198,6 +189,15 @@ contract DssSpellTest is DSTest, DSMath {
     function divup(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = add(x, sub(y, 1)) / y;
     }
+
+    function bytes32ToStr(bytes32 _bytes32) internal pure returns (string memory) {
+        bytes memory bytesArray = new bytes(32);
+        for (uint256 i; i < 32; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        return string(bytesArray);
+    }
+
     // 10^-5 (tenth of a basis point) as a RAY
     uint256 TOLERANCE = 10 ** 22;
 
@@ -217,8 +217,15 @@ contract DssSpellTest is DSTest, DSMath {
         SpellLike prevSpell = SpellLike(spellValues.previous_spell);
         // warp and cast previous spell so values are up-to-date to test against
         if (prevSpell != SpellLike(0) && !prevSpell.done()) {
-            hevm.warp(spellValues.previous_spell_execution_time);
-            prevSpell.cast();
+            if (prevSpell.eta() == 0) {
+                vote(address(prevSpell));
+                scheduleWaitAndCast(address(prevSpell));
+            }
+            else {
+                // jump to nextCastTime to be a little more forgiving on the spell execution time
+                hevm.warp(prevSpell.nextCastTime());
+                prevSpell.cast();
+            }
         }
     }
 
@@ -232,7 +239,6 @@ contract DssSpellTest is DSTest, DSMath {
             deployed_spell:                 address(0x9fbeA12afC3A8b431D41A98943E8E0e0D226aD8d),        // populate with deployed spell if deployed
             deployed_spell_created:         1623784720,        // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
-            previous_spell_execution_time:  1614790361,        // Time to warp to in order to allow the previous spell to be cast ignored if PREV_SPELL is SpellLike(address(0)).
             office_hours_enabled:           false,             // true if officehours is expected to be enabled in the spell
             expiration_threshold:           weekly_expiration  // (weekly_expiration,monthly_expiration) if weekly or monthly spell
         });
@@ -260,8 +266,23 @@ contract DssSpellTest is DSTest, DSMath {
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
             clipper_mom_authority: address(chief),      // ClipperMom authority
-            ilk_count:             27                   // Num expected in system
+            ilk_count:             31                   // Num expected in system
         });
+
+        // afterSpell = SystemValues({
+        //     pot_dsr:               0,                     // In basis points
+        //     vat_Line:              1887678025714652012761622719462012263810031275685188788, // current system values 
+        //     pause_delay:           60,                    // In seconds
+        //     vow_wait:              3600,                  // In seconds
+        //     vow_dump:              2,                     // In whole Dai units
+        //     vow_sump:              50,                    // In whole Dai units
+        //     vow_bump:              10,                    // In whole Dai units
+        //     vow_hump:              500102513227513227500000000000000000000000000000, // current system values
+        //     cat_box:               10 * THOUSAND,         // In whole Dai units
+        //     osm_mom_authority:     addr.addr("MCD_ADM"),  // OsmMom authority -> added addr.addr("MCD_ADM")
+        //     flipper_mom_authority: addr.addr("MCD_ADM"),  // FlipperMom authority -> added addr.addr("MCD_ADM")
+        //     ilk_count:             25                     // Num expected in system
+        // });
 
         //
         // Test for all collateral based changes here
@@ -1254,7 +1275,7 @@ contract DssSpellTest is DSTest, DSMath {
         }
     }
 
-    function checkSystemValues(SystemValues storage values) internal {
+   function checkSystemValues(SystemValues storage values) internal {
         // dsr
         uint256 expectedDSRRate = rates.rates(values.pot_dsr);
         // make sure dsr is less than 100% APR
@@ -1326,14 +1347,14 @@ contract DssSpellTest is DSTest, DSMath {
         {
             uint256 normalizedBox = values.cat_box * RAD;
             assertEq(cat.box(), normalizedBox, "TestError/cat-box");
-            assertTrue(cat.box() >= THOUSAND * RAD && cat.box() <= 50 * MILLION * RAD, "TestError/cat-box-range");
+            assertTrue(cat.box() >= MILLION * RAD && cat.box() <= 50 * MILLION * RAD, "TestError/cat-box-range");
         }
 
         // Hole value in RAD
         {
             uint256 normalizedHole = values.dog_Hole * RAD;
             assertEq(dog.Hole(), normalizedHole, "TestError/dog-Hole");
-            assertTrue(dog.Hole() >= THOUSAND * RAD && dog.Hole() <= 200 * MILLION * RAD, "TestError/dog-Hole-range");
+            assertTrue(dog.Hole() >= MILLION * RAD && dog.Hole() <= 200 * MILLION * RAD, "TestError/dog-Hole-range");
         }
 
         // check Pause authority
@@ -1364,8 +1385,8 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(flap.tau() > 0 && flap.tau() < 2678400, "TestError/flap-tau-range"); // gt 0 && lt 1 month
         assertTrue(flap.tau() >= flap.ttl(), "TestError/flap-tau-ttl");
     }
-
-    function checkCollateralValues(SystemValues storage values) internal {
+    
+function checkCollateralValues(SystemValues storage values) internal {
         uint256 sumlines;
         bytes32[] memory ilks = reg.list();
         for(uint256 i = 0; i < ilks.length; i++) {
@@ -1401,7 +1422,7 @@ contract DssSpellTest is DSTest, DSMath {
             }
             uint256 normalizedTestDust = values.collaterals[ilk].dust * RAD;
             assertEq(dust, normalizedTestDust, string(abi.encodePacked("TestError/vat-dust-", ilk)));
-            assertTrue((dust >= RAD && dust < 20 * THOUSAND * RAD) || dust == 0, string(abi.encodePacked("TestError/vat-dust-range-", ilk))); // eq 0 or gt eq 1 and lt 20k
+            assertTrue((dust >= RAD && dust < 100 * THOUSAND * RAD) || dust == 0, string(abi.encodePacked("TestError/vat-dust-range-", ilk))); // eq 0 or gt eq 1 and lt 100k
             }
 
             {
@@ -1525,7 +1546,7 @@ contract DssSpellTest is DSTest, DSMath {
             }
         }
         //       actual    expected
-        assertEq(sumlines, vat.Line(), "TestError/vat-Line");
+        assertEq(sumlines + values.line_offset * RAD, vat.Line(), "TestError/vat-Line");
     }
 
     function getOSMPrice(address pip) internal returns (uint256) {
@@ -1626,197 +1647,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(false);
     }
 
-	function checkIlkIntegration(
-        bytes32 _ilk,
-        GemJoinAbstract join,
-        FlipAbstract flip,
-        address pip,
-        bool _isOSM,
-        bool _checkLiquidations,
-        bool _transferFee
-    ) public {
-        DSTokenAbstract token = DSTokenAbstract(join.gem());
-
-        if (_isOSM) OsmAbstract(pip).poke();
-        hevm.warp(block.timestamp + 3601);
-        if (_isOSM) OsmAbstract(pip).poke();
-        spotter.poke(_ilk);
-
-        // Authorization
-        assertEq(join.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(join)), 1);
-        assertEq(flip.wards(address(end)), 1);
-        assertEq(flip.wards(address(flipMom)), 1);
-        if (_isOSM) {
-            assertEq(OsmAbstract(pip).wards(address(osmMom)), 1);
-            assertEq(OsmAbstract(pip).bud(address(spotter)), 1);
-            assertEq(OsmAbstract(pip).bud(address(end)), 1);
-            assertEq(MedianAbstract(OsmAbstract(pip).src()).bud(pip), 1);
-        }
-
-        (,,,, uint256 dust) = vat.ilks(_ilk);
-        dust /= RAY;
-        uint256 amount = 2 * dust * WAD / (_isOSM ? getOSMPrice(pip) : uint256(DSValueAbstract(pip).read()));
-        giveTokens(token, amount);
-
-        assertEq(token.balanceOf(address(this)), amount);
-        assertEq(vat.gem(_ilk, address(this)), 0);
-        token.approve(address(join), amount);
-        join.join(address(this), amount);
-        assertEq(token.balanceOf(address(this)), 0);
-        if (_transferFee) {
-            amount = vat.gem(_ilk, address(this));
-            assertTrue(amount > 0);
-        }
-        assertEq(vat.gem(_ilk, address(this)), amount);
-
-        // Tick the fees forward so that art != dai in wad units
-        hevm.warp(block.timestamp + 1);
-        jug.drip(_ilk);
-
-        // Deposit collateral, generate DAI
-        (,uint256 rate,,,) = vat.ilks(_ilk);
-        assertEq(vat.dai(address(this)), 0);
-        vat.frob(_ilk, address(this), address(this), address(this), int256(amount), int256(divup(mul(RAY, dust), rate)));
-        assertEq(vat.gem(_ilk, address(this)), 0);
-        assertTrue(vat.dai(address(this)) >= dust * RAY);
-        assertTrue(vat.dai(address(this)) <= (dust + 1) * RAY);
-
-        // Payback DAI, withdraw collateral
-        vat.frob(_ilk, address(this), address(this), address(this), -int256(amount), -int256(divup(mul(RAY, dust), rate)));
-        assertEq(vat.gem(_ilk, address(this)), amount);
-        assertEq(vat.dai(address(this)), 0);
-
-        // Withdraw from adapter
-        join.exit(address(this), amount);
-        if (_transferFee) {
-            amount = token.balanceOf(address(this));
-        }
-        assertEq(token.balanceOf(address(this)), amount);
-        assertEq(vat.gem(_ilk, address(this)), 0);
-
-        // Generate new DAI to force a liquidation
-        token.approve(address(join), amount);
-        join.join(address(this), amount);
-        if (_transferFee) {
-            amount = vat.gem(_ilk, address(this));
-        }
-        // dart max amount of DAI
-        (,,uint256 spotV,,) = vat.ilks(_ilk);
-        vat.frob(_ilk, address(this), address(this), address(this), int256(amount), int256(mul(amount, spotV) / rate));
-        hevm.warp(block.timestamp + 1);
-        jug.drip(_ilk);
-        assertEq(flip.kicks(), 0);
-        if (_checkLiquidations) {
-            cat.bite(_ilk, address(this));
-            assertEq(flip.kicks(), 1);
-        }
-
-        // Dump all dai for next run
-        vat.move(address(this), address(0x0), vat.dai(address(this)));
-    }
-
-	function checkUNIV2LPIntegration(
-        bytes32 _ilk,
-        GemJoinAbstract join,
-        FlipAbstract flip,
-        LPOsmAbstract pip,
-        address _medianizer1,
-        address _medianizer2,
-        bool _isMedian1,
-        bool _isMedian2,
-        bool _checkLiquidations
-    ) public {
-        DSTokenAbstract token = DSTokenAbstract(join.gem());
-
-        pip.poke();
-        hevm.warp(block.timestamp + 3601);
-        pip.poke();
-        spotter.poke(_ilk);
-
-        // Check medianizer sources
-        assertEq(pip.src(), address(token));
-        assertEq(pip.orb0(), _medianizer1);
-        assertEq(pip.orb1(), _medianizer2);
-
-        // Authorization
-        assertEq(join.wards(pauseProxy), 1);
-        assertEq(vat.wards(address(join)), 1);
-        assertEq(flip.wards(address(end)), 1);
-        assertEq(flip.wards(address(flipMom)), 1);
-        assertEq(pip.wards(address(osmMom)), 1);
-        assertEq(pip.bud(address(spotter)), 1);
-        assertEq(pip.bud(address(end)), 1);
-        if (_isMedian1) assertEq(MedianAbstract(_medianizer1).bud(address(pip)), 1);
-        if (_isMedian2) assertEq(MedianAbstract(_medianizer2).bud(address(pip)), 1);
-
-        (,,,, uint256 dust) = vat.ilks(_ilk);
-        dust /= RAY;
-        uint256 amount = 2 * dust * WAD / getUNIV2LPPrice(address(pip));
-        giveTokens(token, amount);
-
-        assertEq(token.balanceOf(address(this)), amount);
-        assertEq(vat.gem(_ilk, address(this)), 0);
-        token.approve(address(join), amount);
-        join.join(address(this), amount);
-        assertEq(token.balanceOf(address(this)), 0);
-        assertEq(vat.gem(_ilk, address(this)), amount);
-
-        // Tick the fees forward so that art != dai in wad units
-        hevm.warp(block.timestamp + 1);
-        jug.drip(_ilk);
-
-        // Deposit collateral, generate DAI
-        (,uint256 rate,,,) = vat.ilks(_ilk);
-        assertEq(vat.dai(address(this)), 0);
-        vat.frob(_ilk, address(this), address(this), address(this), int256(amount), int256(divup(mul(RAY, dust), rate)));
-        assertEq(vat.gem(_ilk, address(this)), 0);
-        assertTrue(vat.dai(address(this)) >= dust * RAY && vat.dai(address(this)) <= (dust + 1) * RAY);
-
-        // Payback DAI, withdraw collateral
-        vat.frob(_ilk, address(this), address(this), address(this), -int256(amount), -int256(divup(mul(RAY, dust), rate)));
-        assertEq(vat.gem(_ilk, address(this)), amount);
-        assertEq(vat.dai(address(this)), 0);
-
-        // Withdraw from adapter
-        join.exit(address(this), amount);
-        assertEq(token.balanceOf(address(this)), amount);
-        assertEq(vat.gem(_ilk, address(this)), 0);
-
-        // Generate new DAI to force a liquidation
-        token.approve(address(join), amount);
-        join.join(address(this), amount);
-        // dart max amount of DAI
-        (,,uint256 spotV,,) = vat.ilks(_ilk);
-        vat.frob(_ilk, address(this), address(this), address(this), int256(amount), int256(mul(amount, spotV) / rate));
-        hevm.warp(block.timestamp + 1);
-        jug.drip(_ilk);
-        assertEq(flip.kicks(), 0);
-        if (_checkLiquidations) {
-            cat.bite(_ilk, address(this));
-            assertEq(flip.kicks(), 1);
-        }
-
-        // Dump all dai for next run
-        vat.move(address(this), address(0x0), vat.dai(address(this)));
-    }
-
-    // function testCollateralIntegrations() public {
-    //     vote(address(spell));
-    //     scheduleWaitAndCast(address(spell));
-    //     assertTrue(spell.done());
-
-    //     // Insert new collateral tests here
-    //     checkIlkIntegration(
-    //         "PAXG-A",
-    //         GemJoinAbstract(addr.addr("MCD_JOIN_PAXG_A")),
-    //         FlipAbstract(addr.addr("MCD_FLIP_PAXG_A")),
-    //         addr.addr("PIP_PAXG"),
-    //         true,
-    //         true,
-    //         true
-    //     );
-    // }
+    // check integrations for RWA003 - RWA006
 
     function getExtcodesize(address target) public view returns (uint256 exsize) {
         assembly {
@@ -1917,65 +1748,72 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(totalGas <= 10 * MILLION);
     }
 
-    function testFlash() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
+    // function test_nextCastTime() public {
+    //     hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
 
-        uint256 vowDai = vat.dai(address(vow));
+    //     vote(address(spell));
+    //     spell.schedule();
 
-        // Give ourselves tokens for repayment in the callbacks
-        giveTokens(DSTokenAbstract(address(dai)), 1_000 * WAD);
+    //     uint256 monday_1400_UTC = 1606744800; // Nov 30, 2020
+    //     uint256 monday_2100_UTC = 1606770000; // Nov 30, 2020
 
-        FlashLike flash = FlashLike(addr.addr("MCD_FLASH"));
-        assertEq(flash.vat(), address(vat));
-        assertEq(flash.daiJoin(), address(daiJoin));
-        assertEq(flash.dai(), address(dai));
-        assertEq(flash.vow(), address(vow));
-        assertEq(flash.max(), 500 * MILLION * WAD);
-        assertEq(flash.toll(), 5 * WAD / 10000);
-        assertEq(flash.maxFlashLoan(address(dai)), 500 * MILLION * WAD);
-        assertEq(flash.flashFee(address(dai), 1 * MILLION * WAD), 500 * WAD); // 500 DAI fee on a 1M loan
-        flash.flashLoan(address(this), address(dai), 1 * MILLION * WAD, "");
-        flash.vatDaiFlashLoan(address(this), 1 * MILLION * RAD, "");
-        assertEq(vat.sin(address(flash)), 0);
-        assertEq(vat.dai(address(flash)), 1000 * RAD);
-        flash.accrue();
-        assertEq(vat.dai(address(flash)), 0);
-        assertEq(vat.dai(address(vow)), vowDai + 1000 * RAD);
-    }
+    //     // Day tests
+    //     hevm.warp(monday_1400_UTC);                                    // Monday,   14:00 UTC
+    //     assertEq(spell.nextCastTime(), monday_1400_UTC);               // Monday,   14:00 UTC
 
-    function onFlashLoan(
-        address initiator,
-        address token,
-        uint256 amount,
-        uint256 fee,
-        bytes calldata
-    ) external returns (bytes32) {
-        assertEq(initiator, address(this));   
-        assertEq(token, address(dai));
-        assertEq(amount, 1 * MILLION * WAD);
-        assertEq(fee, 500 * WAD);
+    //     if (spell.officeHours()) {
+    //         hevm.warp(monday_1400_UTC - 1 days);                       // Sunday,   14:00 UTC
+    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
 
-        dai.approve(msg.sender, 1_000_500 * WAD);
+    //         hevm.warp(monday_1400_UTC - 2 days);                       // Saturday, 14:00 UTC
+    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
 
-        return keccak256("ERC3156FlashBorrower.onFlashLoan");
-    }
+    //         hevm.warp(monday_1400_UTC - 3 days);                       // Friday,   14:00 UTC
+    //         assertEq(spell.nextCastTime(), monday_1400_UTC - 3 days);  // Able to cast
 
-    function onVatDaiFlashLoan(
-        address initiator,
-        uint256 amount,
-        uint256 fee,
-        bytes calldata
-    ) external returns (bytes32) {
-        assertEq(initiator, address(this));   
-        assertEq(amount, 1 * MILLION * RAD);
-        assertEq(fee, 500 * RAD);
+    //         hevm.warp(monday_2100_UTC);                                // Monday,   21:00 UTC
+    //         assertEq(spell.nextCastTime(), monday_1400_UTC + 1 days);  // Tuesday,  14:00 UTC
 
-        dai.approve(address(daiJoin), 500 * WAD);
-        daiJoin.join(address(this), 500 * WAD);
-        vat.move(address(this), msg.sender, 1_000_500 * RAD);
+    //         hevm.warp(monday_2100_UTC - 1 days);                       // Sunday,   21:00 UTC
+    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
 
-        return keccak256("VatDaiFlashBorrower.onVatDaiFlashLoan");
-    }
+    //         hevm.warp(monday_2100_UTC - 2 days);                       // Saturday, 21:00 UTC
+    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+    //         hevm.warp(monday_2100_UTC - 3 days);                       // Friday,   21:00 UTC
+    //         assertEq(spell.nextCastTime(), monday_1400_UTC);           // Monday,   14:00 UTC
+
+    //         // Time tests
+    //         uint256 castTime;
+
+    //         for(uint256 i = 0; i < 5; i++) {
+    //             castTime = monday_1400_UTC + i * 1 days; // Next day at 14:00 UTC
+    //             hevm.warp(castTime - 1 seconds); // 13:59:59 UTC
+    //             assertEq(spell.nextCastTime(), castTime);
+
+    //             hevm.warp(castTime + 7 hours + 1 seconds); // 21:00:01 UTC
+    //             if (i < 4) {
+    //                 assertEq(spell.nextCastTime(), monday_1400_UTC + (i + 1) * 1 days); // Next day at 14:00 UTC
+    //             } else {
+    //                 assertEq(spell.nextCastTime(), monday_1400_UTC + 7 days); // Next monday at 14:00 UTC (friday case)
+    //             }
+    //         }
+    //     }
+    // }
+
+    // function testFail_notScheduled() public view {
+    //     spell.nextCastTime();
+    // }
+
+    // function test_use_eta() public {
+    //     hevm.warp(1606161600); // Nov 23, 20 UTC (could be cast Nov 26)
+
+    //     vote(address(spell));
+    //     spell.schedule();
+
+    //     uint256 castTime = spell.nextCastTime();
+    //     assertEq(castTime, spell.eta());
+    // }
+
+
 }
