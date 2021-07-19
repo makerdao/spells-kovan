@@ -49,6 +49,13 @@ interface RwaLiquidationLike {
 interface RwaUrnLike {
     function hope(address) external;
     function draw(uint256) external;
+    function lock(uint256 wad) external;
+    function outputConduit() external view returns (address);
+}
+
+interface TinlakeManagerLike {
+    function lock(uint256 wad) external;
+    function file(bytes32 what, address data) external;
 }
 
 contract DssSpellTest is DSTest, DSMath {
@@ -1810,14 +1817,14 @@ function checkCollateralValues(SystemValues storage values) internal {
         spell.cast();
         assertTrue(spell.done());
 
-        _test_RWA_values(bytes32("RWA002-A"), addr.addr("RWA002_A_URN"), 22_495_725 * WAD, 21_424_500 * RAY);
-        _test_RWA_values(bytes32("RWA003-A"), addr.addr("RWA003_A_URN"), 2_359_560 * WAD, 2_247_200 * RAY);
-        _test_RWA_values(bytes32("RWA004-A"), addr.addr("RWA004_A_URN"), 8_815_730 * WAD, 8_014_300 * RAY);
-        _test_RWA_values(bytes32("RWA005-A"), addr.addr("RWA005_A_URN"), 17_199_394 * WAD, 16_380_375 * RAY);
-        _test_RWA_values(bytes32("RWA006-A"), addr.addr("RWA006_A_URN"), 20_808_000 * WAD, 20_808_000 * RAY);
+        _test_RWA_values(bytes32("RWA002-A"), addr.addr("RWA002_A_URN"), 22_495_725 * WAD, 21_424_500 * RAY, false);
+        _test_RWA_values(bytes32("RWA003-A"), addr.addr("RWA003_A_URN"), 2_359_560 * WAD, 2_247_200 * RAY, true);
+        _test_RWA_values(bytes32("RWA004-A"), addr.addr("RWA004_A_URN"), 8_815_730 * WAD, 8_014_300 * RAY, true);
+        _test_RWA_values(bytes32("RWA005-A"), addr.addr("RWA005_A_URN"), 17_199_394 * WAD, 16380375238095238095238095238095238, true);
+        _test_RWA_values(bytes32("RWA006-A"), addr.addr("RWA006_A_URN"), 20_808_000 * WAD, 20_808_000 * RAY, true);
     }
 
-    function _test_RWA_values(bytes32 ilk, address urn_, uint256 price_, uint256 spot_) internal {
+    function _test_RWA_values(bytes32 ilk, address urn_, uint256 price_, uint256 spot_, bool requiresLock) internal {
         jug.drip(ilk);
 
         // Confirm pip value.
@@ -1832,17 +1839,20 @@ function checkCollateralValues(SystemValues storage values) internal {
 
         // Test that a draw can be performed.
         giveAuth(urn_, address(this));
-        RwaUrnLike(urn_).hope(address(this));  // become operator
+        RwaUrnLike(urn_).hope(address(this));
+
+        if (requiresLock) {
+            address operator_ = RwaUrnLike(urn_).outputConduit();
+            giveAuth(operator_, address(this));
+            TinlakeManagerLike(operator_).file("urn", urn_);
+            TinlakeManagerLike(operator_).lock(1 ether);
+        }
+
         uint256 room = sub(line, mul(Art, rate));
         uint256 drawAmt = room / RAY;
         if (mul(divup(mul(drawAmt, RAY), rate), rate) > room) {
             drawAmt = sub(room, rate) / RAY;
         }
-
-        emit log_named_uint("line", line);
-        emit log_named_uint("Art", Art);
-        emit log_named_uint("room", room);
-        emit log_named_uint("drawAmt", drawAmt);
 
         RwaUrnLike(urn_).draw(drawAmt);
         (Art,,,,) = vat.ilks(ilk);
