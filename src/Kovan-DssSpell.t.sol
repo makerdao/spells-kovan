@@ -46,6 +46,11 @@ interface RwaLiquidationLike {
     function ilks(bytes32) external returns (string memory,address,uint48,uint48);
 }
 
+interface RwaUrnLike {
+    function hope(address) external;
+    function draw(uint256) external;
+}
+
 contract DssSpellTest is DSTest, DSMath {
 
     struct SpellValues {
@@ -1796,6 +1801,52 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertTrue(spell.done());
         // Fail if cast is too expensive
         assertTrue(totalGas <= 10 * MILLION);
+    }
+
+    function test_RWA_values() public {
+        vote(address(spell));
+        spell.schedule();
+        hevm.warp(spell.nextCastTime());
+        spell.cast();
+        assertTrue(spell.done());
+
+        _test_RWA_values(bytes32("RWA002-A"), addr.addr("RWA002_A_URN"), 22_495_725 * WAD, 21_424_500 * RAY);
+        _test_RWA_values(bytes32("RWA003-A"), addr.addr("RWA003_A_URN"), 2_359_560 * WAD, 2_247_200 * RAY);
+        _test_RWA_values(bytes32("RWA004-A"), addr.addr("RWA004_A_URN"), 8_815_730 * WAD, 8_014_300 * RAY);
+        _test_RWA_values(bytes32("RWA005-A"), addr.addr("RWA005_A_URN"), 17_199_394 * WAD, 16_380_375 * RAY);
+        _test_RWA_values(bytes32("RWA006-A"), addr.addr("RWA006_A_URN"), 20_808_000 * WAD, 20_808_000 * RAY);
+    }
+
+    function _test_RWA_values(bytes32 ilk, address urn_, uint256 price_, uint256 spot_) internal {
+        jug.drip(ilk);
+
+        // Confirm pip value.
+        RwaLiquidationLike RwaLiqOracle = RwaLiquidationLike(addr.addr("MIP21_LIQUIDATION_ORACLE"));
+        (,address pip_,,) = RwaLiqOracle.ilks(ilk);
+        DSValueAbstract pip = DSValueAbstract(pip_);
+        assertEq(uint256(pip.read()), price_);
+
+        // Confirm Vat.ilk.spot value.
+        (uint256 Art, uint256 rate, uint256 spot, uint256 line,) = vat.ilks(ilk);
+        assertEq(spot, spot_);
+
+        // Test that a draw can be performed.
+        giveAuth(urn_, address(this));
+        RwaUrnLike(urn_).hope(address(this));  // become operator
+        uint256 room = sub(line, mul(Art, rate));
+        uint256 drawAmt = room / RAY;
+        if (mul(divup(mul(drawAmt, RAY), rate), rate) > room) {
+            drawAmt = sub(room, rate) / RAY;
+        }
+
+        emit log_named_uint("line", line);
+        emit log_named_uint("Art", Art);
+        emit log_named_uint("room", room);
+        emit log_named_uint("drawAmt", drawAmt);
+
+        RwaUrnLike(urn_).draw(drawAmt);
+        (Art,,,,) = vat.ilks(ilk);
+        assertTrue(sub(line, mul(Art, rate)) < mul(2, rate));  // got very close to line
     }
 
 }

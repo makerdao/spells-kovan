@@ -205,6 +205,7 @@ contract Addresses {
         addr["LERP_FAB"]                        = 0xa6766Ed3574bAFc6114618E74035C7bb5e9a6aa9;
         addr["MCD_FLASH"]                       = 0x5aA1323f61D679E52a90120DFDA2ed1A76E4475A;
         addr["RWA003"]                          = 0xDBC559F5058E593981C48f4f09fA34323df42d51;
+        addr["PIP_RWA002"]                      = 0xaD6495E5918C5F66650EDf291C97b31aBaf5Cd7B;
         addr["MCD_JOIN_RWA003_A"]               = 0x4CCc7fED3912A32B6Cf7Db2FdA1554a9FF574099;
         addr["RWA003_A_URN"]                    = 0x993c239179D6858769996bcAb5989ab2DF75913F;
         addr["RWA003_A_INPUT_CONDUIT"]          = 0x45e17E350279a2f28243983053B634897BA03b64;
