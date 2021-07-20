@@ -211,7 +211,7 @@ contract DssSpellAction is DssAction {
         );
         (,address pip,,) = RwaLiquidationLike(MIP21_LIQUIDATION_ORACLE).ilks(collateral.ilk);
 
-        // Set price feed for RWA003
+        // Set price feed for RWA-00x
         DssExecLib.setContract(DssExecLib.spotter(), collateral.ilk, "pip", pip);
 
         // Init RWA-00x in Vat
