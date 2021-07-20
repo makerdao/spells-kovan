@@ -76,6 +76,7 @@ contract DssSpellAction is DssAction {
     address public constant MAKER_CHANGELOG = 0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F;
 
     function actions() public override {
+        // https://vote.makerdao.com/polling/QmRCn7Mh#poll-detail
         CentrifugeCollateralValues memory RWA003 = CentrifugeCollateralValues({
             MCD_JOIN: 0x4CCc7fED3912A32B6Cf7Db2FdA1554a9FF574099,
             GEM: 0xDBC559F5058E593981C48f4f09fA34323df42d51,
@@ -100,6 +101,7 @@ contract DssSpellAction is DssAction {
             DOC: "QmQMNfSbGS8qkJbatQgxMUsz27G8YELWgtXeLs8uFCZoY8"
         });
 
+        // https://vote.makerdao.com/polling/QmRWg6nZ#poll-detail
         CentrifugeCollateralValues memory RWA004 = CentrifugeCollateralValues({
             MCD_JOIN: 0xa92D4082BabF785Ba02f9C419509B7d08f2ef271,
             GEM: 0x146b0abaB80a60Bfa3b4fDDb5056bBcFa4f1fec1,
@@ -124,6 +126,7 @@ contract DssSpellAction is DssAction {
             DOC: "QmYR2PXwLpdXS8Vp1yS39SPFT1XhmgbsK6XvZ9ApRpNV8M"
         });
 
+        // https://vote.makerdao.com/polling/QmZCPDVY#poll-detail
         CentrifugeCollateralValues memory RWA005 = CentrifugeCollateralValues({
             MCD_JOIN: 0x1233d0DBb55A4Bb41D711d4B584f8DDB15A2Ff88,
             GEM: 0xcB2A48D26970eE7193d66BAc6F1b3090f2E8f82B,
@@ -148,6 +151,7 @@ contract DssSpellAction is DssAction {
             DOC: "QmbgDoPn6UcfSDENDqHLgatMFoqXikC8E8it9WaZXyLXmc"
         });
 
+        // https://vote.makerdao.com/polling/QmdHV2tW#poll-detail
         CentrifugeCollateralValues memory RWA006 = CentrifugeCollateralValues({
             MCD_JOIN: 0x039B74bD0Adc35046B67E88509900D41b9D95430,
             GEM: 0x4E65F06574F1630B4fF756C898Fe02f276D53E86,
@@ -191,7 +195,7 @@ contract DssSpellAction is DssAction {
         DssExecLib.updateCollateralPrice(ilk);
 
         // bump changelog version
-        DssExecLib.setChangelogVersion("1.1.x");
+        DssExecLib.setChangelogVersion("1.9.2");
     }
 
     function integrateCentrifugeCollateral(CentrifugeCollateralValues memory collateral) internal {
