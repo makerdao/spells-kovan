@@ -285,11 +285,6 @@ contract DssSpellAction is DssAction {
             collateral.ilk_string
         );
     }
-
-    function bytes32ToStr(bytes32 _bytes32) internal pure returns (string memory) {
-        return string(abi.encodePacked(_bytes32));
-    }
-
 }
 
 contract DssSpell is DssExec {
