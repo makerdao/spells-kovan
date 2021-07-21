@@ -284,7 +284,6 @@ contract DssSpellAction is DssAction {
             collateral.ilk_string
         );
     }
-
 }
 
 contract DssSpell is DssExec {
