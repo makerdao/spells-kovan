@@ -1855,26 +1855,26 @@ function checkCollateralValues(SystemValues storage values) internal {
         address RWA003_MGR = addr.addr("RWA003_A_INPUT_CONDUIT");
         address RWA003_ROOT = 0x792164b3e10a3CE1efafF7728961aD506c433c18;
         address RWA003_CLERK = 0xd983B27A4d58C21ceE716bC8a659A9b9e4348773;
-        isWard(RWA003_MGR, RWA003_ROOT);
-        isWard(RWA003_MGR, RWA003_CLERK);
+        assertTrue(isWard(RWA003_MGR, RWA003_ROOT));
+        assertTrue(isWard(RWA003_MGR, RWA003_CLERK));
 
         address RWA004_MGR = addr.addr("RWA004_A_INPUT_CONDUIT");
         address RWA004_ROOT = 0xe4E649e8D591748d7D3031d8001990FCD3E4eba6;
         address RWA004_CLERK = 0x35dfAf31DC97D8C359C65c51E63D8Abaf4902daC;
-        isWard(RWA004_MGR, RWA004_ROOT);
-        isWard(RWA004_MGR, RWA004_CLERK);
+        assertTrue(isWard(RWA004_MGR, RWA004_ROOT));
+        assertTrue(isWard(RWA004_MGR, RWA004_CLERK));
 
         address RWA005_MGR = addr.addr("RWA005_A_INPUT_CONDUIT");
         address RWA005_ROOT = 0x68CA1a0411a8137d8505303A5745aa3Ead87ba6C;
         address RWA005_CLERK = 0x19eBEe6ACCf786CA1009fDCed5BDcF62964d31f3;
-        isWard(RWA005_MGR, RWA005_ROOT);
-        isWard(RWA005_MGR, RWA005_CLERK);
+        assertTrue(isWard(RWA005_MGR, RWA005_ROOT));
+        assertTrue(isWard(RWA005_MGR, RWA005_CLERK));
 
         address RWA006_MGR = addr.addr("RWA006_A_INPUT_CONDUIT");
         address RWA006_ROOT = 0x09E5b61a15526753b8aF01e21Bd3853146472080;
         address RWA006_CLERK = 0xEc8FF575e916e95188547DFB346d9d5fDa97453b;
-        isWard(RWA006_MGR, RWA006_ROOT);
-        isWard(RWA006_MGR, RWA006_CLERK);
+        assertTrue(isWard(RWA006_MGR, RWA006_ROOT));
+        assertTrue(isWard(RWA006_MGR, RWA006_CLERK));
     }
     
     function isWard(address addr, address user) internal returns (bool) {
