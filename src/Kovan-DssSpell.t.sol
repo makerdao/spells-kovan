@@ -1851,4 +1851,28 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertTrue(sub(line, mul(Art, rate)) < mul(2, rate));  // got very close to line
     }
 
+    function testManagerWards() public {
+        address RWA003_MGR = addr.addr("RWA003_A_INPUT_CONDUIT");
+        address RWA003_ROOT = 0x792164b3e10a3CE1efafF7728961aD506c433c18;
+        isWard(RWA003_MGR, RWA003_ROOT);
+
+        address RWA004_MGR = addr.addr("RWA004_A_INPUT_CONDUIT");
+        address RWA004_ROOT = 0xe4E649e8D591748d7D3031d8001990FCD3E4eba6;
+        isWard(RWA004_MGR, RWA004_ROOT);
+
+        address RWA005_MGR = addr.addr("RWA005_A_INPUT_CONDUIT");
+        address RWA005_ROOT = 0x68CA1a0411a8137d8505303A5745aa3Ead87ba6C;
+        isWard(RWA005_MGR, RWA005_ROOT);
+
+        address RWA006_MGR = addr.addr("RWA006_A_INPUT_CONDUIT");
+        address RWA006_ROOT = 0x09E5b61a15526753b8aF01e21Bd3853146472080;
+        address RWA006_CLERK = 0xEc8FF575e916e95188547DFB346d9d5fDa97453b;
+        isWard(RWA006_MGR, RWA006_ROOT);
+        isWard(RWA006_MGR, RWA006_CLERK);
+    }
+    
+    function isWard(address addr, address user) internal returns (bool) {
+        return AuthLike(addr).wards(user) == 1;
+    }
+
 }
