@@ -5,7 +5,6 @@ import "ds-test/test.sol";
 import "lib/dss-interfaces/src/Interfaces.sol";
 import "./test/rates.sol";
 import "./test/addresses_kovan.sol";
-import "./CentrifugeCollateralValues.sol";
 
 import {DssSpell} from "./Kovan-DssSpell.sol";
 
@@ -247,8 +246,8 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0xdf7AC882DbbEbD9814d61F2b66afa6Dd4523D139),        // populate with deployed spell if deployed
-            deployed_spell_created:         1626887324,        // use get-created-timestamp.sh if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
+            deployed_spell_created:         0,        // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
             office_hours_enabled:           true,              // true if officehours is expected to be enabled in the spell
             expiration_threshold:           weekly_expiration  // (weekly_expiration,monthly_expiration) if weekly or monthly spell
@@ -1629,8 +1628,6 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertTrue(false);
     }
 
-    // check integrations for RWA003 - RWA006
-
     function getExtcodesize(address target) public view returns (uint256 exsize) {
         assembly {
             exsize := extcodesize(target)
@@ -1667,41 +1664,9 @@ function checkCollateralValues(SystemValues storage values) internal {
         checkCollateralValues(afterSpell);
     }
 
-    function testNewChainlogValues() public {
-        vote(address(spell));
-        scheduleWaitAndCast(address(spell));
-        assertTrue(spell.done());
-
-        ChainlogAbstract chainlog = ChainlogAbstract(addr.addr("CHANGELOG"));
-
-        assertEq(chainlog.getAddress("RWA003"), addr.addr("RWA003"));
-        assertEq(chainlog.getAddress("MCD_JOIN_RWA003_A"), addr.addr("MCD_JOIN_RWA003_A"));
-        assertEq(chainlog.getAddress("RWA003_A_URN"), addr.addr("RWA003_A_URN"));
-        assertEq(chainlog.getAddress("RWA003_A_INPUT_CONDUIT"), addr.addr("RWA003_A_INPUT_CONDUIT"));
-        assertEq(chainlog.getAddress("RWA003_A_OUTPUT_CONDUIT"), addr.addr("RWA003_A_OUTPUT_CONDUIT"));
-
-        assertEq(chainlog.getAddress("RWA004"), addr.addr("RWA004"));
-        assertEq(chainlog.getAddress("MCD_JOIN_RWA004_A"), addr.addr("MCD_JOIN_RWA004_A"));
-        assertEq(chainlog.getAddress("RWA004_A_URN"), addr.addr("RWA004_A_URN"));
-        assertEq(chainlog.getAddress("RWA004_A_INPUT_CONDUIT"), addr.addr("RWA004_A_INPUT_CONDUIT"));
-        assertEq(chainlog.getAddress("RWA004_A_OUTPUT_CONDUIT"), addr.addr("RWA004_A_OUTPUT_CONDUIT"));
-
-        assertEq(chainlog.getAddress("RWA005"), addr.addr("RWA005"));
-        assertEq(chainlog.getAddress("MCD_JOIN_RWA005_A"), addr.addr("MCD_JOIN_RWA005_A"));
-        assertEq(chainlog.getAddress("RWA005_A_URN"), addr.addr("RWA005_A_URN"));
-        assertEq(chainlog.getAddress("RWA005_A_INPUT_CONDUIT"), addr.addr("RWA005_A_INPUT_CONDUIT"));
-        assertEq(chainlog.getAddress("RWA005_A_OUTPUT_CONDUIT"), addr.addr("RWA005_A_OUTPUT_CONDUIT"));
-
-        assertEq(chainlog.getAddress("RWA006"), addr.addr("RWA006"));
-        assertEq(chainlog.getAddress("MCD_JOIN_RWA006_A"), addr.addr("MCD_JOIN_RWA006_A"));
-        assertEq(chainlog.getAddress("RWA006_A_URN"), addr.addr("RWA006_A_URN"));
-        assertEq(chainlog.getAddress("RWA006_A_INPUT_CONDUIT"), addr.addr("RWA006_A_INPUT_CONDUIT"));
-        assertEq(chainlog.getAddress("RWA006_A_OUTPUT_CONDUIT"), addr.addr("RWA006_A_OUTPUT_CONDUIT"));
-
-        assertEq(chainlog.getAddress("MIP21_LIQUIDATION_ORACLE"), addr.addr("MIP21_LIQUIDATION_ORACLE"));
-    }
-
     function testNewIlkRegistryValues() public {
+        // TODO: update for new rwa ilk registry values once elaborated names are in place
+
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
         assertTrue(spell.done());
@@ -1802,81 +1767,6 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertTrue(totalGas <= 10 * MILLION);
     }
 
-    function test_RWA_values() public {
-        vote(address(spell));
-        spell.schedule();
-        hevm.warp(spell.nextCastTime());
-        spell.cast();
-        assertTrue(spell.done());
-
-        _test_RWA_values(bytes32("RWA002-A"), addr.addr("RWA002_A_URN"), 22_495_725 * WAD, 21_424_500 * RAY, false);
-        _test_RWA_values(bytes32("RWA003-A"), addr.addr("RWA003_A_URN"), 2_359_560 * WAD, 2_247_200 * RAY, true);
-        _test_RWA_values(bytes32("RWA004-A"), addr.addr("RWA004_A_URN"), 8_815_730 * WAD, 8_014_300 * RAY, true);
-        _test_RWA_values(bytes32("RWA005-A"), addr.addr("RWA005_A_URN"), 17_199_394 * WAD, 16380375238095238095238095238095238, true);
-        _test_RWA_values(bytes32("RWA006-A"), addr.addr("RWA006_A_URN"), 20_808_000 * WAD, 20_808_000 * RAY, true);
-    }
-
-    function _test_RWA_values(bytes32 ilk, address urn_, uint256 price_, uint256 spot_, bool requiresLock) internal {
-        jug.drip(ilk);
-
-        // Confirm pip value.
-        RwaLiquidationLike RwaLiqOracle = RwaLiquidationLike(addr.addr("MIP21_LIQUIDATION_ORACLE"));
-        (,address pip_,,) = RwaLiqOracle.ilks(ilk);
-        DSValueAbstract pip = DSValueAbstract(pip_);
-        assertEq(uint256(pip.read()), price_);
-
-        // Confirm Vat.ilk.spot value.
-        (uint256 Art, uint256 rate, uint256 spot, uint256 line,) = vat.ilks(ilk);
-        assertEq(spot, spot_);
-
-        // Test that a draw can be performed.
-        giveAuth(urn_, address(this));
-        RwaUrnLike(urn_).hope(address(this));
-
-        if (requiresLock) {
-            address operator_ = RwaUrnLike(urn_).outputConduit();
-            giveAuth(operator_, address(this));
-            TinlakeManagerLike(operator_).file("urn", urn_);
-            TinlakeManagerLike(operator_).lock(1 ether);
-        }
-
-        uint256 room = sub(line, mul(Art, rate));
-        uint256 drawAmt = room / RAY;
-        if (mul(divup(mul(drawAmt, RAY), rate), rate) > room) {
-            drawAmt = sub(room, rate) / RAY;
-        }
-
-        RwaUrnLike(urn_).draw(drawAmt);
-        (Art,,,,) = vat.ilks(ilk);
-        assertTrue(sub(line, mul(Art, rate)) < mul(2, rate));  // got very close to line
-    }
-
-    function testManagerWards() public {
-        address RWA003_MGR = addr.addr("RWA003_A_INPUT_CONDUIT");
-        address RWA003_ROOT = 0x792164b3e10a3CE1efafF7728961aD506c433c18;
-        address RWA003_CLERK = 0xd983B27A4d58C21ceE716bC8a659A9b9e4348773;
-        assertTrue(isWard(RWA003_MGR, RWA003_ROOT));
-        assertTrue(isWard(RWA003_MGR, RWA003_CLERK));
-
-        address RWA004_MGR = addr.addr("RWA004_A_INPUT_CONDUIT");
-        address RWA004_ROOT = 0xe4E649e8D591748d7D3031d8001990FCD3E4eba6;
-        address RWA004_CLERK = 0x35dfAf31DC97D8C359C65c51E63D8Abaf4902daC;
-        assertTrue(isWard(RWA004_MGR, RWA004_ROOT));
-        assertTrue(isWard(RWA004_MGR, RWA004_CLERK));
-
-        address RWA005_MGR = addr.addr("RWA005_A_INPUT_CONDUIT");
-        address RWA005_ROOT = 0x68CA1a0411a8137d8505303A5745aa3Ead87ba6C;
-        address RWA005_CLERK = 0x19eBEe6ACCf786CA1009fDCed5BDcF62964d31f3;
-        assertTrue(isWard(RWA005_MGR, RWA005_ROOT));
-        assertTrue(isWard(RWA005_MGR, RWA005_CLERK));
-
-        address RWA006_MGR = addr.addr("RWA006_A_INPUT_CONDUIT");
-        address RWA006_ROOT = 0x09E5b61a15526753b8aF01e21Bd3853146472080;
-        address RWA006_CLERK = 0xEc8FF575e916e95188547DFB346d9d5fDa97453b;
-        assertTrue(isWard(RWA006_MGR, RWA006_ROOT));
-        assertTrue(isWard(RWA006_MGR, RWA006_CLERK));
-    }
-    
     function isWard(address addr, address user) internal returns (bool) {
         return AuthLike(addr).wards(user) == 1;
     }
