@@ -30,11 +30,34 @@ contract DssSpellAction is DssAction {
     // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/TODO -q -O - 2>/dev/null)"
     string public constant override description = "Optimism test spell casting + housekeeping";
 
-    // Maker changelog
-    address public constant MAKER_CHANGELOG = 0xdA0Ab1e0017DEbCd72Be8599041a2aa3bA7e740F;
+    // Vote delegate proxy factory
+    address constant VOTE_DELEGATE_PROXY_FACTORY = 0xB10cf58E08b94480fCb81d341A63295eBb2062C2;
 
     function actions() public override {
 
+        // Update early RWA tokens names in ilk registry
+        IlkRegistryAbstract ILK_REGISTRY = IlkRegistryAbstract(DssExecLib.reg());
+
+        address join;
+        address gem;
+        uint8   dec;
+        uint96  class;
+        address pip;
+        address xlip;
+        string memory name;
+        string memory symbol;
+
+        (, join, gem, dec, class, pip, xlip, name, symbol) = ILK_REGISTRY.ilkData("RWA001-A");
+        ILK_REGISTRY.put("RWA001-A", join, gem, dec, class, pip, xlip, "RWA001-A: 6S Capital", symbol);
+
+        (, join, gem, dec, class, pip, xlip, name, symbol) = ILK_REGISTRY.ilkData("RWA002-A");
+        ILK_REGISTRY.put("RWA002-A", join, gem, dec, class, pip, xlip, "RWA002-A: Centrifuge: New Silver Series 2 DROP", symbol);
+
+        // Add vote delegate factory to changelog
+        DssExecLib.setChangelogAddress("VOTE_DELEGATE_PROXY_FACTORY", VOTE_DELEGATE_PROXY_FACTORY);
+
+        // Bump version, assuming 1.9.2 version passes
+        DssExecLib.setChangelogVersion("1.9.3");
     }
 }
 
