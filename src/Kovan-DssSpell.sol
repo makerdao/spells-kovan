@@ -23,6 +23,10 @@ import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
 
+interface L1GovernanceRelayLike {
+    function relay(address, bytes calldata, uint32) external;
+}
+
 contract DssSpellAction is DssAction {
 
     // Provides a descriptive tag for bot consumption
@@ -32,6 +36,8 @@ contract DssSpellAction is DssAction {
 
     // Vote delegate proxy factory
     address constant VOTE_DELEGATE_PROXY_FACTORY = 0xB10cf58E08b94480fCb81d341A63295eBb2062C2;
+    address constant L1_GOVERNANCE_RELAY         = 0xAeFc25750d8C2bd331293076E2DC5d5ad414b4a2;
+    address constant L2_SPELL                    = 0xC88e0cDAA48FA8cA12212b157fdee617be4cBD70;
 
     function actions() public override {
 
@@ -58,6 +64,9 @@ contract DssSpellAction is DssAction {
 
         // Bump version, assuming 1.9.2 version passes
         DssExecLib.setChangelogVersion("1.9.3");
+
+        // Perform a test spell on optimism
+        L1GovernanceRelayLike(L1_GOVERNANCE_RELAY).relay(L2_SPELL, abi.encodeWithSignature("act()"), 3000000);
     }
 }
 
