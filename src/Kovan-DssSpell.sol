@@ -39,6 +39,11 @@ contract DssSpellAction is DssAction {
     address constant L1_GOVERNANCE_RELAY         = 0xAeFc25750d8C2bd331293076E2DC5d5ad414b4a2;
     address constant L2_SPELL                    = 0xC88e0cDAA48FA8cA12212b157fdee617be4cBD70;
 
+    // Turn off office hours
+    function officeHours() public override returns (bool) {
+        return false;
+    }
+
     function actions() public override {
 
         // Update early RWA tokens names in ilk registry
