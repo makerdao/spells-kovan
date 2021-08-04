@@ -1736,6 +1736,16 @@ function checkCollateralValues(SystemValues storage values) internal {
         assertEq(ilkRegistry.xlip("RWA006-A"), address(0));
         assertEq(ilkRegistry.name("RWA006-A"), "RWA006-A: Centrifuge: Alternative Equity Advisers");
         assertEq(ilkRegistry.symbol("RWA006-A"), "RWA006");
+
+
+        assertEq(ilkRegistry.join("KNC-A"), addr.addr("MCD_JOIN_KNC_A"));
+        assertEq(ilkRegistry.gem("KNC-A"), addr.addr("KNC"));
+        assertEq(ilkRegistry.dec("KNC-A"), DSTokenAbstract(addr.addr("KNC")).decimals());
+        assertEq(ilkRegistry.class("KNC-A"), 1);
+        assertEq(ilkRegistry.pip("KNC-A"), addr.addr("PIP_KNC"));
+        assertEq(ilkRegistry.xlip("KNC-A"), addr.addr("MCD_CLIP_KNC_A"));
+        assertEq(ilkRegistry.name("KNC-A"), "KNC-A");
+        assertEq(ilkRegistry.symbol("KNC-A"), "KNC");
     }
 
     function testNewChainlogValues() public {
