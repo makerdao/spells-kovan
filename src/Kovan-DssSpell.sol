@@ -32,6 +32,7 @@ contract DssSpellAction is DssAction {
     // Provides a descriptive tag for bot consumption
     // This should be modified weekly to provide a summary of the actions
     // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/TODO -q -O - 2>/dev/null)"
+    string public constant in_memory_of = "Jeffrey Blechschmidt";
     string public constant override description = "Optimism test spell casting + housekeeping";
 
     // Vote delegate proxy factory
