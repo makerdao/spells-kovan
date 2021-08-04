@@ -47,20 +47,19 @@ contract DssSpellAction is DssAction {
 
     function actions() public override {
 
-        // Update early RWA tokens names in ilk registry
+        // Update RWA tokens symbols in ilk registry
         IlkRegistryAbstract ILK_REGISTRY = IlkRegistryAbstract(DssExecLib.reg());
 
-        address join;
-        address gem;
-        uint8   dec;
-        uint96  class;
-        address pip;
-        address xlip;
-        string memory name;
-        string memory symbol;
+        ILK_REGISTRY.file("RWA001-A", "symbol", "RWA001");
+        ILK_REGISTRY.file("RWA002-A", "symbol", "RWA002");
+        ILK_REGISTRY.file("RWA003-A", "symbol", "RWA003");
+        ILK_REGISTRY.file("RWA004-A", "symbol", "RWA004");
+        ILK_REGISTRY.file("RWA005-A", "symbol", "RWA005");
+        ILK_REGISTRY.file("RWA006-A", "symbol", "RWA006");
 
-
-        ILK_REGISTRY.put("RWA002-A", join, gem, dec, class, pip, xlip, "RWA002-A: Centrifuge: New Silver Series 2 DROP", symbol);
+        // Update early RWA tokens names in ilk registry
+        ILK_REGISTRY.file("RWA001-A", "name", "RWA001-A: 6s Capital");
+        ILK_REGISTRY.file("RWA002-A", "name", "RWA002-A: Centrifuge: New Silver");
 
         // Add vote delegate factory to changelog
         DssExecLib.setChangelogAddress("VOTE_DELEGATE_PROXY_FACTORY", VOTE_DELEGATE_PROXY_FACTORY);
