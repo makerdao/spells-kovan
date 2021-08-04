@@ -23,22 +23,12 @@ import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
 import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
 import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
 
-interface L1GovernanceRelayLike {
-    function relay(address, bytes calldata, uint32) external;
-}
-
 contract DssSpellAction is DssAction {
 
     // Provides a descriptive tag for bot consumption
     // This should be modified weekly to provide a summary of the actions
     // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/TODO -q -O - 2>/dev/null)"
-    string public constant in_memory_of = "Jeffrey Blechschmidt";
-    string public constant override description = "Optimism test spell casting + housekeeping";
-
-    // Vote delegate proxy factory
-    address constant VOTE_DELEGATE_PROXY_FACTORY = 0x1740F3bD55b1900C816A0071F8972C201566e3a3;
-    address constant L1_GOVERNANCE_RELAY         = 0xAeFc25750d8C2bd331293076E2DC5d5ad414b4a2;
-    address constant L2_SPELL                    = 0xC88e0cDAA48FA8cA12212b157fdee617be4cBD70;
+    string public constant override description = "Add MATIC";
 
     // Turn off office hours
     function officeHours() public override returns (bool) {
@@ -47,30 +37,18 @@ contract DssSpellAction is DssAction {
 
     function actions() public override {
 
-        // Update RWA tokens and KNC symbols in ilk registry
         IlkRegistryAbstract ILK_REGISTRY = IlkRegistryAbstract(DssExecLib.reg());
 
-        ILK_REGISTRY.file("RWA001-A", "symbol", "RWA001");
-        ILK_REGISTRY.file("RWA002-A", "symbol", "RWA002");
-        ILK_REGISTRY.file("RWA003-A", "symbol", "RWA003");
-        ILK_REGISTRY.file("RWA004-A", "symbol", "RWA004");
-        ILK_REGISTRY.file("RWA005-A", "symbol", "RWA005");
-        ILK_REGISTRY.file("RWA006-A", "symbol", "RWA006");
-        ILK_REGISTRY.file("KNC-A",    "symbol", "KNC");
+        // TODO: set clipper params, see:
+        // https://github.com/makerdao/spells-kovan/commit/1c9206f4fbd3f1c46b5fd7730e5a225e8e08ca45
+        // https://github.com/makerdao/dss-exec-lib/blob/master/src/DssExecLib.sol#L807
 
-        // Update early RWA and KNC tokens names in ilk registry
-        ILK_REGISTRY.file("RWA001-A", "name", "RWA001-A: 6s Capital");
-        ILK_REGISTRY.file("RWA002-A", "name", "RWA002-A: Centrifuge: New Silver");
-        ILK_REGISTRY.file("KNC-A",    "name", "KNC-A");
+        // TODO: add matic through DssExecLib.addNewCollateral()
+        // TODO: add matic to ilk registry
+        // TODO: update changelog with matic addresses
 
-        // Add vote delegate factory to changelog
-        DssExecLib.setChangelogAddress("VOTE_DELEGATE_PROXY_FACTORY", VOTE_DELEGATE_PROXY_FACTORY);
-
-        // Bump version, assuming 1.9.2 version passes
-        DssExecLib.setChangelogVersion("1.9.3");
-
-        // Perform a test spell on optimism
-        L1GovernanceRelayLike(L1_GOVERNANCE_RELAY).relay(L2_SPELL, abi.encodeWithSignature("act()"), 3000000);
+        // Bump version, assuming 1.9.3 version passes
+        DssExecLib.setChangelogVersion("1.9.4");
     }
 }
 
