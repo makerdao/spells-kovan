@@ -37,6 +37,12 @@ contract DssSpellAction is DssAction {
 
     function actions() public override {
 
+        // deployed addresses:
+        // gem token: 0x688E1A8830Ea8dd8fe389FA2228997C663b3807A
+        // gem join:  0x4Af8801fbDD5ae4FDe2cbC9F844b09c6777525CE
+        // clipper:   0x75fe5cd0c23894c8424ac835c054aca92b994445
+        // abacus:    0x0AB67AA706F1cECD3df457016E822a09bFf18f23
+
         IlkRegistryAbstract ILK_REGISTRY = IlkRegistryAbstract(DssExecLib.reg());
 
         // TODO: set clipper params, see:
