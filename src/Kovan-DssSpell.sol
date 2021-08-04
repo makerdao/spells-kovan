@@ -35,7 +35,7 @@ contract DssSpellAction is DssAction {
     string public constant override description = "Optimism test spell casting + housekeeping";
 
     // Vote delegate proxy factory
-    address constant VOTE_DELEGATE_PROXY_FACTORY = 0xB10cf58E08b94480fCb81d341A63295eBb2062C2;
+    address constant VOTE_DELEGATE_PROXY_FACTORY = 0x1740F3bD55b1900C816A0071F8972C201566e3a3;
     address constant L1_GOVERNANCE_RELAY         = 0xAeFc25750d8C2bd331293076E2DC5d5ad414b4a2;
     address constant L2_SPELL                    = 0xC88e0cDAA48FA8cA12212b157fdee617be4cBD70;
 
