@@ -60,7 +60,6 @@ contract DssSpellAction is DssAction {
         string memory symbol;
 
 
-        (, join, gem, dec, class, pip, xlip, name, symbol) = ILK_REGISTRY.ilkData("RWA002-A");
         ILK_REGISTRY.put("RWA002-A", join, gem, dec, class, pip, xlip, "RWA002-A: Centrifuge: New Silver Series 2 DROP", symbol);
 
         // Add vote delegate factory to changelog
