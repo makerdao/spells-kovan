@@ -59,7 +59,6 @@ contract DssSpellAction is DssAction {
         string memory name;
         string memory symbol;
 
-        (, join, gem, dec, class, pip, xlip, name, symbol) = ILK_REGISTRY.ilkData("RWA001-A");
         ILK_REGISTRY.put("RWA001-A", join, gem, dec, class, pip, xlip, "RWA001-A: 6S Capital", symbol);
 
         (, join, gem, dec, class, pip, xlip, name, symbol) = ILK_REGISTRY.ilkData("RWA002-A");
