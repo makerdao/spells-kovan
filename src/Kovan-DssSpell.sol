@@ -31,7 +31,7 @@ contract DssSpellAction is DssAction {
     address constant MCD_JOIN_MATIC_A      = 0x4Af8801fbDD5ae4FDe2cbC9F844b09c6777525CE;
     address constant MCD_CLIP_MATIC_A      = 0x75FE5CD0c23894C8424ac835C054aCA92B994445;
     address constant MCD_CLIP_CALC_MATIC_A = 0x0AB67AA706F1cECD3df457016E822a09bFf18f23;
-    address constant PIP_MATIC             = 0x6125dC3a51407640A8b439E2ECd78878bC00EAd3;
+    address constant PIP_MATIC             = 0x13594bF4E0C61946936674217c415c6d555Fec50;
 
     uint256 constant THOUSAND   = 10**3;
     uint256 constant MILLION    = 10**6;
@@ -52,7 +52,7 @@ contract DssSpellAction is DssAction {
             isLiquidatable:        true,
             isOSM:                 true,
             whitelistOSM:          true,
-            ilkDebtCeiling:        3 * MILLION, // TODO: is this correct? currently set this according to dc-iam gap
+            ilkDebtCeiling:        3 * MILLION, // TODO: is this correct? currently setting this according to dc-iam gap
             minVaultAmount:        10 * THOUSAND,
             maxLiquidationAmount:  3 * MILLION,
             liquidationPenalty:    1300,

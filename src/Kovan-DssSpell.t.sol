@@ -246,10 +246,10 @@ contract DssSpellTest is DSTest, DSMath {
         // Test for spell-specific parameters
         //
         spellValues = SpellValues({
-            deployed_spell:                 address(0x8c38736FF2dA058a3aef53E59f39A42b34104636),        // populate with deployed spell if deployed
-            deployed_spell_created:         1628088292,        // use get-created-timestamp.sh if deployed
+            deployed_spell:                 address(0),        // populate with deployed spell if deployed
+            deployed_spell_created:         0,        // use get-created-timestamp.sh if deployed
             previous_spell:                 address(0),        // supply if there is a need to test prior to its cast() function being called on-chain.
-            office_hours_enabled:           false,              // true if officehours is expected to be enabled in the spell
+            office_hours_enabled:           true,              // true if officehours is expected to be enabled in the spell
             expiration_threshold:           weekly_expiration  // (weekly_expiration,monthly_expiration) if weekly or monthly spell
         });
         spell = spellValues.deployed_spell != address(0) ?
@@ -277,7 +277,7 @@ contract DssSpellTest is DSTest, DSMath {
             osm_mom_authority:     address(chief),      // OsmMom authority
             flipper_mom_authority: address(chief),      // FlipperMom authority
             clipper_mom_authority: address(chief),      // ClipperMom authority
-            ilk_count:             31                   // Num expected in system
+            ilk_count:             32                   // Num expected in system
         });
 
         afterSpell.collaterals["ETH-A"] = CollateralValues({
@@ -1178,6 +1178,35 @@ contract DssSpellTest is DSTest, DSMath {
             calc_tau:     0,
             calc_step:    0,
             calc_cut:     0
+        });
+        afterSpell.collaterals["MATIC-A"] = CollateralValues({
+            aL_enabled:   true,
+            aL_line:      10 * MILLION,
+            aL_gap:       3 * MILLION,
+            aL_ttl:       8 hours,
+            line:         3 * MILLION, // TODO: is this correct? currently setting this according to dc-iam gap
+            dust:         10000, // TODO: seeing other tests set this to 100, maybe for supporitng tests
+            pct:          300,
+            mat:          17500,
+            liqType:      "clip",
+            liqOn:        true,
+            chop:         1300,
+            cat_dunk:     0,
+            flip_beg:     0,
+            flip_ttl:     0,
+            flip_tau:     0,
+            flipper_mom:  0,
+            dog_hole:     3 * MILLION, // TODO: seeing other tests set this to 5 * THOUSAND, maybe for supporitng tests
+            clip_buf:     13000,
+            clip_tail:    140 minutes,
+            clip_cusp:    4000,
+            clip_chip:    10,
+            clip_tip:     300, // TODO: seeing other tests set this to 1, maybe for supporitng tests
+            clipper_mom:  1,
+            cm_tolerance: 5000,
+            calc_tau:     0,
+            calc_step:    90,
+            calc_cut:     9900
         });
     }
 
