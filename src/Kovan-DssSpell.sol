@@ -15,13 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 pragma solidity 0.6.12;
+pragma experimental ABIEncoderV2;
 
 import "dss-exec-lib/DssExec.sol";
 import "dss-exec-lib/DssAction.sol";
-
-import "lib/dss-interfaces/src/dss/GemJoinAbstract.sol";
-import "lib/dss-interfaces/src/dss/IlkRegistryAbstract.sol";
-import "lib/dss-interfaces/src/dapp/DSTokenAbstract.sol";
 
 contract DssSpellAction is DssAction {
 
@@ -30,28 +27,53 @@ contract DssSpellAction is DssAction {
     // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/TODO -q -O - 2>/dev/null)"
     string public constant override description = "Add MATIC";
 
-    // Turn off office hours
-    function officeHours() public override returns (bool) {
-        return false;
-    }
+    address constant MATIC                 = 0x688E1A8830Ea8dd8fe389FA2228997C663b3807A;
+    address constant MCD_JOIN_MATIC_A      = 0x4Af8801fbDD5ae4FDe2cbC9F844b09c6777525CE;
+    address constant MCD_CLIP_MATIC_A      = 0x75FE5CD0c23894C8424ac835C054aCA92B994445;
+    address constant MCD_CLIP_CALC_MATIC_A = 0x0AB67AA706F1cECD3df457016E822a09bFf18f23;
+    address constant PIP_MATIC             = 0x6125dC3a51407640A8b439E2ECd78878bC00EAd3;
+
+    uint256 constant THOUSAND   = 10**3;
+    uint256 constant MILLION    = 10**6;
 
     function actions() public override {
 
-        // deployed addresses:
-        // gem token: 0x688E1A8830Ea8dd8fe389FA2228997C663b3807A
-        // gem join:  0x4Af8801fbDD5ae4FDe2cbC9F844b09c6777525CE
-        // clipper:   0x75fe5cd0c23894c8424ac835c054aca92b994445
-        // abacus:    0x0AB67AA706F1cECD3df457016E822a09bFf18f23
+        // values taken from https://forum.makerdao.com/t/matic-collateral-onboarding-risk-evaluation/9069
 
-        IlkRegistryAbstract ILK_REGISTRY = IlkRegistryAbstract(DssExecLib.reg());
+        DssExecLib.setStairstepExponentialDecrease(MCD_CLIP_CALC_MATIC_A, 90 seconds, 9900);
 
-        // TODO: set clipper params, see:
-        // https://github.com/makerdao/spells-kovan/commit/1c9206f4fbd3f1c46b5fd7730e5a225e8e08ca45
-        // https://github.com/makerdao/dss-exec-lib/blob/master/src/DssExecLib.sol#L807
+        CollateralOpts memory MATIC_A = CollateralOpts({
+            ilk:                   "MATIC-A",
+            gem:                   MATIC,
+            join:                  MCD_JOIN_MATIC_A,
+            clip:                  MCD_CLIP_MATIC_A,
+            calc:                  MCD_CLIP_CALC_MATIC_A,
+            pip:                   PIP_MATIC,
+            isLiquidatable:        true,
+            isOSM:                 true,
+            whitelistOSM:          true,
+            ilkDebtCeiling:        3 * MILLION, // TODO: is this correct? currently set this according to dc-iam gap
+            minVaultAmount:        10 * THOUSAND,
+            maxLiquidationAmount:  3 * MILLION,
+            liquidationPenalty:    1300,
+            ilkStabilityFee:       1000000000937303470807876289,
+            startingPriceFactor:   13000,
+            breakerTolerance:      5000, // Allows for a 50% hourly price drop before disabling liquidations
+            auctionDuration:       140 minutes,
+            permittedDrop:         4000,
+            liquidationRatio:      17500,
+            kprFlatReward:         300, // 300 Dai
+            kprPctReward:          10 // 0.1%
+        });
 
-        // TODO: add matic through DssExecLib.addNewCollateral()
-        // TODO: add matic to ilk registry
-        // TODO: update changelog with matic addresses
+        DssExecLib.addNewCollateral(MATIC_A);
+        DssExecLib.setIlkAutoLineParameters("MATIC-A", 10 * MILLION, 3 * MILLION, 8 hours);
+
+        DssExecLib.setChangelogAddress("MATIC", MATIC);
+        DssExecLib.setChangelogAddress("MCD_JOIN_MATIC_A", MCD_JOIN_MATIC_A);
+        DssExecLib.setChangelogAddress("MCD_CLIP_MATIC_A", MCD_CLIP_MATIC_A);
+        DssExecLib.setChangelogAddress("MCD_CLIP_CALC_MATIC_A", MCD_CLIP_CALC_MATIC_A);
+        DssExecLib.setChangelogAddress("PIP_MATIC", PIP_MATIC);
 
         // Bump version, assuming 1.9.3 version passes
         DssExecLib.setChangelogVersion("1.9.4");
