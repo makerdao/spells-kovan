@@ -126,7 +126,7 @@ contract DssSpellTest is DSTest, DSMath {
     Hevm hevm;
     Rates     rates = new Rates();
     Addresses addr  = new Addresses();
-    
+
     // KOVAN ADDRESSES
     DSPauseAbstract        pause = DSPauseAbstract(    addr.addr("MCD_PAUSE"));
     address           pauseProxy =                     addr.addr("MCD_PAUSE_PROXY");
@@ -1394,7 +1394,7 @@ contract DssSpellTest is DSTest, DSMath {
         assertTrue(flap.tau() > 0 && flap.tau() < 2678400, "TestError/flap-tau-range"); // gt 0 && lt 1 month
         assertTrue(flap.tau() >= flap.ttl(), "TestError/flap-tau-ttl");
     }
-    
+
 function checkCollateralValues(SystemValues storage values) internal {
         uint256 sumlines;
         bytes32[] memory ilks = reg.list();
