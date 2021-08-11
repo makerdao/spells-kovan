@@ -1184,8 +1184,8 @@ contract DssSpellTest is DSTest, DSMath {
             aL_line:      10 * MILLION,
             aL_gap:       3 * MILLION,
             aL_ttl:       8 hours,
-            line:         3 * MILLION, // TODO: is this correct? currently setting this according to dc-iam gap
-            dust:         10000, // TODO: seeing other tests set this to 100, maybe for supporitng tests
+            line:         0,
+            dust:         100,
             pct:          300,
             mat:          17500,
             liqType:      "clip",
@@ -1196,12 +1196,12 @@ contract DssSpellTest is DSTest, DSMath {
             flip_ttl:     0,
             flip_tau:     0,
             flipper_mom:  0,
-            dog_hole:     3 * MILLION, // TODO: seeing other tests set this to 5 * THOUSAND, maybe for supporitng tests
+            dog_hole:     5 * THOUSAND,
             clip_buf:     13000,
             clip_tail:    140 minutes,
             clip_cusp:    4000,
             clip_chip:    10,
-            clip_tip:     300, // TODO: seeing other tests set this to 1, maybe for supporitng tests
+            clip_tip:     1,
             clipper_mom:  1,
             cm_tolerance: 5000,
             calc_tau:     0,
