@@ -52,9 +52,9 @@ contract DssSpellAction is DssAction {
             isLiquidatable:        true,
             isOSM:                 true,
             whitelistOSM:          true,
-            ilkDebtCeiling:        3 * MILLION, // TODO: is this correct? currently setting this according to dc-iam gap
-            minVaultAmount:        10 * THOUSAND,
-            maxLiquidationAmount:  3 * MILLION,
+            ilkDebtCeiling:        3 * MILLION,
+            minVaultAmount:        100, // TODO: test value, adjust value on mainnet spell
+            maxLiquidationAmount:  5 * THOUSAND, // TODO: test value, adjust value om mainnet spell
             liquidationPenalty:    1300,
             ilkStabilityFee:       1000000000937303470807876289,
             startingPriceFactor:   13000,
@@ -62,7 +62,7 @@ contract DssSpellAction is DssAction {
             auctionDuration:       140 minutes,
             permittedDrop:         4000,
             liquidationRatio:      17500,
-            kprFlatReward:         300, // 300 Dai
+            kprFlatReward:         1, // TODO: test value, adjust value om mainnet spell
             kprPctReward:          10 // 0.1%
         });
 
