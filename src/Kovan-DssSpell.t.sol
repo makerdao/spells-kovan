@@ -1693,6 +1693,113 @@ function checkCollateralValues(SystemValues storage values) internal {
         checkCollateralValues(afterSpell);
     }
 
+    function checkIlkIntegration(
+        bytes32 _ilk,
+        GemJoinAbstract join,
+        ClipAbstract clip,
+        address pip,
+        bool _isOSM,
+        bool _checkLiquidations,
+        bool _transferFee
+    ) public {
+        DSTokenAbstract token = DSTokenAbstract(join.gem());
+
+        if (_isOSM) OsmAbstract(pip).poke();
+        hevm.warp(block.timestamp + 3601);
+        if (_isOSM) OsmAbstract(pip).poke();
+        spotter.poke(_ilk);
+
+        // Authorization
+        assertEq(join.wards(pauseProxy), 1);
+        assertEq(vat.wards(address(join)), 1);
+        assertEq(clip.wards(address(end)), 1);
+        assertEq(clip.wards(address(clipMom)), 1);
+        if (_isOSM) {
+            assertEq(OsmAbstract(pip).wards(address(osmMom)), 1);
+            assertEq(OsmAbstract(pip).bud(address(spotter)), 1);
+            assertEq(OsmAbstract(pip).bud(address(end)), 1);
+            assertEq(MedianAbstract(OsmAbstract(pip).src()).bud(pip), 1);
+        }
+
+        (,,,, uint256 dust) = vat.ilks(_ilk);
+        dust /= RAY;
+        uint256 amount = 2 * dust * WAD / (_isOSM ? getOSMPrice(pip) : uint256(DSValueAbstract(pip).read()));
+        giveTokens(token, amount);
+
+        assertEq(token.balanceOf(address(this)), amount);
+        assertEq(vat.gem(_ilk, address(this)), 0);
+        token.approve(address(join), amount);
+        join.join(address(this), amount);
+        assertEq(token.balanceOf(address(this)), 0);
+        if (_transferFee) {
+            amount = vat.gem(_ilk, address(this));
+            assertTrue(amount > 0);
+        }
+        assertEq(vat.gem(_ilk, address(this)), amount);
+
+        // Tick the fees forward so that art != dai in wad units
+        hevm.warp(block.timestamp + 1);
+        jug.drip(_ilk);
+
+        // Deposit collateral, generate DAI
+        (,uint256 rate,,,) = vat.ilks(_ilk);
+        assertEq(vat.dai(address(this)), 0);
+        vat.frob(_ilk, address(this), address(this), address(this), int256(amount), int256(divup(mul(RAY, dust), rate)));
+        assertEq(vat.gem(_ilk, address(this)), 0);
+        assertTrue(vat.dai(address(this)) >= dust * RAY);
+        assertTrue(vat.dai(address(this)) <= (dust + 1) * RAY);
+
+        // Payback DAI, withdraw collateral
+        vat.frob(_ilk, address(this), address(this), address(this), -int256(amount), -int256(divup(mul(RAY, dust), rate)));
+        assertEq(vat.gem(_ilk, address(this)), amount);
+        assertEq(vat.dai(address(this)), 0);
+
+        // Withdraw from adapter
+        join.exit(address(this), amount);
+        if (_transferFee) {
+            amount = token.balanceOf(address(this));
+        }
+        assertEq(token.balanceOf(address(this)), amount);
+        assertEq(vat.gem(_ilk, address(this)), 0);
+
+        // Generate new DAI to force a liquidation
+        token.approve(address(join), amount);
+        join.join(address(this), amount);
+        if (_transferFee) {
+            amount = vat.gem(_ilk, address(this));
+        }
+        // dart max amount of DAI
+        (,,uint256 spotV,,) = vat.ilks(_ilk);
+        vat.frob(_ilk, address(this), address(this), address(this), int256(amount), int256(mul(amount, spotV) / rate));
+        hevm.warp(block.timestamp + 1);
+        jug.drip(_ilk);
+        assertEq(clip.kicks(), 0);
+        if (_checkLiquidations) {
+            dog.bark(_ilk, address(this), address(this));
+            assertEq(clip.kicks(), 1);
+        }
+
+        // Dump all dai for next run
+        vat.move(address(this), address(0x0), vat.dai(address(this)));
+    }
+
+    function testCollateralIntegrations() public {
+        vote(address(spell));
+        scheduleWaitAndCast(address(spell));
+        assertTrue(spell.done());
+
+        // Insert new collateral tests here
+        checkIlkIntegration(
+            "MATIC-A",
+            GemJoinAbstract(addr.addr("MCD_JOIN_MATIC_A")),
+            ClipAbstract(addr.addr("MCD_CLIP_MATIC_A")),
+            addr.addr("PIP_MATIC"),
+            true,
+            true,
+            true
+        );
+    }
+
     function testNewIlkRegistryValues() public {
         vote(address(spell));
         scheduleWaitAndCast(address(spell));
