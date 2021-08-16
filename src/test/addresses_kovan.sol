@@ -233,5 +233,6 @@ contract Addresses {
         addr["PIP_MATIC"]                       = 0x13594bF4E0C61946936674217c415c6d555Fec50;
         addr["MCD_JOIN_MATIC_A"]                = 0x4Af8801fbDD5ae4FDe2cbC9F844b09c6777525CE;
         addr["MCD_CLIP_MATIC_A"]                = 0x75FE5CD0c23894C8424ac835C054aCA92B994445;
+        addr["MCD_CLIP_CALC_MATIC_A"]           = 0x0AB67AA706F1cECD3df457016E822a09bFf18f23;
     }
 }
