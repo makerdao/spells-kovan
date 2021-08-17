@@ -27,6 +27,12 @@ contract DssSpellAction is DssAction {
     // Hash: seth keccak -- "$(wget https://raw.githubusercontent.com/makerdao/community/TODO -q -O - 2>/dev/null)"
     string public constant override description = "Add MATIC";
 
+    // TODO - enable officeHours (if needed) on mainnet
+    // Turn off office hours
+    function officeHours() public override returns (bool) {
+        return false;
+    }
+
     address constant MATIC                 = 0x688E1A8830Ea8dd8fe389FA2228997C663b3807A;
     address constant MCD_JOIN_MATIC_A      = 0x4Af8801fbDD5ae4FDe2cbC9F844b09c6777525CE;
     address constant MCD_CLIP_MATIC_A      = 0x75FE5CD0c23894C8424ac835C054aCA92B994445;
